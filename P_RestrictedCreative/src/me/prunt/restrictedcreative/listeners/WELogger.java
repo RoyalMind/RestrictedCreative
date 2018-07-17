@@ -10,6 +10,7 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.logging.AbstractLoggingExtent;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.store.DataHandler;
 
 public class WELogger extends AbstractLoggingExtent {
     private Player p;
@@ -25,22 +26,22 @@ public class WELogger extends AbstractLoggingExtent {
     protected void onBlockChange(Vector position, BaseBlock newBlock) {
 	Block b = p.getWorld().getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
 
+	if (!DataHandler.isCreative(b))
+	    return;
+
 	// If the block is removed (0 == AIR)
 	if (newBlock.getId() == 0) {
-	    // If it's tracked
-	    if (Main.isCreative(b))
-		Main.remove(b);
-
-	    // If the block is changed/placed
-	} else {
-	    // Bypass + config check
-	    if (p.hasPermission("rc.bypass.track.save-blocks")
-		    || (!main.we_extended && p.getGameMode() != GameMode.CREATIVE))
-		return;
-
-	    // If it's not tracked
-	    if (!Main.isCreative(b))
-		Main.add(b);
+	    DataHandler.removeFromTracking(b);
+	    return;
 	}
+
+	// The block is changed/placed
+
+	if (p.hasPermission("rc.bypass.tracking.worldedit")
+		|| (!main.getSettings().isEnabled("tracking.wordedit.extended")
+			&& p.getGameMode() != GameMode.CREATIVE))
+	    return;
+
+	DataHandler.addForTracking(b);
     }
 }

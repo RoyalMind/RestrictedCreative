@@ -30,8 +30,9 @@ block:
   remove:
     remove: '&aRight-click a block/entity you want to remove from the database. Type "/rc block remove" again to cancel.'
     removed: '&aRemoved %material% from the database!'
-  info: '&aRight-click a block/entity you want to know more about. Type "/rc block info" again to cancel.'
-    true: '&aBlock/entity %material% is placed in creative mode!'
-    false: '&aBlock/entity %material% is not placed in creative mode.'
+  info:
+    info: '&aRight-click a block/entity you want to know more about. Type "/rc block info" again to cancel.'
+    true: '&aBlock/entity %material% was placed in creative mode!'
+    false: '&aBlock/entity %material% was not placed in creative mode.'
   stats: '&eTotal creative placed blocks and entities: %total%'
   cancel: '&cCancelled!'

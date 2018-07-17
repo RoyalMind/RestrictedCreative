@@ -10,10 +10,8 @@ import org.bukkit.Bukkit;
 import me.prunt.restrictedcreative.Main;
 
 public class Database {
-    // Main class
     private Main main;
 
-    // Database-related variables
     private String host, name, user, pass, type, table;
     private int port;
     private Connection connection;
@@ -21,7 +19,6 @@ public class Database {
     public Database(Main main, String type) {
 	this.main = main;
 
-	// Database variables
 	this.type = type.toLowerCase();
 	this.host = main.getConfig().getString("database.host");
 	this.name = main.getConfig().getString("database.database");
@@ -96,8 +93,7 @@ public class Database {
 	    openSQLiteConnection();
 	    break;
 	default:
-	    main.getLogger()
-		    .severe("Incompatible database type provided: '" + type + "'. Compatible are: MySQL and SQLite.");
+	    log("Incompatible database type provided: '" + type + "'. Compatible are: MySQL and SQLite.");
 	    break;
 	}
     }

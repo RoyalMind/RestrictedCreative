@@ -2,13 +2,17 @@ package me.prunt.restrictedcreative.store;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.Utils;
 
 public class ConfigProvider {
     private Main main;
@@ -24,18 +28,29 @@ public class ConfigProvider {
     /* Configuration */
 
     public String getMessage(String path) {
-	String msg = getConfig().getString(path);
-
-	// If the user wished to remove the message
-	if (msg.equalsIgnoreCase("none"))
-	    return "";
-
-	// Convert formatting to readable format
-	return ChatColor.translateAlternateColorCodes('&', msg);
+	return ChatColor.translateAlternateColorCodes('&', getConfig().getString(path));
     }
 
     public boolean isEnabled(String path) {
 	return getConfig().getBoolean(path);
+    }
+
+    public List<String> getStringList(String path) {
+	return getConfig().getStringList(path);
+    }
+
+    public List<Material> getMaterialList(String path) {
+	List<Material> list = new ArrayList<>();
+
+	for (String m : getConfig().getStringList(path)) {
+	    try {
+		list.add(Material.valueOf(m));
+	    } catch (IllegalArgumentException e) {
+		Utils.log("Skipped item: " + e.getMessage());
+	    }
+	}
+
+	return list;
     }
 
     /* Methods */
@@ -47,6 +62,15 @@ public class ConfigProvider {
 	} else {
 	    setConfig(loadCustomConfig(getName()));
 	}
+    }
+
+    public boolean isNone(String... list) {
+	for (String str : list) {
+	    if (!getMessage(str).equalsIgnoreCase(""))
+		return false;
+	}
+
+	return true;
     }
 
     private FileConfiguration loadCustomConfig(String name) {
@@ -78,15 +102,6 @@ public class ConfigProvider {
 
     private boolean isDefault() {
 	return getName() == "config.yml";
-    }
-
-    private boolean isNone(String... list) {
-	for (String str : list) {
-	    if (!str.equalsIgnoreCase(""))
-		return false;
-	}
-
-	return true;
     }
 
     /* Getters & setters */

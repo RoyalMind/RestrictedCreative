@@ -1,5 +1,6 @@
 package me.prunt.restrictedcreative.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
@@ -16,17 +17,17 @@ public class WEListener {
     }
 
     @Subscribe
-    public void wrapForLogging(EditSessionEvent event) {
-	Actor actor = event.getActor();
+    public void wrapForLogging(EditSessionEvent e) {
+	Actor a = e.getActor();
 
-	if (actor != null && actor.isPlayer()) {
-	    Player p = main.getServer().getPlayer(actor.getUniqueId());
+	if (a == null || !a.isPlayer())
+	    return;
 
-	    // World check
-	    if (main.isDisabledWorld(p.getWorld().getName()))
-		return;
+	Player p = Bukkit.getServer().getPlayer(a.getUniqueId());
 
-	    event.setExtent(new WELogger(main, p, event.getExtent()));
-	}
+	if (main.isDisabledWorld(p.getWorld().getName()))
+	    return;
+
+	e.setExtent(new WELogger(main, p, e.getExtent()));
     }
 }
