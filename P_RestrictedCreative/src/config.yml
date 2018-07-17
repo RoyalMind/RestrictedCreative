@@ -1,0 +1,142 @@
+# Config explanation - https://github.com/Prunt/RestrictedCreative/wiki/Config-explanation
+database:
+  type: sqlite
+  username: root
+  password: ''
+  host: localhost
+  port: 3306
+  database: rc_database
+  table: rc_table
+
+command:
+  rc:
+    description: 'RestrictedCreative main command used for reloading, statistics and other.'
+    aliases:
+    - 'restrictedcreative'
+  creative:
+    description: 'Enter creative mode.'
+    aliases:
+    - 'gm1'
+    - 'gmc'
+  survival:
+    description: 'Enter survival mode.'
+    aliases:
+    - 'gm0'
+    - 'gms'
+  adventure:
+    description: 'Enter adventure mode.'
+    aliases:
+    - 'gm2'
+    - 'gma'
+  spectator:
+    description: 'Enter spectator mode.'
+    aliases:
+    - 'gm3'
+    - 'gmsp'
+    
+
+general:
+  converter:
+    creative-control: cc_
+    share-control: blocks
+  worlds:
+    disable-plugin:
+    - 'only-survival-world'
+    bypass:
+    - 'only_creative_world'
+  saving:
+    interval: 6000
+    inventories:
+      enabled: true
+  
+creative:
+  armor:
+    enabled: true
+    color: 16711680
+  permissions:
+    enabled: false
+    vault: false
+    list:
+    - 'prefix.creative'
+    - '-prefix.survival'
+
+tracking:
+  blocks:
+    enabled: true
+    exclude:
+    - 'AIR'
+  worldedit:
+    enabled: false
+    extended: false
+  inventory:
+    enabled: true
+
+limit:
+  regions:
+    owner-based:
+      enabled: false
+      allow-members: true 
+    whitelist:
+      enabled: false
+      list:
+      - 'building_competition'
+  moving:
+    enabled: false
+    below-y: -1
+    above-y: -1
+  interact:
+    inventories: true
+    entities: true
+    breeding: true
+  item:
+    drop: true
+    pickup: true
+    throw: true
+  commands:
+  - '(.*)(buy|sell)(.*)'
+  - '(.*)(chest)(.*)'
+  combat:
+    pvp: true
+    pve: true
+  creation:
+    wither: true
+    snow-golem: true
+    iron-golem: true
+  
+confiscate:
+  enabled: true
+  invalid-items: false
+  middle-click: true
+  items:
+    name:
+    - 'Cash'
+    lore:
+    - '$'
+
+disable:
+  placing:
+  - 'BEDROCK'
+  - 'ENDER_PORTAL_FRAME'
+  - 'TNT'
+  - 'SAPLING'
+  breaking:
+  - 'BEDROCK'
+  - 'ENDER_PORTAL_FRAME'
+  interacting:
+    in-hand:
+    - 'SPLASH_POTION'
+    - 'LINGERING_POTION' 
+    - 'MONSTER_EGG'
+    - 'FLINT_AND_STEEL'
+    - 'FIREBALL'
+    - 'EXP_BOTTLE'
+    - 'INK_SACK'
+    - 'EYE_OF_ENDER'
+    - 'EGG'
+    - 'LAVA_BUCKET'
+    on-ground:
+    - 'JUKEBOX'
+    - 'FLOWER_POT'
+    - 'SIGN_POST'
+    - 'WALL_SIGN'
+    
