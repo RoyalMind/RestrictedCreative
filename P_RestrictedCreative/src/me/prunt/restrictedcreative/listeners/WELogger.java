@@ -31,7 +31,7 @@ public class WELogger extends AbstractLoggingExtent {
 
 	// If the block is removed (0 == AIR)
 	if (newBlock.getId() == 0) {
-	    DataHandler.removeFromTracking(b);
+	    DataHandler.removeTracking(b);
 	    return;
 	}
 
@@ -42,6 +42,6 @@ public class WELogger extends AbstractLoggingExtent {
 			&& p.getGameMode() != GameMode.CREATIVE))
 	    return;
 
-	DataHandler.addForTracking(b);
+	DataHandler.setAsTracked(b);
     }
 }

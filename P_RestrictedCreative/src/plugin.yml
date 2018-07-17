@@ -26,7 +26,6 @@ permissions:
     children:
       rc.commands.*: true
       rc.bypass.*: true
-      rc.convert.*: true
 
   rc.commands.*:
     description: Allows every command.
@@ -39,7 +38,6 @@ permissions:
       rc.commands.spectator: true
       rc.commands.reload: true
       rc.commands.delete: true
-      rc.commands.convert: true
       rc.commands.block: true
   rc.bypass.*:
     description: Allows to bypass everything.
@@ -74,11 +72,6 @@ permissions:
       rc.bypass.disable.interacting.in-hand: true # per Material enum
       rc.bypass.disable.interacting.on-ground: true # per Material enum
       rc.bypass.disable.breaking: true # per Material enum
-  rc.convert.*:
-    description: Allows to convert everything.
-    default: false
-    children:
-      rc.bypass.creative.armor: true
 
   rc.bypass.tracking.inventory.*:
     description: Allows to bypass inventory separation.

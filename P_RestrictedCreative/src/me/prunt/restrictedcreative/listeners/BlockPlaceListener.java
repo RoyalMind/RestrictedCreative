@@ -55,7 +55,7 @@ public class BlockPlaceListener implements Listener {
 	    return;
 	}
 
-	DataHandler.addForTracking(b);
+	DataHandler.setAsTracked(b);
     }
 
     // HIGHEST required for WorldGuard and similar plugins

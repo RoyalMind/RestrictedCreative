@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -14,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.WorldEdit;
 
+import me.prunt.restrictedcreative.commands.MainCommand;
 import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.WEListener;
 import me.prunt.restrictedcreative.store.ConfigProvider;
@@ -91,18 +93,19 @@ public class Main extends JavaPlugin {
     private void registerCommands() {
 	// Register commands
 	for (Entry<String, Map<String, Object>> entry : getDescription().getCommands().entrySet()) {
-	    PluginCommand cmd = getCommand(entry.getKey());
-	    cmd.setExecutor(new Commands(this));
+	    String name = entry.getKey();
+
+	    PluginCommand cmd = getCommand(name);
+	    cmd.setExecutor(getExecutor(name));
 	    cmd.setPermissionMessage(getMessages().getMessage("no-permission"));
-	    cmd.setDescription(getSettings().getMessage("commands." + entry.getKey() + ".description"));
+	    cmd.setDescription(getSettings().getMessage("commands." + name + ".description"));
 
 	    // Register aliases
 	    AliasManager aliasManager = new AliasManager(this);
-	    if (!aliasManager.setAdditionalAliases(cmd,
-		    getSettings().getStringList("commands." + entry.getKey() + ".aliases"))) {
+	    if (!aliasManager.setAdditionalAliases(cmd, getSettings().getStringList("commands." + name + ".aliases"))) {
 		DataHandler.setUsingOldAliases(true);
-		System.out.println("" + ChatColor.RED + ChatColor.BOLD + "Unable to access CommandMap for: "
-			+ ChatColor.RESET + cmd.getName() + ChatColor.YELLOW + ChatColor.BOLD
+		Utils.log("" + ChatColor.RED + ChatColor.BOLD + "Unable to access CommandMap for: " + ChatColor.RESET
+			+ cmd.getName() + ChatColor.YELLOW + ChatColor.BOLD
 			+ ". Plugin will use old (agressive) method to enforce aliases!");
 	    }
 	}
@@ -115,6 +118,23 @@ public class Main extends JavaPlugin {
     private void loadData() {
 	setDB(new Database(this, getSettings().getString("database.type")));
 
+    }
+
+    private CommandExecutor getExecutor(String name) {
+	switch (name) {
+	case "rc":
+	    return new MainCommand(this);
+	case "creative":
+	    return null;
+	case "survival":
+	    return null;
+	case "adventure":
+	    return null;
+	case "spectator":
+	    return null;
+	default:
+	    return null;
+	}
     }
 
     /**
@@ -200,20 +220,35 @@ public class Main extends JavaPlugin {
 
     /**
      * @param sender
-     *                   Player to send the message
+     *                   Player to send the message to
      * @param prefix
      *                   Whether to include a prefix in the message
      * @param string
-     *                   Strings to send to the player
+     *                   Paths of messages to send to the player
      */
-    public void sendMessage(CommandSender sender, boolean prefix, String... string) {
-	if (getSettings().isNone(string))
-	    return;
+    public void sendMessage(CommandSender sender, boolean prefix, String... strings) {
+	sendMessage(sender, getMessage(prefix, strings));
+    }
 
-	String msg = "";
-	for (String path : string)
-	    msg += getSettings().getMessage(path);
+    public void sendMessage(CommandSender sender, String msg) {
+	if (msg != "")
+	    sender.sendMessage(msg);
+    }
 
-	sender.sendMessage(msg);
+    /**
+     * @param prefix
+     *                   Whether to include a prefix in the message
+     * @param string
+     *                   Paths of messages to send to the player
+     */
+    public String getMessage(boolean prefix, String... strings) {
+	if (getSettings().isNone(strings))
+	    return "";
+
+	String msg = prefix ? getMessages().getMessage("prefix") : "";
+	for (String path : strings)
+	    msg += getMessages().getMessage(path);
+
+	return msg;
     }
 }

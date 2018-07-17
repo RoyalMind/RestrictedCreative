@@ -3,6 +3,7 @@ package me.prunt.restrictedcreative.store;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
@@ -173,6 +174,31 @@ public class Database {
 
 	    return null;
 	}
+    }
+
+    /**
+     * Excecute update
+     */
+    public void executeUpdate(String sql) {
+	try {
+	    getStatement(sql).executeUpdate();
+	} catch (SQLException e) {
+	    log("Could not execute SQL statement:");
+	    e.printStackTrace();
+	}
+    }
+
+    /**
+     * Excecute query
+     */
+    public ResultSet executeQuery(String sql) {
+	try {
+	    return getStatement(sql).executeQuery();
+	} catch (SQLException e) {
+	    log("Could not execute SQL statement:");
+	    e.printStackTrace();
+	}
+	return null;
     }
 
     /**
