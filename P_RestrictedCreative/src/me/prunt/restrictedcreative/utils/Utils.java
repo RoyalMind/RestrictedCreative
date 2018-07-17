@@ -1,4 +1,4 @@
-package me.prunt.restrictedcreative;
+package me.prunt.restrictedcreative.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;

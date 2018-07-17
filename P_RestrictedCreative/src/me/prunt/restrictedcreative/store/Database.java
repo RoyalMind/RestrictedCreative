@@ -20,12 +20,12 @@ public class Database {
 	this.main = main;
 
 	this.type = type.toLowerCase();
-	this.host = main.getConfig().getString("database.host");
-	this.name = main.getConfig().getString("database.database");
-	this.user = main.getConfig().getString("database.username");
-	this.pass = main.getConfig().getString("database.password");
-	this.port = main.getConfig().getInt("database.port");
-	this.table = main.getConfig().getString("database.table");
+	this.host = main.getSettings().getString("database.host");
+	this.name = main.getSettings().getString("database.database");
+	this.user = main.getSettings().getString("database.username");
+	this.pass = main.getSettings().getString("database.password");
+	this.port = main.getSettings().getInt("database.port");
+	this.table = main.getSettings().getString("database.table");
 
 	openConnection();
     }

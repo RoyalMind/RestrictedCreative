@@ -12,7 +12,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.Utils;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class ConfigProvider {
     private Main main;
@@ -28,7 +28,15 @@ public class ConfigProvider {
     /* Configuration */
 
     public String getMessage(String path) {
-	return ChatColor.translateAlternateColorCodes('&', getConfig().getString(path));
+	return ChatColor.translateAlternateColorCodes('&', getString(path));
+    }
+
+    public String getString(String path) {
+	return getConfig().getString(path);
+    }
+
+    public int getInt(String path) {
+	return getConfig().getInt(path);
     }
 
     public boolean isEnabled(String path) {

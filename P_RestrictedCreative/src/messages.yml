@@ -21,7 +21,8 @@ gamemodes:
   adventure: '&aSwitched to adventure mode!'
   spectator: '&aSwitched to spectator mode!'
 incorrect:
-  convert: '&cCorrect usage: /rc convert <cc|gmi|sql>'
+  main: '&cCorrect usage: /rc <reload|block|convert|i-am-sure-i-want-to-delete-all-plugin-data-from-database>'
+  convert: '&cCorrect usage: /rc convert <cc|gmi|sc|sql>'
   block: '&cCorrect usage: /rc block <add|remove|info|stats>'
 block:
   add:

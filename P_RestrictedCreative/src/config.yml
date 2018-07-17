@@ -8,7 +8,7 @@ database:
   database: rc_database
   table: rc_table
 
-command:
+commands:
   rc:
     description: 'RestrictedCreative main command used for reloading, statistics and other.'
     aliases:

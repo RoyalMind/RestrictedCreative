@@ -6,11 +6,13 @@ import org.bukkit.block.Block;
 import org.bukkit.metadata.MetadataValue;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.Utils;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class DataHandler {
     private static List<String> addToDatabase;
     private static List<String> removeFromDatabase;
+
+    private static boolean usingOldAliases = false;
 
     public static boolean isCreative(Block b) {
 	if (b == null)
@@ -42,5 +44,13 @@ public class DataHandler {
 	b.removeMetadata("GMC", Main.getInstance());
 	addToDatabase.remove(Utils.getBlockString(b));
 	removeFromDatabase.add(Utils.getBlockString(b));
+    }
+
+    public static boolean isUsingOldAliases() {
+	return usingOldAliases;
+    }
+
+    public static void setUsingOldAliases(boolean usingOldAliases) {
+	DataHandler.usingOldAliases = usingOldAliases;
     }
 }
