@@ -34,6 +34,10 @@ public class ConfigProvider {
 	return ChatColor.translateAlternateColorCodes('&', msg);
     }
 
+    public boolean isEnabled(String path) {
+	return getConfig().getBoolean(path);
+    }
+
     /* Methods */
 
     public void reload() {

@@ -33,7 +33,7 @@ public class Main extends JavaPlugin {
     }
 
     private void registerListeners() {
-	if (Utils.isInstalled("WorldEdit") && getSettings().isEnabled(""))
+	if (Utils.isInstalled("WorldEdit") && getSettings().isEnabled("tracking.worldedit.enabled"))
 	    WorldEdit.getInstance().getEventBus().register(new WEListener(this));
     }
 
