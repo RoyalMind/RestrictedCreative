@@ -1,0 +1,7 @@
+name: RestrictedCreative
+version: 2.0
+description: Extremely lightweight, but fully-featured and customizable Creative mode limiter.
+author: Prunt
+main: me.prunt.restrictedcreative.Main
+website: 'https://www.spigotmc.org/resources/restrictedcreative.42790/'
+api-version: 1.13
