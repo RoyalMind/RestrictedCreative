@@ -1,14 +1,18 @@
 package me.prunt.restrictedcreative;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,34 +25,18 @@ import me.prunt.restrictedcreative.listeners.WEListener;
 import me.prunt.restrictedcreative.store.ConfigProvider;
 import me.prunt.restrictedcreative.store.DataHandler;
 import me.prunt.restrictedcreative.store.Database;
+import me.prunt.restrictedcreative.store.SyncData;
 import me.prunt.restrictedcreative.utils.AliasManager;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class Main extends JavaPlugin {
-    /**
-     * Database handler
-     */
     private Database database;
 
-    /**
-     * Config provider for general settings
-     */
     private ConfigProvider config;
-    /**
-     * Config provider for translatable messages
-     */
     private ConfigProvider messages;
 
-    /**
-     * FixedMetadataValue used by RestrictedCreative
-     */
     private static FixedMetadataValue fmv;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.bukkit.plugin.java.JavaPlugin#onEnable()
-     */
     @Override
     public void onEnable() {
 	setFMV(new FixedMetadataValue(getInstance(), "true"));
@@ -59,14 +47,24 @@ public class Main extends JavaPlugin {
 	loadData();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
-     */
     @Override
     public void onDisable() {
+	for (Player p : getServer().getOnlinePlayers()) {
+	    String name = p.getWorld().getName();
 
+	    if (p.getGameMode() == GameMode.CREATIVE)
+		continue;
+	    if (isDisabledWorld(name) || isBypassedWorld(name))
+		continue;
+
+	    // TODO save player's data
+	}
+
+	final List<String> fadd = new ArrayList<>(DataHandler.addToDatabase);
+	final List<String> fdel = new ArrayList<>(DataHandler.removeFromDatabase);
+	getServer().getScheduler().runTask(this, new SyncData(this, fadd, fdel));
+
+	getDB().closeConnection();
     }
 
     /**
@@ -84,7 +82,7 @@ public class Main extends JavaPlugin {
 	if (Utils.isInstalled("WorldEdit") && getSettings().isEnabled("tracking.worldedit.enabled"))
 	    WorldEdit.getInstance().getEventBus().register(new WEListener(this));
 
-	getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), getInstance());
+	getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), this);
     }
 
     /**
@@ -118,6 +116,17 @@ public class Main extends JavaPlugin {
     private void loadData() {
 	setDB(new Database(this, getSettings().getString("database.type")));
 
+	if (getSettings().getString("database.type").equalsIgnoreCase("mysql")) {
+	    getDB().executeUpdate(
+		    "CREATE TABLE IF NOT EXISTS " + getDB().getTableName() + " (block VARCHAR(255), UNIQUE (block))");
+	} else if (getSettings().getString("database.type").equalsIgnoreCase("sqlite")) {
+	    DataHandler.setUsingSQLite(true);
+	    getDB().executeUpdate(
+		    "CREATE TABLE IF NOT EXISTS " + getDB().getTableName() + " (block VARCHAR(255) UNIQUE)");
+	}
+
+	DataHandler.loadFromDatabase(this);
+	DataHandler.startDataSync(this);
     }
 
     private CommandExecutor getExecutor(String name) {

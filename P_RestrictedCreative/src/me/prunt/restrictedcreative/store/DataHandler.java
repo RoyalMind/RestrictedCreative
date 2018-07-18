@@ -1,8 +1,11 @@
 package me.prunt.restrictedcreative.store;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
@@ -13,14 +16,17 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class DataHandler {
-    private static List<String> addToDatabase = new ArrayList<>();
-    private static List<String> removeFromDatabase = new ArrayList<>();
+    public static List<String> addToDatabase = new ArrayList<>();
+    public static List<String> removeFromDatabase = new ArrayList<>();
 
     private static boolean usingOldAliases = false;
+    private static boolean usingSQLite = false;
 
     private static List<Player> addWithCommand = new ArrayList<>();
     private static List<Player> removeWithCommand = new ArrayList<>();
     private static List<Player> infoWithCommand = new ArrayList<>();
+
+    private static int totalCount = 0;
 
     public static boolean isCreative(Block b) {
 	if (b == null)
@@ -82,12 +88,28 @@ public class DataHandler {
 	e.removeScoreboardTag("GMC");
     }
 
+    private static void setTotalCount(int totalCount) {
+	DataHandler.totalCount = totalCount;
+    }
+
+    public static String getTotalCount() {
+	return String.valueOf(totalCount);
+    }
+
     public static boolean isUsingOldAliases() {
 	return usingOldAliases;
     }
 
     public static void setUsingOldAliases(boolean usingOldAliases) {
 	DataHandler.usingOldAliases = usingOldAliases;
+    }
+
+    public static boolean isUsingSQLite() {
+	return usingSQLite;
+    }
+
+    public static void setUsingSQLite(boolean usingSQLite) {
+	DataHandler.usingSQLite = usingSQLite;
     }
 
     public static List<Player> getAddWithCommand() {
@@ -100,5 +122,68 @@ public class DataHandler {
 
     public static List<Player> getInfoWithCommand() {
 	return infoWithCommand;
+    }
+
+    public static void loadFromDatabase(Main main) {
+	Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), new Runnable() {
+	    @Override
+	    public void run() {
+		long start = System.currentTimeMillis();
+
+		main.sendMessage(Bukkit.getConsoleSender(), true, "database.load");
+
+		// Gets all blocks from database
+		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getTableName());
+
+		// Back to sync processing
+		Bukkit.getScheduler().runTask(Main.getInstance(), new Runnable() {
+		    @Override
+		    public void run() {
+			int count = 0;
+
+			try {
+			    while (rs.next()) {
+				count++;
+
+				String str = rs.getString("block");
+				Block b = Utils.getBlock(str);
+
+				if (b == null || b.isEmpty()) {
+				    removeFromDatabase.add(Utils.getBlockString(b));
+				} else {
+				    setAsTracked(b);
+				}
+			    }
+			} catch (SQLException e) {
+			    e.printStackTrace();
+			}
+
+			setTotalCount(count);
+
+			main.sendMessage(Bukkit.getConsoleSender(),
+				main.getMessage(true, "database.loaded").replaceAll("%blocks%", getTotalCount()));
+
+			String took = String.valueOf(System.currentTimeMillis() - start);
+
+			main.sendMessage(Bukkit.getConsoleSender(),
+				main.getMessage(true, "database.done").replaceAll("%mills%", took));
+		    }
+		});
+	    }
+	});
+    }
+
+    public static void startDataSync(Main main) {
+	int interval = main.getSettings().getInt("general.saving.interval");
+
+	Bukkit.getServer().getScheduler().runTaskTimer(main, new Runnable() {
+	    @Override
+	    public void run() {
+		final List<String> fadd = new ArrayList<>(addToDatabase);
+		final List<String> fdel = new ArrayList<>(removeFromDatabase);
+
+		Bukkit.getScheduler().runTaskAsynchronously(main, new SyncData(main, fadd, fdel));
+	    }
+	}, interval, interval);
     }
 }

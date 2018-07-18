@@ -17,6 +17,41 @@ public class MainCommand implements CommandExecutor {
 	this.main = plugin;
     }
 
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+	if (args.length == 0) {
+	    main.sendMessage(sender, false, "incorrect.main");
+	    return true;
+	}
+
+	switch (args[0]) {
+	case "reload":
+	    if (sender.hasPermission("rc.commands.reload")) {
+		reload(sender);
+		return true;
+	    }
+	    break;
+	case "block":
+	    if (sender.hasPermission("rc.commands.block")) {
+		block(sender, args);
+		return true;
+	    }
+	    break;
+	case "i-am-sure-i-want-to-delete-all-plugin-data-from-database":
+	    if (sender.hasPermission("rc.commands.delete")) {
+		delete(sender);
+		return true;
+	    }
+	    break;
+	default:
+	    main.sendMessage(sender, true, "incorrect.main");
+	    return true;
+	}
+
+	main.sendMessage(sender, false, "no-permission");
+	return true;
+    }
+
     private void reload(CommandSender sender) {
 	main.loadConfig();
 	main.sendMessage(sender, true, "reloaded");
@@ -86,40 +121,5 @@ public class MainCommand implements CommandExecutor {
 	default:
 	    main.sendMessage(sender, false, "incorrect.block");
 	}
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-	if (args.length == 0) {
-	    main.sendMessage(sender, false, "incorrect.main");
-	    return true;
-	}
-
-	switch (args[0]) {
-	case "reload":
-	    if (sender.hasPermission("rc.commands.reload")) {
-		reload(sender);
-		return true;
-	    }
-	    break;
-	case "block":
-	    if (sender.hasPermission("rc.commands.block")) {
-		block(sender, args);
-		return true;
-	    }
-	    break;
-	case "i-am-sure-i-want-to-delete-all-plugin-data-from-database":
-	    if (sender.hasPermission("rc.commands.delete")) {
-		delete(sender);
-		return true;
-	    }
-	    break;
-	default:
-	    main.sendMessage(sender, true, "incorrect.main");
-	    return true;
-	}
-
-	main.sendMessage(sender, false, "no-permission");
-	return true;
     }
 }

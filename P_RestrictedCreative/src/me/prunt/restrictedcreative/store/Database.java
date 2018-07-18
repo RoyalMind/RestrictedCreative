@@ -202,6 +202,30 @@ public class Database {
     }
 
     /**
+     * Set autocommit
+     */
+    public void setAutoCommit(boolean status) {
+	try {
+	    getConnection().setAutoCommit(status);
+	} catch (SQLException e) {
+	    log("Could not change autocommit status:");
+	    e.printStackTrace();
+	}
+    }
+
+    /**
+     * Commit
+     */
+    public void commit() {
+	try {
+	    getConnection().commit();
+	} catch (SQLException e) {
+	    log("Could not commit:");
+	    e.printStackTrace();
+	}
+    }
+
+    /**
      * Print error to console
      */
     private void log(String msg) {
