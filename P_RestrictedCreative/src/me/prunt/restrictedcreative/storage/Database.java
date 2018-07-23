@@ -1,4 +1,4 @@
-package me.prunt.restrictedcreative.store;
+package me.prunt.restrictedcreative.storage;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

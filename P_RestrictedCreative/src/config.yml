@@ -39,11 +39,9 @@ general:
   converter:
     creative-control: cc_
     share-control: blocks
-  worlds:
-    disable-plugin:
-    - 'only-survival-world'
-    bypass:
-    - 'only_creative_world'
+  disabled-worlds:
+   - 'pure-survival-world'
+   - 'pure-creative-world'
   saving:
     interval: 6000
     inventories:

@@ -10,7 +10,7 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.logging.AbstractLoggingExtent;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.store.DataHandler;
+import me.prunt.restrictedcreative.storage.DataHandler;
 
 public class WELogger extends AbstractLoggingExtent {
     private Player p;

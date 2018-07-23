@@ -1,4 +1,4 @@
-package me.prunt.restrictedcreative.store;
+package me.prunt.restrictedcreative.storage;
 
 import java.io.File;
 import java.io.IOException;

@@ -8,7 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.store.DataHandler;
+import me.prunt.restrictedcreative.storage.DataHandler;
 
 public class MainCommand implements CommandExecutor {
     private Main main;

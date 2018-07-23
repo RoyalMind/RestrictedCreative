@@ -22,10 +22,10 @@ import com.sk89q.worldedit.WorldEdit;
 import me.prunt.restrictedcreative.commands.MainCommand;
 import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.WEListener;
-import me.prunt.restrictedcreative.store.ConfigProvider;
-import me.prunt.restrictedcreative.store.DataHandler;
-import me.prunt.restrictedcreative.store.Database;
-import me.prunt.restrictedcreative.store.SyncData;
+import me.prunt.restrictedcreative.storage.ConfigProvider;
+import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.Database;
+import me.prunt.restrictedcreative.storage.SyncData;
 import me.prunt.restrictedcreative.utils.AliasManager;
 import me.prunt.restrictedcreative.utils.Utils;
 
@@ -54,7 +54,7 @@ public class Main extends JavaPlugin {
 
 	    if (p.getGameMode() == GameMode.CREATIVE)
 		continue;
-	    if (isDisabledWorld(name) || isBypassedWorld(name))
+	    if (isDisabledWorld(name))
 		continue;
 
 	    // TODO save player's data
@@ -156,21 +156,13 @@ public class Main extends JavaPlugin {
     }
 
     /**
-     * @param name
-     *                 World name
-     * @return Whether tracking and saving is disabled in the given world
-     */
-    public boolean isBypassedWorld(String name) {
-	return getSettings().getStringList("general.worlds.bypass").contains(name);
-    }
-
-    /**
      * @param m
      *              Material type
      * @return Whether the given type should be excluded from tracking
      */
     public boolean isExcluded(Material m) {
-	return getSettings().getMaterialList("tracking.blocks.exclude").contains(m);
+	return getSettings().getMaterialList("tracking.blocks.exclude").contains(m)
+		|| getSettings().isEnabled("tracking.blocks.enabled");
     }
 
     /**

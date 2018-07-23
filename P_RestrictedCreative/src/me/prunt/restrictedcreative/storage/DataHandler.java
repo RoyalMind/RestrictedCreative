@@ -1,4 +1,4 @@
-package me.prunt.restrictedcreative.store;
+package me.prunt.restrictedcreative.storage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
@@ -58,6 +59,28 @@ public class DataHandler {
 	b.removeMetadata("GMC", Main.getInstance());
 	addToDatabase.remove(Utils.getBlockString(b));
 	removeFromDatabase.add(Utils.getBlockString(b));
+    }
+
+    public static void breakBlock(Block b, Player p) {
+	// TODO update
+	// BlocksHub
+	// if (Utils.isInstalled("BlocksHub")) {
+	// IBlocksHubApi blockshub = ((IBlocksHubApiProvider)
+	// Bukkit.getServer().getPluginManager()
+	// .getPlugin("BlocksHub")).getApi();
+	//
+	// Vector location = new Vector(b.getX(), b.getY(), b.getZ());
+	// IPlayer player = p == null ? blockshub.getPlayer("RestrictedCreative")
+	// : blockshub.getPlayer(p.getUniqueId());
+	// IWorld world = blockshub.getWorld(b.getWorld().getUID());
+	// BlockData oldBlock = new BlockData(b.getTypeId(), b.getData());
+	// BlockData newBlock = BlockData.AIR;
+	//
+	// blockshub.logBlock(location, player, world, oldBlock, newBlock);
+	// }
+
+	b.setType(Material.AIR, false);
+	DataHandler.removeTracking(b);
     }
 
     public static boolean isCreative(Entity e) {

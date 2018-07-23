@@ -11,7 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.store.DataHandler;
+import me.prunt.restrictedcreative.storage.DataHandler;
 
 public class BlockPlaceListener implements Listener {
     private Main main;
@@ -31,8 +31,8 @@ public class BlockPlaceListener implements Listener {
 	Block b = e.getBlockPlaced();
 	Material m = b.getType();
 
-	// No need to track blocks in disabled and bypassed worlds
-	if (getMain().isDisabledWorld(p.getWorld().getName()) || getMain().isBypassedWorld(p.getWorld().getName()))
+	// No need to track blocks in disabled worlds
+	if (getMain().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
 	// No need to track non-creative players
@@ -64,8 +64,8 @@ public class BlockPlaceListener implements Listener {
 	Player p = e.getPlayer();
 	Block head = e.getBlockPlaced();
 
-	// No need to check creations in disabled and bypassed worlds
-	if (getMain().isDisabledWorld(p.getWorld().getName()) || getMain().isBypassedWorld(p.getWorld().getName()))
+	// No need to check creations in disabled worlds
+	if (getMain().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
 	switch (head.getType()) {
