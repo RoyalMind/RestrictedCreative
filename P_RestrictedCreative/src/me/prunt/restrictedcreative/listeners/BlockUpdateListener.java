@@ -56,30 +56,29 @@ public class BlockUpdateListener implements Listener {
 
 	}
 
-	/* Chorus */
-	if (b.getType() == Material.CHORUS_PLANT) {
-	    if (willDrop(b))
-		DataHandler.breakBlock(b, null);
-
-	    return;
-	}
-
 	/* Rail */
 	if (bd instanceof Rail) {
 	    Block bl = b.getRelative(BlockFace.DOWN);
 
 	    // If the block below the rail isn't solid
 	    // or rail is on slope, but there's no block to support on
-	    if (!isSolid(bl) && !isSlopeOk(b)) {
+	    if (!isSolid(bl) || !isSlopeOk(b)) {
 		e.setCancelled(true);
 		DataHandler.breakBlock(b, null);
+		return;
 	    }
+	}
 
-	    return;
+	/* Chorus */
+	else if (b.getType() == Material.CHORUS_PLANT) {
+	    if (willDrop(b)) {
+		DataHandler.breakBlock(b, null);
+		return;
+	    }
 	}
 
 	/* Attachable */
-	if (md instanceof Attachable) {
+	else if (md instanceof Attachable) {
 	    Attachable at = (Attachable) b.getState().getData();
 	    Block bl = b.getRelative(at.getAttachedFace());
 
