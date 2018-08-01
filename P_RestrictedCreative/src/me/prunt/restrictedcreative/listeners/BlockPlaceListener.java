@@ -1,13 +1,17 @@
 package me.prunt.restrictedcreative.listeners;
 
+import java.util.List;
+
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 import me.prunt.restrictedcreative.Main;
@@ -22,6 +26,48 @@ public class BlockPlaceListener implements Listener {
 
     private Main getMain() {
 	return this.main;
+    }
+
+    /*
+     * Fired when a single block placement action of a player triggers the creation
+     * of multiple blocks(e.g. placing a bed block). The block returned by
+     * BlockPlaceEvent.getBlockPlaced() and its related methods is the block where
+     * the placed block would exist if the placement only affected a single block.
+     */
+    // HIGHEST required for WorldGuard and similar plugins
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onBlockMultiPlace(BlockMultiPlaceEvent e) {
+	Player p = e.getPlayer();
+	Block b = e.getBlockPlaced();
+	List<BlockState> states = e.getReplacedBlockStates();
+	Material m = b.getType();
+
+	// No need to track blocks in disabled worlds
+	if (getMain().isDisabledWorld(p.getWorld().getName()))
+	    return;
+
+	// No need to track non-creative players
+	if (p.getGameMode() != GameMode.CREATIVE)
+	    return;
+
+	// No need to track excluded blocks
+	if (getMain().isExcluded(b.getType()))
+	    return;
+
+	// No need to track bypassed players
+	if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
+	    return;
+
+	/* Disabled blocks */
+	if (getMain().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
+		&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
+	    main.sendMessage(p, true, "disabled.general");
+	    e.setCancelled(true);
+	    return;
+	}
+
+	for (BlockState bs : states)
+	    DataHandler.setAsTracked(bs.getBlock());
     }
 
     /*

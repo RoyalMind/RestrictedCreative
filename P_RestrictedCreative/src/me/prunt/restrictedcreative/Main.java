@@ -20,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.sk89q.worldedit.WorldEdit;
 
 import me.prunt.restrictedcreative.commands.MainCommand;
+import me.prunt.restrictedcreative.listeners.BlockBreakListener;
 import me.prunt.restrictedcreative.listeners.BlockChangeListener;
 import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.BlockUpdateListener;
@@ -85,6 +86,7 @@ public class Main extends JavaPlugin {
 	    WorldEdit.getInstance().getEventBus().register(new WEListener(this));
 
 	getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), this);
+	getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockUpdateListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockChangeListener(this), this);
     }
@@ -177,6 +179,16 @@ public class Main extends JavaPlugin {
      */
     public boolean isDisabledPlacing(Material m) {
 	return getSettings().getMaterialList("disable.placing").contains(m);
+    }
+
+    /**
+     * @param m
+     *              Material type
+     * @return Whether the given type should be disabled from placing by creative
+     *         players
+     */
+    public boolean isDisabledBreaking(Material m) {
+	return getSettings().getMaterialList("disable.breaking").contains(m);
     }
 
     /**

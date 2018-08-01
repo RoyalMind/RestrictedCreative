@@ -39,14 +39,16 @@ public class MaterialHandler {
 	    Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY, Material.RED_MUSHROOM,
 	    Material.BROWN_MUSHROOM, Material.SUGAR_CANE, Material.MELON_STEM, Material.PUMPKIN_STEM,
 	    Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM, Material.CACTUS, Material.LILY_PAD,
-	    Material.TALL_GRASS, Material.SUNFLOWER, Material.LILAC, Material.ROSE_BUSH, Material.PEONY,
-	    Material.LARGE_FERN, Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS,
-	    Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
-	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
+	    Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS, Material.STONE_PRESSURE_PLATE,
+	    Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
 
     // Crops
     private static List<Material> crops = new ArrayList<>(
 	    Arrays.asList(Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS));
+
+    // Double plants
+    private static List<Material> doublePlants = new ArrayList<>(Arrays.asList(Material.TALL_GRASS, Material.SUNFLOWER,
+	    Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.LARGE_FERN));
 
     public static boolean needsBlockBelow(Block b) {
 	BlockData bd = b.getBlockData();
@@ -89,6 +91,8 @@ public class MaterialHandler {
 	    return true;
 	if (crops.contains(m))
 	    return true;
+	if (doublePlants.contains(m))
+	    return true;
 
 	return false;
     }
@@ -117,16 +121,20 @@ public class MaterialHandler {
 	MaterialData md = b.getState().getData();
 
 	if (md instanceof Banner)
-	    return d.getFacing();
+	    return ((Banner) md).getAttachedFace();
 	if (md instanceof Button)
-	    return d.getFacing();
+	    return ((Button) md).getAttachedFace();
 	if (md instanceof Torch)
-	    return d.getFacing();
+	    return ((Torch) md).getAttachedFace();
 
 	return null;
     }
 
     public static boolean isCrop(Block b) {
 	return crops.contains(b.getType());
+    }
+
+    public static boolean isDoublePlant(Block b) {
+	return doublePlants.contains(b.getType());
     }
 }
