@@ -36,7 +36,7 @@ public class BlockExplodeListener implements Listener {
 	    if (getMain().isExcluded(b.getType()))
 		continue;
 
-	    if (!DataHandler.isCreative(b))
+	    if (!DataHandler.isTracked(b))
 		continue;
 
 	    DataHandler.breakBlock(b, null);
@@ -58,7 +58,7 @@ public class BlockExplodeListener implements Listener {
 	    if (getMain().isExcluded(bl.getType()))
 		continue;
 
-	    if (!DataHandler.isCreative(bl))
+	    if (!DataHandler.isTracked(bl))
 		continue;
 
 	    DataHandler.breakBlock(bl, null);

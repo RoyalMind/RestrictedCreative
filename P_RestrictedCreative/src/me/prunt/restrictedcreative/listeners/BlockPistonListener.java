@@ -41,7 +41,7 @@ public class BlockPistonListener implements Listener {
 
 	// Loop through pulled blocks
 	for (Block b : e.getBlocks()) {
-	    if (!DataHandler.isCreative(b))
+	    if (!DataHandler.isTracked(b))
 		return;
 
 	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
@@ -64,7 +64,7 @@ public class BlockPistonListener implements Listener {
 
 	// Loop through pushed blocks
 	for (Block b : e.getBlocks()) {
-	    if (!DataHandler.isCreative(b))
+	    if (!DataHandler.isTracked(b))
 		return;
 
 	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)

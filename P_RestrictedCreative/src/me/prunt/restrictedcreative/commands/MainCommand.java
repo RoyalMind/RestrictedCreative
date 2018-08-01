@@ -68,7 +68,7 @@ public class MainCommand implements CommandExecutor {
 
 	    // Loops through entities
 	    for (Entity e : w.getEntities()) {
-		if (DataHandler.isCreative(e))
+		if (DataHandler.isTracked(e))
 		    DataHandler.removeTracking(e);
 	    }
 	}

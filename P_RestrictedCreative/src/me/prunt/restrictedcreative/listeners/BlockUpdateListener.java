@@ -51,7 +51,7 @@ public class BlockUpdateListener implements Listener {
 	    return;
 
 	// No need to control non-tracked blocks
-	if (!DataHandler.isCreative(b))
+	if (!DataHandler.isTracked(b))
 	    return;
 
 	/* Rail */

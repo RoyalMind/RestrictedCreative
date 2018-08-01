@@ -44,7 +44,7 @@ public class BlockChangeListener implements Listener {
 	    return;
 
 	// No need to control non-tracked blocks
-	if (!DataHandler.isCreative(b))
+	if (!DataHandler.isTracked(b))
 	    return;
 
 	// Removes, because otherwise a liquid would destroy it and drop the block
@@ -69,7 +69,7 @@ public class BlockChangeListener implements Listener {
 	    return;
 
 	// No need to control non-tracked blocks and entities
-	if (!DataHandler.isCreative(b) && !DataHandler.isCreative(en))
+	if (!DataHandler.isTracked(b) && !DataHandler.isTracked(en))
 	    return;
 
 	// Lily pad broken by boat

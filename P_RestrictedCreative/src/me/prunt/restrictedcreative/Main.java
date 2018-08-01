@@ -23,6 +23,7 @@ import me.prunt.restrictedcreative.commands.MainCommand;
 import me.prunt.restrictedcreative.listeners.BlockBreakListener;
 import me.prunt.restrictedcreative.listeners.BlockChangeListener;
 import me.prunt.restrictedcreative.listeners.BlockExplodeListener;
+import me.prunt.restrictedcreative.listeners.EntityDamageListener;
 import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.BlockUpdateListener;
 import me.prunt.restrictedcreative.listeners.WEListener;
@@ -91,6 +92,7 @@ public class Main extends JavaPlugin {
 	getServer().getPluginManager().registerEvents(new BlockUpdateListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockChangeListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockExplodeListener(this), this);
+	getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
     }
 
     /**

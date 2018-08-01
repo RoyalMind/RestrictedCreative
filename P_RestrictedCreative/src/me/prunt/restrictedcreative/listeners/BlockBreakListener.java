@@ -59,7 +59,7 @@ public class BlockBreakListener implements Listener {
 	    return;
 
 	// No need to control non-tracked blocks
-	if (!DataHandler.isCreative(b))
+	if (!DataHandler.isTracked(b))
 	    return;
 
 	/* Disabled blocks for creative players */

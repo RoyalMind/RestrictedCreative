@@ -26,7 +26,7 @@ public class WELogger extends AbstractLoggingExtent {
     protected void onBlockChange(Vector position, BaseBlock newBlock) {
 	Block b = p.getWorld().getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
 
-	if (!DataHandler.isCreative(b))
+	if (!DataHandler.isTracked(b))
 	    return;
 
 	// If the block is removed (0 == AIR)

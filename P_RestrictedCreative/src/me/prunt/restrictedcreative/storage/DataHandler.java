@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 
 import me.prunt.restrictedcreative.Main;
@@ -29,7 +30,7 @@ public class DataHandler {
 
     private static int totalCount = 0;
 
-    public static boolean isCreative(Block b) {
+    public static boolean isTracked(Block b) {
 	if (b == null)
 	    return false;
 
@@ -44,7 +45,7 @@ public class DataHandler {
     }
 
     public static void setAsTracked(Block b) {
-	if (b == null || isCreative(b))
+	if (b == null || isTracked(b))
 	    return;
 
 	b.setMetadata("GMC", Main.getFMV());
@@ -53,7 +54,7 @@ public class DataHandler {
     }
 
     public static void removeTracking(Block b) {
-	if (b == null || !isCreative(b))
+	if (b == null || !isTracked(b))
 	    return;
 
 	b.removeMetadata("GMC", Main.getInstance());
@@ -84,21 +85,14 @@ public class DataHandler {
 	// }
 
 	b.setType(Material.AIR, update);
-	DataHandler.removeTracking(b);
+	removeTracking(b);
     }
 
-    public static boolean isCreative(Entity e) {
+    public static boolean isTracked(Entity e) {
 	if (e == null)
 	    return false;
 
 	return e.getScoreboardTags().contains("GMC");
-    }
-
-    public static boolean isCreativeItem(ItemFrame frame) {
-	if (frame == null)
-	    return false;
-
-	return frame.getScoreboardTags().contains("GMC_IF");
     }
 
     public static void setAsTracked(Entity e) {
@@ -113,6 +107,35 @@ public class DataHandler {
 	    return;
 
 	e.removeScoreboardTag("GMC");
+    }
+
+    public static boolean hasTrackedItem(ItemFrame frame) {
+	if (frame == null)
+	    return false;
+
+	return frame.getScoreboardTags().contains("GMC_IF");
+    }
+
+    public static void setAsTrackedItem(ItemFrame frame) {
+	if (frame == null)
+	    return;
+
+	frame.addScoreboardTag("GMC_IF");
+    }
+
+    public static void removeItemTracking(ItemFrame frame) {
+	if (frame == null)
+	    return;
+
+	frame.removeScoreboardTag("GMC_IF");
+    }
+
+    public static void removeItem(ItemFrame frame) {
+	if (frame == null)
+	    return;
+
+	frame.setItem(new ItemStack(Material.AIR));
+	removeItemTracking(frame);
     }
 
     private static void setTotalCount(int totalCount) {

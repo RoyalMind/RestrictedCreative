@@ -60,7 +60,7 @@ permissions:
       rc.bypass.limit.item.throw: true # per Material enum
       rc.bypass.limit.commands: true
       rc.bypass.limit.combat.pvp: true
-      rc.bypass.limit.combat.pve: true
+      rc.bypass.limit.combat.pve: true # per EntityType enum
       rc.bypass.limit.creation.wither: true
       rc.bypass.limit.creation.snow-golem: true
       rc.bypass.limit.creation.iron-golem: true
