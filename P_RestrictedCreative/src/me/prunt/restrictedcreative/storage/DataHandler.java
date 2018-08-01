@@ -62,6 +62,10 @@ public class DataHandler {
     }
 
     public static void breakBlock(Block b, Player p) {
+	breakBlock(b, p, false);
+    }
+
+    public static void breakBlock(Block b, Player p, boolean update) {
 	// TODO update
 	// BlocksHub
 	// if (Utils.isInstalled("BlocksHub")) {
@@ -79,7 +83,7 @@ public class DataHandler {
 	// blockshub.logBlock(location, player, world, oldBlock, newBlock);
 	// }
 
-	b.setType(Material.AIR, false);
+	b.setType(Material.AIR, update);
 	DataHandler.removeTracking(b);
     }
 

@@ -51,30 +51,61 @@ public class BlockUpdateListener implements Listener {
 	if (!DataHandler.isCreative(b))
 	    return;
 
-	/* Top blocks */
-	if (MaterialHandler.needsBlockBelow(b)) {
-
-	}
-
 	/* Rail */
 	if (bd instanceof Rail) {
 	    Block bl = b.getRelative(BlockFace.DOWN);
 
-	    // If the block below the rail isn't solid
-	    // or rail is on slope, but there's no block to support on
-	    if (!isSolid(bl) || !isSlopeOk(b)) {
-		e.setCancelled(true);
-		DataHandler.breakBlock(b, null);
+	    // If the block below the rail is solid
+	    // and if rail is on slope, there's a block to support on
+	    if (isSolid(bl) && isSlopeOk(b))
 		return;
-	    }
+
+	    e.setCancelled(true);
+	    DataHandler.breakBlock(b, null);
+	    return;
 	}
 
 	/* Chorus */
 	else if (b.getType() == Material.CHORUS_PLANT) {
-	    if (willDrop(b)) {
+	    if (!willChorusDrop(b))
+		return;
+
+	    e.setCancelled(true);
+	    DataHandler.breakBlock(b, null, true);
+	    return;
+	}
+
+	/* Top blocks */
+	if (MaterialHandler.needsBlockBelow(b)) {
+	    Block bl = b.getRelative(BlockFace.DOWN);
+	    Material m = b.getType();
+	    Material ma = bl.getType();
+
+	    // Needs to be checked BEFORE isSolid()
+	    if (m == Material.LILY_PAD && ma != Material.WATER) {
+		e.setCancelled(true);
 		DataHandler.breakBlock(b, null);
 		return;
 	    }
+
+	    // Needs to be checked BEFORE isSolid()
+	    if (m == Material.CACTUS && isCactusOk(b))
+		return;
+
+	    // Needs to be checked BEFORE isSolid()
+	    if (m == Material.SUGAR_CANE && isSugarCaneOk(b))
+		return;
+
+	    if (isSolid(bl))
+		return;
+
+	    // Needs to be checked AFTER isSolid()
+	    if (MaterialHandler.isCrop(b) && isLightingOk(b))
+		return;
+
+	    e.setCancelled(true);
+	    DataHandler.breakBlock(b, null);
+	    return;
 	}
 
 	/* Attachable */
@@ -87,69 +118,12 @@ public class BlockUpdateListener implements Listener {
 		return;
 
 	    // If the block (to which the first block is attached to) isn't solid
-	    if (!bl.getType().isSolid() || bl.getType() == Material.PISTON || bl.getType() == Material.STICKY_PISTON) {
-		e.setCancelled(true);
-		DataHandler.breakBlock(b, null);
+	    if (isSolid(bl))
 		return;
-	    }
 
-	}
-
-	// If it should be on top of sth
-	if (main.top.contains(b.getType())) {
-	    // If it's a growing block
-	    if (main.growers.contains(b.getType())) {
-		// If the block (to which the first block is attached to) isn't solid
-		if (!b.getRelative(BlockFace.DOWN).getType().isSolid()
-			|| b.getRelative(BlockFace.DOWN).getType() == Material.PISTON_BASE
-			|| b.getRelative(BlockFace.DOWN).getType() == Material.PISTON_STICKY_BASE) {
-		    e.setCancelled(true);
-		    main.breakBlock(b, null);
-		    return;
-		}
-		// If there is something under the growing plant
-
-		// If it's a cactus
-		if (b.getType() == Material.CACTUS) {
-		    // If there's a block besides the cactus
-		    if (b.getRelative(BlockFace.EAST).getType() != Material.AIR
-			    || b.getRelative(BlockFace.WEST).getType() != Material.AIR
-			    || b.getRelative(BlockFace.NORTH).getType() != Material.AIR
-			    || b.getRelative(BlockFace.SOUTH).getType() != Material.AIR) {
-			e.setCancelled(true);
-			main.breakBlock(b, null);
-			return;
-		    }
-
-		    // It's a sugar cane
-		} else {
-		    // Blocked to prevent breaking when there's no water
-		    // nearby
-		    e.setCancelled(true);
-		}
-
-		return;
-	    }
-
-	    Block block = b.getRelative(BlockFace.DOWN);
-
-	    // If it's a water lily
-	    if (b.getType() == Material.WATER_LILY) {
-		// If the block under it isn't water
-		if (block.getType() != Material.STATIONARY_WATER) {
-		    e.setCancelled(true);
-		    main.breakBlock(b, null);
-		    return;
-		}
-	    }
-
-	    // If the block (to which the first block is attached to) isn't solid
-	    if (!block.getType().isSolid() || block.getType() == Material.PISTON_BASE
-		    || block.getType() == Material.PISTON_STICKY_BASE) {
-		e.setCancelled(true);
-		main.breakBlock(b, null);
-		return;
-	    }
+	    e.setCancelled(true);
+	    DataHandler.breakBlock(b, null);
+	    return;
 	}
     }
 
@@ -170,13 +144,13 @@ public class BlockUpdateListener implements Listener {
 	}
     }
 
-    private boolean willDrop(Block b) {
+    private boolean willChorusDrop(Block b) {
 	boolean isVerticalEmpty = b.getRelative(BlockFace.UP).getType() == Material.AIR
 		|| b.getRelative(BlockFace.DOWN).getType() == Material.AIR;
 
 	List<Block> horisontals = getValidHorisontalChoruses(b);
 
-	if (!isBelowOk(b) && horisontals.isEmpty())
+	if (!isBelowChorusOk(b) && horisontals.isEmpty())
 	    return true;
 
 	if (!horisontals.isEmpty() && !isVerticalEmpty)
@@ -185,7 +159,7 @@ public class BlockUpdateListener implements Listener {
 	return false;
     }
 
-    private boolean isBelowOk(Block b) {
+    private boolean isBelowChorusOk(Block b) {
 	return b.getRelative(BlockFace.DOWN).getType() == Material.END_STONE
 		|| b.getRelative(BlockFace.DOWN).getType() == Material.CHORUS_PLANT;
     }
@@ -200,12 +174,37 @@ public class BlockUpdateListener implements Listener {
 	for (BlockFace bf : horisontal) {
 	    Block bl = b.getRelative(bf);
 
-	    if (bl.getType() == Material.CHORUS_PLANT && isBelowOk(bl)) {
+	    if (bl.getType() == Material.CHORUS_PLANT && isBelowChorusOk(bl)) {
 		list.add(bl);
 		break;
 	    }
 	}
 
 	return list;
+    }
+
+    private boolean isLightingOk(Block b) {
+	return b.getLightFromSky() >= 5 || b.getLightFromBlocks() >= 8;
+    }
+
+    private boolean isCactusOk(Block b) {
+	boolean nothingAround = b.getRelative(BlockFace.EAST).isEmpty() && b.getRelative(BlockFace.WEST).isEmpty()
+		&& b.getRelative(BlockFace.NORTH).isEmpty() && b.getRelative(BlockFace.SOUTH).isEmpty();
+	boolean belowOk = b.getRelative(BlockFace.DOWN).getType() == Material.SAND
+		|| b.getRelative(BlockFace.DOWN).getType() == Material.CACTUS;
+
+	return nothingAround && belowOk;
+    }
+
+    private boolean isSugarCaneOk(Block b) {
+	Block bl = b.getRelative(BlockFace.DOWN);
+
+	if (bl.getType() == Material.SUGAR_CANE)
+	    return true;
+
+	return bl.getRelative(BlockFace.EAST).getType() == Material.WATER
+		|| bl.getRelative(BlockFace.WEST).getType() == Material.WATER
+		|| bl.getRelative(BlockFace.NORTH).getType() == Material.WATER
+		|| bl.getRelative(BlockFace.SOUTH).getType() == Material.WATER;
     }
 }

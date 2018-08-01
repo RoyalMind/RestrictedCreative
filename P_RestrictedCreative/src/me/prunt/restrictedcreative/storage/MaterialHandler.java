@@ -14,8 +14,10 @@ import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.type.Cake;
 import org.bukkit.block.data.type.Cocoa;
+import org.bukkit.block.data.type.CoralWallFan;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Ladder;
+import org.bukkit.block.data.type.RedstoneWallTorch;
 import org.bukkit.block.data.type.RedstoneWire;
 import org.bukkit.block.data.type.Repeater;
 import org.bukkit.block.data.type.Sapling;
@@ -23,11 +25,13 @@ import org.bukkit.block.data.type.SeaPickle;
 import org.bukkit.block.data.type.Sign;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Switch;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.material.Banner;
 import org.bukkit.material.Button;
-import org.bukkit.material.RedstoneTorch;
+import org.bukkit.material.MaterialData;
 import org.bukkit.material.Torch;
 
+@SuppressWarnings("deprecation")
 public class MaterialHandler {
     // Items that will break if block below is air
     private static List<Material> top = new ArrayList<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
@@ -38,8 +42,11 @@ public class MaterialHandler {
 	    Material.TALL_GRASS, Material.SUNFLOWER, Material.LILAC, Material.ROSE_BUSH, Material.PEONY,
 	    Material.LARGE_FERN, Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS,
 	    Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
-	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.WHEAT, Material.CARROTS, Material.POTATOES,
-	    Material.BEETROOTS, Material.NETHER_WART));
+	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
+
+    // Crops
+    private static List<Material> crops = new ArrayList<>(
+	    Arrays.asList(Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS));
 
     public static boolean needsBlockBelow(Block b) {
 	BlockData bd = b.getBlockData();
@@ -75,7 +82,12 @@ public class MaterialHandler {
 	if (bd instanceof Snow)
 	    return true;
 
+	if (getNeededSide(b) == BlockFace.DOWN)
+	    return true;
+
 	if (top.contains(m))
+	    return true;
+	if (crops.contains(m))
 	    return true;
 
 	return false;
@@ -95,18 +107,26 @@ public class MaterialHandler {
 	    return d.getFacing();
 	if (bd instanceof Switch)
 	    return d.getFacing();
-	// if (bd instanceof CoralWallFan)
-	// return d.getFacing();
+	if (bd instanceof CoralWallFan)
+	    return d.getFacing();
+	if (bd instanceof RedstoneWallTorch)
+	    return d.getFacing();
+	if (bd instanceof WallSign)
+	    return d.getFacing();
 
-	if (bd instanceof Banner)
+	MaterialData md = b.getState().getData();
+
+	if (md instanceof Banner)
 	    return d.getFacing();
-	if (bd instanceof Button)
+	if (md instanceof Button)
 	    return d.getFacing();
-	if (bd instanceof RedstoneTorch)
-	    return d.getFacing();
-	if (bd instanceof Torch)
+	if (md instanceof Torch)
 	    return d.getFacing();
 
 	return null;
+    }
+
+    public static boolean isCrop(Block b) {
+	return crops.contains(b.getType());
     }
 }
