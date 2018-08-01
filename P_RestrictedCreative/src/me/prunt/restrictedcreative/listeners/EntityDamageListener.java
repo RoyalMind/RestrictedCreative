@@ -99,7 +99,7 @@ public class EntityDamageListener implements Listener {
 	if (!DataHandler.isTracked(en))
 	    return;
 
-	// Remove boats, carts etc.
+	// Remove armor stands etc.
 	en.remove();
 	e.setCancelled(true);
     }
@@ -113,16 +113,17 @@ public class EntityDamageListener implements Listener {
     public void onVehicleDestory(VehicleDestroyEvent e) {
 	Entity en = e.getVehicle();
 
-	// World check
-	if (main.isDisabledWorld(en.getWorld().getName()))
+	// No need to control entities in disabled worlds
+	if (getMain().isDisabledWorld(en.getWorld().getName()))
 	    return;
 
-	// If it's tracked
-	if (Main.isTracked(en)) {
-	    en.remove();
-	    e.setCancelled(true);
+	// No need to control non-tracked entities
+	if (!DataHandler.isTracked(en))
 	    return;
-	}
+
+	// Remove boats, carts etc.
+	en.remove();
+	e.setCancelled(true);
     }
 
     /*
@@ -133,26 +134,20 @@ public class EntityDamageListener implements Listener {
     public void onHangingBreak(HangingBreakEvent e) {
 	Entity en = e.getEntity();
 
-	// World + config check
-	if (main.isDisabledWorld(en.getWorld().getName()) || !main.track)
+	// No need to control entities in disabled worlds
+	if (getMain().isDisabledWorld(en.getWorld().getName()))
 	    return;
 
-	// If it's placed in creative
-	if (Main.isTracked(en)) {
-	    en.remove();
-	    Main.remove(en);
-
-	    // If it's placed in survival
-	} else {
-	    // If it's an item frame
+	if (!DataHandler.isTracked(en)) {
 	    if (en instanceof ItemFrame) {
-		ItemFrame frame = (ItemFrame) en;
-
-		if (Main.hasCreativeItem(frame)) {
+		if (DataHandler.hasTrackedItem((ItemFrame) en))
 		    en.remove();
-		    Main.remove(en);
-		}
 	    }
+
+	    return;
 	}
+
+	en.remove();
+	e.setCancelled(true);
     }
 }
