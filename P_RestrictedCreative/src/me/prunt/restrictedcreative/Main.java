@@ -20,7 +20,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.sk89q.worldedit.WorldEdit;
 
 import me.prunt.restrictedcreative.commands.MainCommand;
+import me.prunt.restrictedcreative.listeners.BlockChangeListener;
 import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
+import me.prunt.restrictedcreative.listeners.BlockUpdateListener;
 import me.prunt.restrictedcreative.listeners.WEListener;
 import me.prunt.restrictedcreative.storage.ConfigProvider;
 import me.prunt.restrictedcreative.storage.DataHandler;
@@ -83,6 +85,8 @@ public class Main extends JavaPlugin {
 	    WorldEdit.getInstance().getEventBus().register(new WEListener(this));
 
 	getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), this);
+	getServer().getPluginManager().registerEvents(new BlockUpdateListener(this), this);
+	getServer().getPluginManager().registerEvents(new BlockChangeListener(this), this);
     }
 
     /**

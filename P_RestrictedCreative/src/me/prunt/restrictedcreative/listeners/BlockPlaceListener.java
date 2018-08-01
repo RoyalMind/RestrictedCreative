@@ -24,6 +24,11 @@ public class BlockPlaceListener implements Listener {
 	return this.main;
     }
 
+    /*
+     * Called when a block is placed by a player.
+     * 
+     * If a Block Place event is cancelled, the block will not be placed.
+     */
     // HIGHEST required for WorldGuard and similar plugins
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent e) {
@@ -58,6 +63,11 @@ public class BlockPlaceListener implements Listener {
 	DataHandler.setAsTracked(b);
     }
 
+    /*
+     * Called when a block is placed by a player.
+     * 
+     * If a Block Place event is cancelled, the block will not be placed.
+     */
     // HIGHEST required for WorldGuard and similar plugins
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onCreatureCreate(BlockPlaceEvent e) {

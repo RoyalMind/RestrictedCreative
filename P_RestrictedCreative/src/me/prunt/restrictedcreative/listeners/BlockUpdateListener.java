@@ -33,6 +33,9 @@ public class BlockUpdateListener implements Listener {
 	return this.main;
     }
 
+    /*
+     * Thrown when a block physics check is called
+     */
     @EventHandler(ignoreCancelled = true)
     public void onBlockUpdate(BlockPhysicsEvent e) {
 	Block b = e.getBlock();
@@ -40,7 +43,7 @@ public class BlockUpdateListener implements Listener {
 	MaterialData md = b.getState().getData();
 
 	// No need to control blocks in disabled worlds
-	if (main.isDisabledWorld(b.getWorld().getName()))
+	if (getMain().isDisabledWorld(b.getWorld().getName()))
 	    return;
 
 	// No need to control excluded blocks
