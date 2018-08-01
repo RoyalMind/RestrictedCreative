@@ -26,6 +26,7 @@ import me.prunt.restrictedcreative.listeners.BlockExplodeListener;
 import me.prunt.restrictedcreative.listeners.BlockPistonListener;
 import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.BlockUpdateListener;
+import me.prunt.restrictedcreative.listeners.EntityCreateListener;
 import me.prunt.restrictedcreative.listeners.EntityDamageListener;
 import me.prunt.restrictedcreative.listeners.WEListener;
 import me.prunt.restrictedcreative.storage.ConfigProvider;
@@ -94,7 +95,9 @@ public class Main extends JavaPlugin {
 	getServer().getPluginManager().registerEvents(new BlockChangeListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockExplodeListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockPistonListener(this), this);
+
 	getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
+	getServer().getPluginManager().registerEvents(new EntityCreateListener(this), this);
     }
 
     /**
@@ -172,9 +175,17 @@ public class Main extends JavaPlugin {
      *              Material type
      * @return Whether the given type should be excluded from tracking
      */
+    public boolean isTrackingOn() {
+	return getSettings().isEnabled("tracking.blocks.enabled");
+    }
+
+    /**
+     * @param m
+     *              Material type
+     * @return Whether the given type should be excluded from tracking
+     */
     public boolean isExcluded(Material m) {
-	return getSettings().getMaterialList("tracking.blocks.exclude").contains(m)
-		|| getSettings().isEnabled("tracking.blocks.enabled");
+	return getSettings().getMaterialList("tracking.blocks.exclude").contains(m) || !isTrackingOn();
     }
 
     /**

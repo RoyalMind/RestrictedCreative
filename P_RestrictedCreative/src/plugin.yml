@@ -47,6 +47,7 @@ permissions:
       rc.bypass.creative.armor: true
       rc.bypass.creative.permissions: true
       rc.bypass.tracking.blocks: true # per Material enum
+      rc.bypass.tracking.entities: true # per EntityType enum
       rc.bypass.tracking.worldedit: true
       rc.bypass.tracking.inventory.*: true
       rc.bypass.limit.regions.owner-based: true
@@ -116,6 +117,7 @@ permissions:
   rc.bypass.limit.regions.whitelist:
     description: Allows to enter creative mode and place blocks/items outside whitelisted regions in creative mode.
     default: false
+    
   rc.bypass.separate-invs:
     description: Allows to have same inventory for both creative and survival/adventure.
     default: false

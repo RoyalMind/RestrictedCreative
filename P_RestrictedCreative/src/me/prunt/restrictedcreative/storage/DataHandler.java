@@ -21,6 +21,8 @@ public class DataHandler {
     public static List<String> addToDatabase = new ArrayList<>();
     public static List<String> removeFromDatabase = new ArrayList<>();
 
+    private static List<String> trackedLocs = new ArrayList<>();
+
     private static boolean usingOldAliases = false;
     private static boolean usingSQLite = false;
 
@@ -136,6 +138,19 @@ public class DataHandler {
 
 	frame.setItem(new ItemStack(Material.AIR));
 	removeItemTracking(frame);
+    }
+
+    public static boolean isTrackedLoc(String loc) {
+	return trackedLocs.contains(loc);
+    }
+
+    public static void addToTrackedLocs(String loc) {
+	trackedLocs.add(loc);
+    }
+
+    public static void removeFromTrackedLocs(String loc) {
+	if (isTrackedLoc(loc))
+	    trackedLocs.remove(loc);
     }
 
     private static void setTotalCount(int totalCount) {

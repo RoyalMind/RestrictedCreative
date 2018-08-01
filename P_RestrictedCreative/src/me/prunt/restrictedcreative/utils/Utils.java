@@ -1,6 +1,7 @@
 package me.prunt.restrictedcreative.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 public class Utils {
@@ -11,6 +12,11 @@ public class Utils {
     // Return block position as a string
     public static String getBlockString(Block b) {
 	return b.getWorld().getName() + ";" + b.getX() + ";" + b.getY() + ";" + b.getZ();
+    }
+
+    // Return location coordinates as a string
+    public static String getLocString(Location loc) {
+	return loc.getWorld().getName() + ";" + loc.getBlockX() + ";" + loc.getBlockZ();
     }
 
     // Return block from a position string
