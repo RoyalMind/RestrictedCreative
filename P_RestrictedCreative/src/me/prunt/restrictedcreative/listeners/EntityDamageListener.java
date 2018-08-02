@@ -36,7 +36,7 @@ public class EntityDamageListener implements Listener {
 	Entity en = e.getEntity();
 
 	// No need to control entities in disabled worlds
-	if (getMain().isDisabledWorld(en.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(en.getWorld().getName()))
 	    return;
 
 	// Item frame
@@ -75,7 +75,7 @@ public class EntityDamageListener implements Listener {
 		    return;
 
 		e.setCancelled(true);
-		main.sendMessage(p, true, "disabled.general");
+		getMain().getUtils().sendMessage(p, true, "disabled.general");
 		return;
 	    }
 
@@ -90,7 +90,7 @@ public class EntityDamageListener implements Listener {
 		    return;
 
 		e.setCancelled(true);
-		main.sendMessage(p, true, "disabled.general");
+		getMain().getUtils().sendMessage(p, true, "disabled.general");
 		return;
 	    }
 	}
@@ -114,7 +114,7 @@ public class EntityDamageListener implements Listener {
 	Entity en = e.getVehicle();
 
 	// No need to control entities in disabled worlds
-	if (getMain().isDisabledWorld(en.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(en.getWorld().getName()))
 	    return;
 
 	// No need to control non-tracked entities
@@ -135,7 +135,7 @@ public class EntityDamageListener implements Listener {
 	Entity en = e.getEntity();
 
 	// No need to control entities in disabled worlds
-	if (getMain().isDisabledWorld(en.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(en.getWorld().getName()))
 	    return;
 
 	if (!DataHandler.isTracked(en)) {

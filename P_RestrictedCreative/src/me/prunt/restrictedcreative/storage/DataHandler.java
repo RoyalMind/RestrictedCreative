@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -140,17 +141,17 @@ public class DataHandler {
 	removeItemTracking(frame);
     }
 
-    public static boolean isTrackedLoc(String loc) {
-	return trackedLocs.contains(loc);
+    public static boolean isTrackedLoc(Location loc) {
+	return trackedLocs.contains(Utils.getLocString(loc));
     }
 
-    public static void addToTrackedLocs(String loc) {
-	trackedLocs.add(loc);
+    public static void addToTrackedLocs(Location loc) {
+	trackedLocs.add(Utils.getLocString(loc));
     }
 
-    public static void removeFromTrackedLocs(String loc) {
+    public static void removeFromTrackedLocs(Location loc) {
 	if (isTrackedLoc(loc))
-	    trackedLocs.remove(loc);
+	    trackedLocs.remove(Utils.getLocString(loc));
     }
 
     private static void setTotalCount(int totalCount) {
@@ -189,13 +190,52 @@ public class DataHandler {
 	return infoWithCommand;
     }
 
+    public static boolean isAddWithCommand(Player p) {
+	return getAddWithCommand().contains(p);
+    }
+
+    public static boolean isRemoveWithCommand(Player p) {
+	return getRemoveWithCommand().contains(p);
+    }
+
+    public static boolean isInfoWithCommand(Player p) {
+	return getInfoWithCommand().contains(p);
+    }
+
+    public static void removeAddWithCommand(Player p) {
+	if (isAddWithCommand(p))
+	    getAddWithCommand().remove(p);
+    }
+
+    public static void removeRemoveWithCommand(Player p) {
+	if (isRemoveWithCommand(p))
+	    getRemoveWithCommand().remove(p);
+    }
+
+    public static void removeInfoWithCommand(Player p) {
+	if (isInfoWithCommand(p))
+	    getInfoWithCommand().remove(p);
+    }
+
+    public static void setAddWithCommand(Player p) {
+	getAddWithCommand().add(p);
+    }
+
+    public static void setRemoveWithCommand(Player p) {
+	getRemoveWithCommand().add(p);
+    }
+
+    public static void setInfoWithCommand(Player p) {
+	getInfoWithCommand().add(p);
+    }
+
     public static void loadFromDatabase(Main main) {
 	Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), new Runnable() {
 	    @Override
 	    public void run() {
 		long start = System.currentTimeMillis();
 
-		main.sendMessage(Bukkit.getConsoleSender(), true, "database.load");
+		main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.load");
 
 		// Gets all blocks from database
 		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getTableName());
@@ -225,13 +265,13 @@ public class DataHandler {
 
 			setTotalCount(count);
 
-			main.sendMessage(Bukkit.getConsoleSender(),
-				main.getMessage(true, "database.loaded").replaceAll("%blocks%", getTotalCount()));
+			Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")
+				.replaceAll("%blocks%", getTotalCount()));
 
 			String took = String.valueOf(System.currentTimeMillis() - start);
 
-			main.sendMessage(Bukkit.getConsoleSender(),
-				main.getMessage(true, "database.done").replaceAll("%mills%", took));
+			Utils.sendMessage(Bukkit.getConsoleSender(),
+				main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
 		    }
 		});
 	    }

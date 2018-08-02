@@ -8,9 +8,7 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -39,6 +37,8 @@ import me.prunt.restrictedcreative.utils.Utils;
 public class Main extends JavaPlugin {
     private Database database;
 
+    private Utils utils;
+
     private ConfigProvider config;
     private ConfigProvider messages;
 
@@ -47,6 +47,7 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
 	setFMV(new FixedMetadataValue(getInstance(), "true"));
+	setUtils(new Utils(this));
 
 	loadConfig();
 	registerListeners();
@@ -61,7 +62,7 @@ public class Main extends JavaPlugin {
 
 	    if (p.getGameMode() == GameMode.CREATIVE)
 		continue;
-	    if (isDisabledWorld(name))
+	    if (getUtils().isDisabledWorld(name))
 		continue;
 
 	    // TODO save player's data
@@ -162,53 +163,6 @@ public class Main extends JavaPlugin {
     }
 
     /**
-     * @param name
-     *                 World name
-     * @return Whether the plugin is disabled in the given world
-     */
-    public boolean isDisabledWorld(String name) {
-	return getSettings().getStringList("general.worlds.disable-plugin").contains(name);
-    }
-
-    /**
-     * @param m
-     *              Material type
-     * @return Whether the given type should be excluded from tracking
-     */
-    public boolean isTrackingOn() {
-	return getSettings().isEnabled("tracking.blocks.enabled");
-    }
-
-    /**
-     * @param m
-     *              Material type
-     * @return Whether the given type should be excluded from tracking
-     */
-    public boolean isExcluded(Material m) {
-	return getSettings().getMaterialList("tracking.blocks.exclude").contains(m) || !isTrackingOn();
-    }
-
-    /**
-     * @param m
-     *              Material type
-     * @return Whether the given type should be disabled from placing by creative
-     *         players
-     */
-    public boolean isDisabledPlacing(Material m) {
-	return getSettings().getMaterialList("disable.placing").contains(m);
-    }
-
-    /**
-     * @param m
-     *              Material type
-     * @return Whether the given type should be disabled from placing by creative
-     *         players
-     */
-    public boolean isDisabledBreaking(Material m) {
-	return getSettings().getMaterialList("disable.breaking").contains(m);
-    }
-
-    /**
      * @return RestrictedCreative plugin instance
      */
     public static Plugin getInstance() {
@@ -252,37 +206,11 @@ public class Main extends JavaPlugin {
 	this.database = database;
     }
 
-    /**
-     * @param sender
-     *                   Player to send the message to
-     * @param prefix
-     *                   Whether to include a prefix in the message
-     * @param string
-     *                   Paths of messages to send to the player
-     */
-    public void sendMessage(CommandSender sender, boolean prefix, String... strings) {
-	sendMessage(sender, getMessage(prefix, strings));
+    public Utils getUtils() {
+	return utils;
     }
 
-    public void sendMessage(CommandSender sender, String msg) {
-	if (msg != "")
-	    sender.sendMessage(msg);
-    }
-
-    /**
-     * @param prefix
-     *                   Whether to include a prefix in the message
-     * @param string
-     *                   Paths of messages to send to the player
-     */
-    public String getMessage(boolean prefix, String... strings) {
-	if (getSettings().isNone(strings))
-	    return "";
-
-	String msg = prefix ? getMessages().getMessage("prefix") : "";
-	for (String path : strings)
-	    msg += getMessages().getMessage(path);
-
-	return msg;
+    public void setUtils(Utils utils) {
+	this.utils = utils;
     }
 }

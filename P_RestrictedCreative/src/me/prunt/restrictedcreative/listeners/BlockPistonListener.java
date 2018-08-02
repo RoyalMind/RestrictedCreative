@@ -32,7 +32,7 @@ public class BlockPistonListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPull(BlockPistonRetractEvent e) {
 	// No need to control blocks in disabled worlds
-	if (getMain().isDisabledWorld(e.getBlock().getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
 	    return;
 
 	// Non-sticky piston doesn't pull anything
@@ -56,7 +56,7 @@ public class BlockPistonListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPush(BlockPistonExtendEvent e) {
 	// No need to control blocks in disabled worlds
-	if (getMain().isDisabledWorld(e.getBlock().getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
 	    return;
 
 	List<Block> newBlocks = new ArrayList<>();

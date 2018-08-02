@@ -50,6 +50,12 @@ public class MaterialHandler {
     private static List<Material> doublePlants = new ArrayList<>(Arrays.asList(Material.TALL_GRASS, Material.SUNFLOWER,
 	    Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.LARGE_FERN));
 
+    // Placeable entities (but not hangables)
+    private static List<Material> entities = new ArrayList<>(Arrays.asList(Material.END_CRYSTAL, Material.ARMOR_STAND,
+	    Material.MINECART, Material.CHEST_MINECART, Material.COMMAND_BLOCK_MINECART, Material.FURNACE_MINECART,
+	    Material.HOPPER_MINECART, Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT,
+	    Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT, Material.SPRUCE_BOAT));
+
     public static boolean needsBlockBelow(Block b) {
 	BlockData bd = b.getBlockData();
 	Material m = b.getType();
@@ -136,5 +142,9 @@ public class MaterialHandler {
 
     public static boolean isDoublePlant(Block b) {
 	return doublePlants.contains(b.getType());
+    }
+
+    public static boolean isPlaceableEntity(Material m) {
+	return entities.contains(m);
     }
 }

@@ -70,10 +70,10 @@ tracking:
     enabled: true
 
 limit:
-  regions:
+  regions: # requires WorldGuard or GriefPrevention
     owner-based:
       enabled: false
-      allow-members: true 
+      allow-members: false # requires WorldGuard
     whitelist:
       enabled: false
       list:
@@ -103,9 +103,23 @@ limit:
   
 confiscate:
   enabled: true
-  invalid-items: false
+  invalid-items: true # NBT check requires ProtocolLib
   middle-click: true
   items:
+    material:
+    - 'BARRIER'
+    - 'CHAIN_COMMAND_BLOCK'
+    - 'COMMAND_BLOCK'
+    - 'COMMAND_BLOCK_MINECART'
+    - 'REPEATING_COMMAND_BLOCK'
+    - 'SPAWNER'
+    - 'DRAGON_EGG'
+    - 'RED_MUSHROOM_BLOCK'
+    - 'BROWN_MUSHROOM_BLOCK'
+    - 'GRASS_PATH'
+    - 'STRUCTURE_BLOCK'
+    - 'STRUCTURE_VOID'
+    - 'VOID_AIR'
     name:
     - 'Cash'
     lore:

@@ -51,11 +51,11 @@ public class BlockBreakListener implements Listener {
 	Material m = b.getType();
 
 	// No need to control blocks in disabled worlds
-	if (getMain().isDisabledWorld(p.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
 	// No need to control excluded blocks
-	if (getMain().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcluded(b.getType()))
 	    return;
 
 	// No need to control non-tracked blocks
@@ -63,10 +63,10 @@ public class BlockBreakListener implements Listener {
 	    return;
 
 	/* Disabled blocks for creative players */
-	if (p.getGameMode() == GameMode.CREATIVE && getMain().isDisabledBreaking(m)
+	if (p.getGameMode() == GameMode.CREATIVE && getMain().getUtils().isDisabledBreaking(m)
 		&& !p.hasPermission("rc.bypass.disable.breaking")
 		&& !p.hasPermission("rc.bypass.disable.breaking." + m)) {
-	    main.sendMessage(p, true, "disabled.general");
+	    getMain().getUtils().sendMessage(p, true, "disabled.general");
 	    e.setCancelled(true);
 	    return;
 	}

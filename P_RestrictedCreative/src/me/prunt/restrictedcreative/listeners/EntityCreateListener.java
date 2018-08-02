@@ -1,6 +1,7 @@
 package me.prunt.restrictedcreative.listeners;
 
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,7 +16,6 @@ import org.bukkit.event.vehicle.VehicleCreateEvent;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
-import me.prunt.restrictedcreative.utils.Utils;
 
 public class EntityCreateListener implements Listener {
     private Main main;
@@ -38,10 +38,10 @@ public class EntityCreateListener implements Listener {
 	Entity en = e.getEntity();
 
 	// No need to track entities in disabled worlds
-	if (getMain().isDisabledWorld(en.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(en.getWorld().getName()))
 	    return;
 
-	String loc = Utils.getLocString(e.getLocation());
+	Location loc = e.getLocation();
 
 	// No need to track non-tracked entities
 	if (DataHandler.isTrackedLoc(loc))
@@ -59,10 +59,10 @@ public class EntityCreateListener implements Listener {
 	Entity en = e.getVehicle();
 
 	// No need to control entities in disabled worlds
-	if (getMain().isDisabledWorld(en.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(en.getWorld().getName()))
 	    return;
 
-	String loc = Utils.getLocString(en.getLocation());
+	Location loc = en.getLocation();
 
 	// No need to track non-tracked entities
 	if (DataHandler.isTrackedLoc(loc))
@@ -83,7 +83,11 @@ public class EntityCreateListener implements Listener {
 	EntityType et = en.getType();
 
 	// No need to track entities in disabled worlds
-	if (getMain().isDisabledWorld(en.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(en.getWorld().getName()))
+	    return;
+
+	// No need to track disabled features
+	if (!getMain().getUtils().isTrackingOn())
 	    return;
 
 	// No need to track non-creative players
@@ -92,10 +96,6 @@ public class EntityCreateListener implements Listener {
 
 	// No need to track bypassed players
 	if (p.hasPermission("rc.bypass.tracking.entities") || p.hasPermission("rc.bypass.tracking.entities." + et))
-	    return;
-
-	// No need to track disabled features
-	if (!getMain().isTrackingOn())
 	    return;
 
 	DataHandler.setAsTracked(en);
@@ -109,7 +109,7 @@ public class EntityCreateListener implements Listener {
 	Projectile en = e.getEntity();
 
 	// No need to control entities in disabled worlds
-	if (getMain().isDisabledWorld(e.getEntity().getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(e.getEntity().getWorld().getName()))
 	    return;
 
 	// No need to control disabled features
@@ -132,6 +132,6 @@ public class EntityCreateListener implements Listener {
 	    return;
 
 	e.setCancelled(true);
-	getMain().sendMessage(p, true, "disabled.general");
+	getMain().getUtils().sendMessage(p, true, "disabled.general");
     }
 }

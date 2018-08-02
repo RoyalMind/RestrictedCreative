@@ -67,6 +67,7 @@ permissions:
       rc.bypass.limit.creation.iron-golem: true
       rc.bypass.confiscate.invalid-items: true
       rc.bypass.confiscate.middle-click: true
+      rc.bypass.confiscate.items.material: true # per Material enum
       rc.bypass.confiscate.items.name: true
       rc.bypass.confiscate.items.lore: true
       rc.bypass.disable.placing: true # per Material enum

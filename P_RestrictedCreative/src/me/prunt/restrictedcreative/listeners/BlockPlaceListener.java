@@ -43,7 +43,7 @@ public class BlockPlaceListener implements Listener {
 	Material m = b.getType();
 
 	// No need to track blocks in disabled worlds
-	if (getMain().isDisabledWorld(p.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
 	// No need to track non-creative players
@@ -51,7 +51,7 @@ public class BlockPlaceListener implements Listener {
 	    return;
 
 	// No need to track excluded blocks
-	if (getMain().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcluded(b.getType()))
 	    return;
 
 	// No need to track bypassed players
@@ -59,9 +59,9 @@ public class BlockPlaceListener implements Listener {
 	    return;
 
 	/* Disabled blocks */
-	if (getMain().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
+	if (getMain().getUtils().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
 		&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
-	    getMain().sendMessage(p, true, "disabled.general");
+	    getMain().getUtils().sendMessage(p, true, "disabled.general");
 	    e.setCancelled(true);
 	    return;
 	}
@@ -83,7 +83,7 @@ public class BlockPlaceListener implements Listener {
 	Material m = b.getType();
 
 	// No need to track blocks in disabled worlds
-	if (getMain().isDisabledWorld(p.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
 	// No need to track non-creative players
@@ -91,7 +91,7 @@ public class BlockPlaceListener implements Listener {
 	    return;
 
 	// No need to track excluded blocks
-	if (getMain().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcluded(b.getType()))
 	    return;
 
 	// No need to track bypassed players
@@ -99,9 +99,9 @@ public class BlockPlaceListener implements Listener {
 	    return;
 
 	/* Disabled blocks */
-	if (getMain().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
+	if (getMain().getUtils().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
 		&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
-	    main.sendMessage(p, true, "disabled.general");
+	    getMain().getUtils().sendMessage(p, true, "disabled.general");
 	    e.setCancelled(true);
 	    return;
 	}
@@ -121,13 +121,13 @@ public class BlockPlaceListener implements Listener {
 	Block head = e.getBlockPlaced();
 
 	// No need to check creations in disabled worlds
-	if (getMain().isDisabledWorld(p.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
 	switch (head.getType()) {
 	// Wither
 	case WITHER_SKELETON_SKULL:
-	    if (!main.getSettings().isEnabled("limit.creation.wither"))
+	    if (!getMain().getSettings().isEnabled("limit.creation.wither"))
 		return;
 
 	    if (!couldWitherBeBuilt(head))
@@ -137,29 +137,29 @@ public class BlockPlaceListener implements Listener {
 	    if (p.getGameMode() != GameMode.CREATIVE && canSurvivalBuildWither(head))
 		return;
 
-	    main.sendMessage(p, true, "disabled.creature");
+	    getMain().getUtils().sendMessage(p, true, "disabled.creature");
 	    e.setCancelled(true);
 	    return;
 	// Golem
 	case PUMPKIN:
 	case JACK_O_LANTERN:
 	    // Iron golem
-	    if (main.getSettings().isEnabled("limit.creation.iron-golem") && couldIronGolemBeBuilt(head)) {
+	    if (getMain().getSettings().isEnabled("limit.creation.iron-golem") && couldIronGolemBeBuilt(head)) {
 		// Golem was built in survival mode
 		if (p.getGameMode() != GameMode.CREATIVE && canSurvivalBuildIronGolem(head))
 		    return;
 
-		main.sendMessage(p, true, "disabled.creature");
+		getMain().getUtils().sendMessage(p, true, "disabled.creature");
 		e.setCancelled(true);
 		return;
 	    }
 	    // Snow golem
-	    else if (main.getSettings().isEnabled("limit.creation.snow-golem") && couldSnowGolemBeBuilt(head)) {
+	    else if (getMain().getSettings().isEnabled("limit.creation.snow-golem") && couldSnowGolemBeBuilt(head)) {
 		// Golem was built in survival mode
 		if (p.getGameMode() != GameMode.CREATIVE && canSurvivalBuildSnowGolem(head))
 		    return;
 
-		main.sendMessage(p, true, "disabled.creature");
+		getMain().getUtils().sendMessage(p, true, "disabled.creature");
 		e.setCancelled(true);
 		return;
 	    }

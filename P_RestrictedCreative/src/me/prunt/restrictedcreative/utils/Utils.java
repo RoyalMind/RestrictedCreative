@@ -1,10 +1,32 @@
 package me.prunt.restrictedcreative.utils;
 
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import me.prunt.restrictedcreative.Main;
+import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class Utils {
+    /* --- Static methods --- */
     public static boolean isInstalled(String plugin) {
 	return Bukkit.getPluginManager().getPlugin(plugin) != null;
     }
@@ -39,5 +61,289 @@ public class Utils {
     // Print error to console
     public static void log(String msg) {
 	Bukkit.getLogger().severe(msg);
+    }
+
+    public static void sendMessage(CommandSender sender, String msg) {
+	if (msg != "")
+	    sender.sendMessage(msg);
+    }
+
+    /* --- Non-static methods --- */
+    private Main main;
+
+    public Utils(Main main) {
+	this.main = main;
+    }
+
+    private Main getMain() {
+	return this.main;
+    }
+
+    /**
+     * @param name
+     *                 World name
+     * @return Whether the plugin is disabled in the given world
+     */
+    public boolean isDisabledWorld(String name) {
+	return getMain().getSettings().getStringList("general.worlds.disable-plugin").contains(name);
+    }
+
+    /**
+     * @param m
+     *              Material type
+     * @return Whether tracking is enabled in the config
+     */
+    public boolean isTrackingOn() {
+	return getMain().getSettings().isEnabled("tracking.blocks.enabled");
+    }
+
+    /**
+     * @param m
+     *              Material type
+     * @return Whether the given type should be excluded from tracking
+     */
+    public boolean isExcluded(Material m) {
+	return getMain().getSettings().getMaterialList("tracking.blocks.exclude").contains(m) || !isTrackingOn();
+    }
+
+    private boolean isInvalid(Material m) {
+	return getMain().getSettings().getMaterialList("confiscate.items.material").contains(m);
+    }
+
+    /**
+     * @param m
+     *              Material type
+     * @return Whether the given type should be disabled from placing by creative
+     *         players
+     */
+    public boolean isDisabledPlacing(Material m) {
+	return getMain().getSettings().getMaterialList("disable.placing").contains(m);
+    }
+
+    /**
+     * @param m
+     *              Material type
+     * @return Whether the given type should be disabled from breaking by creative
+     *         players
+     */
+    public boolean isDisabledBreaking(Material m) {
+	return getMain().getSettings().getMaterialList("disable.breaking").contains(m);
+    }
+
+    public boolean isWhitelistedRegion(String name) {
+	return getMain().getSettings().getStringList("limit.regions.whitelist.list").contains(name);
+    }
+
+    /**
+     * @param sender
+     *                   Player to send the message to
+     * @param prefix
+     *                   Whether to include a prefix in the message
+     * @param string
+     *                   Paths of messages to send to the player
+     */
+    public void sendMessage(CommandSender sender, boolean prefix, String... strings) {
+	sendMessage(sender, getMessage(prefix, strings));
+    }
+
+    /**
+     * @param prefix
+     *                   Whether to include a prefix in the message
+     * @param string
+     *                   Paths of messages to send to the player
+     */
+    public String getMessage(boolean prefix, String... strings) {
+	if (getMain().getSettings().isNone(strings))
+	    return "";
+
+	String msg = prefix ? getMain().getMessages().getMessage("prefix") : "";
+	for (String path : strings)
+	    msg += getMain().getMessages().getMessage(path);
+
+	return msg;
+    }
+
+    public boolean canBuildHere(Player p, Block b, ItemStack is) {
+	// Gets the player or block location
+	Location loc = p.getLocation();
+	if (b != null)
+	    loc = b.getLocation();
+
+	// WorldGuard check
+	if (Utils.isInstalled("WorldGuard")) {
+	    WorldGuardPlugin wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
+	    LocalPlayer lp = wg.wrapPlayer(p);
+
+	    // Gets all regions covering the block or player location
+	    ApplicableRegionSet set = wg.getRegionManager(p.getWorld()).getApplicableRegions(loc);
+
+	    // Loops through applicable regions
+	    for (ProtectedRegion rg : set) {
+		// Whitelist check
+		if (getMain().getSettings().isEnabled("limit.regions.whitelist.enabled")) {
+		    // If it's whitelisted
+		    if (isWhitelistedRegion(rg.getId()))
+			return true;
+		}
+
+		// Owner check
+		if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")) {
+		    if (rg.isOwner(lp))
+			return true;
+
+		    // Member check
+		    if (getMain().getSettings().isEnabled("limit.regions.owner-based.allow-members")) {
+			if (rg.isMember(lp))
+			    return true;
+		    }
+		}
+	    }
+	}
+
+	// GriefPrevention check
+	if (Utils.isInstalled("GriefPrevention")) {
+	    Claim claim = GriefPrevention.instance.dataStore.getClaimAt(b.getLocation(), false, null);
+
+	    if (claim == null)
+		return false;
+
+	    // Owner check
+	    if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")) {
+		if (claim.getOwnerName() == p.getName())
+		    return true;
+
+		// Member check
+		if (getMain().getSettings().isEnabled("limit.regions.owner-based.allow-members")) {
+		    if (claim.allowBuild(p, is.getType()) == null)
+			return true;
+		}
+	    }
+	}
+
+	return false;
+    }
+
+    private boolean isInvalidNBT(ItemStack is) {
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("confiscate.invalid-items"))
+	    return false;
+
+	if (is == null || is.getType() == Material.AIR)
+	    return false;
+
+	try {
+	    NbtCompound nc = (NbtCompound) NbtFactory.fromItemTag(is);
+
+	    if (nc.containsKey("CustomPotionEffects") || nc.containsKey("StoredEnchantments")
+		    || nc.containsKey("HideFlags") || nc.containsKey("Unbreakable")
+		    || nc.containsKey("AttributeModifiers"))
+		return true;
+	} catch (Exception ex) {
+	    return false;
+	}
+
+	return false;
+    }
+
+    private boolean isInvalid(ItemStack is) {
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("confiscate.invalid-items"))
+	    return false;
+
+	if (is == null || is.getType() == Material.AIR)
+	    return false;
+
+	ItemMeta im = is.getItemMeta();
+
+	// Displayname length check
+	if (im.getDisplayName() != null) {
+	    if (im.getDisplayName().length() > 30)
+		return true;
+	}
+
+	// Enchantments check
+	for (Map.Entry<Enchantment, Integer> ench : is.getEnchantments().entrySet()) {
+	    if (ench.getValue() < 1 || ench.getValue() > ench.getKey().getMaxLevel())
+		return true;
+	}
+
+	// Invalid anvil check
+	if (is.getType() == Material.ANVIL && is.getDurability() > 2)
+	    return true;
+
+	return false;
+    }
+
+    // Check if item name is bad
+    private boolean isBadName(ItemStack is) {
+	for (String name : getMain().getSettings().getStringList("confiscate.items.name")) {
+	    String dn = is.getItemMeta().getDisplayName();
+
+	    if (dn != null && dn.contains(name))
+		return true;
+	}
+
+	return false;
+    }
+
+    // Check if item lore is bad
+    private boolean isBadLore(ItemStack is) {
+	for (String name : getMain().getSettings().getStringList("confiscate.items.lore")) {
+	    List<String> lores = is.getItemMeta().getLore();
+
+	    if (lores == null)
+		return false;
+
+	    for (String lore : lores) {
+		if (lore.contains(name))
+		    return true;
+	    }
+	}
+
+	return false;
+    }
+
+    public void confiscate(PlayerInteractEvent e) {
+	Player p = e.getPlayer();
+	ItemStack is = e.getItem();
+	Material m = is.getType();
+
+	// Invalid items
+	if (!p.hasPermission("rc.bypass.confiscate.invalid-items")) {
+	    if ((Utils.isInstalled("ProtocolLib") && getMain().getUtils().isInvalidNBT(is))
+		    || getMain().getUtils().isInvalid(is)) {
+		p.getInventory().remove(is);
+		e.setCancelled(true);
+		return;
+	    }
+	}
+
+	// Material
+	if (!p.hasPermission("rc.bypass.confiscate.items.material")
+		&& !p.hasPermission("rc.bypass.confiscate.items.material." + m)) {
+	    if (getMain().getUtils().isInvalid(m)) {
+		p.getInventory().remove(is);
+		e.setCancelled(true);
+		return;
+	    }
+	}
+
+	// Name
+	if (!p.hasPermission("rc.bypass.confiscate.items.name")) {
+	    if (getMain().getUtils().isBadName(is)) {
+		p.getInventory().remove(is);
+		e.setCancelled(true);
+		return;
+	    }
+	}
+
+	// Lore
+	if (!p.hasPermission("rc.bypass.confiscate.items.lore")) {
+	    if (getMain().getUtils().isBadLore(is)) {
+		p.getInventory().remove(is);
+		e.setCancelled(true);
+		return;
+	    }
+	}
     }
 }

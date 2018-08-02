@@ -43,11 +43,11 @@ public class BlockUpdateListener implements Listener {
 	MaterialData md = b.getState().getData();
 
 	// No need to control blocks in disabled worlds
-	if (getMain().isDisabledWorld(b.getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
 	    return;
 
 	// No need to control excluded blocks
-	if (getMain().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcluded(b.getType()))
 	    return;
 
 	// No need to control non-tracked blocks
