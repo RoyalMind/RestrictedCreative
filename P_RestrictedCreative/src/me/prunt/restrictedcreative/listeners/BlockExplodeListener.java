@@ -28,12 +28,12 @@ public class BlockExplodeListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockExplode(BlockExplodeEvent e) {
 	// No need to control blocks in disabled worlds
-	if (getMain().isDisabledWorld(e.getBlock().getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
 	    return;
 
 	// Loops through all broken blocks
 	for (Block b : e.blockList()) {
-	    if (getMain().isExcluded(b.getType()))
+	    if (getMain().getUtils().isExcluded(b.getType()))
 		continue;
 
 	    if (!DataHandler.isTracked(b))
@@ -50,12 +50,12 @@ public class BlockExplodeListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onEntityExplode(EntityExplodeEvent e) {
 	// No need to control blocks in disabled worlds
-	if (getMain().isDisabledWorld(e.getEntity().getWorld().getName()))
+	if (getMain().getUtils().isDisabledWorld(e.getEntity().getWorld().getName()))
 	    return;
 
 	// Loops through all broken blocks
 	for (Block bl : e.blockList()) {
-	    if (getMain().isExcluded(bl.getType()))
+	    if (getMain().getUtils().isExcluded(bl.getType()))
 		continue;
 
 	    if (!DataHandler.isTracked(bl))

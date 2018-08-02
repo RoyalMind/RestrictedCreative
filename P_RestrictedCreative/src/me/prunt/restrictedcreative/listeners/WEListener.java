@@ -25,7 +25,7 @@ public class WEListener {
 
 	Player p = Bukkit.getServer().getPlayer(a.getUniqueId());
 
-	if (main.isDisabledWorld(p.getWorld().getName()))
+	if (main.getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
 	e.setExtent(new WELogger(main, p, e.getExtent()));

@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class SyncData implements Runnable {
     private Main main;
@@ -29,7 +30,7 @@ public class SyncData implements Runnable {
 	long start = System.currentTimeMillis();
 	String or = DataHandler.isUsingSQLite() ? "or" : "";
 
-	main.sendMessage(Bukkit.getConsoleSender(), true, "database.save");
+	main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.save");
 
 	main.getDB().setAutoCommit(false);
 
@@ -38,16 +39,16 @@ public class SyncData implements Runnable {
 		main.getDB().executeUpdate("INSERT " + or + "IGNORE INTO " + main.getDB().getTableName()
 			+ " (block) VALUES ('" + str + "')");
 	    }
-	    main.sendMessage(Bukkit.getConsoleSender(),
-		    main.getMessage(true, "database.added").replaceAll("%blocks%", String.valueOf(addedCount)));
+	    Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.added")
+		    .replaceAll("%blocks%", String.valueOf(addedCount)));
 	}
 	if (removedCount > 0) {
 	    for (String str : toRemove) {
 		main.getDB()
 			.executeUpdate("DELETE FROM " + main.getDB().getTableName() + " WHERE block = '" + str + "'");
 	    }
-	    main.sendMessage(Bukkit.getConsoleSender(),
-		    main.getMessage(true, "database.removed").replaceAll("%blocks%", String.valueOf(removedCount)));
+	    Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.removed")
+		    .replaceAll("%blocks%", String.valueOf(removedCount)));
 	}
 
 	main.getDB().commit();
@@ -61,8 +62,8 @@ public class SyncData implements Runnable {
 
 		String took = String.valueOf(System.currentTimeMillis() - start);
 
-		main.sendMessage(Bukkit.getConsoleSender(),
-			main.getMessage(true, "database.done").replaceAll("%mills%", took));
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+			main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
 	    }
 	});
     }

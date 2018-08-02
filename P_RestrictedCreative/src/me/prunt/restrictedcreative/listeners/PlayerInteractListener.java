@@ -1,11 +1,11 @@
 package me.prunt.restrictedcreative.listeners;
 
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -167,7 +167,6 @@ public class PlayerInteractListener implements Listener {
 
 	Block b = e.getClickedBlock();
 
-	// If block doesn't exist
 	if (b == null || b.getType() == Material.AIR)
 	    return;
 
@@ -182,6 +181,7 @@ public class PlayerInteractListener implements Listener {
 	    }
 
 	    DataHandler.removeInfoWithCommand(p);
+	    e.setCancelled(true);
 	} else if (DataHandler.isAddWithCommand(p)) {
 	    DataHandler.setAsTracked(b);
 	    DataHandler.removeAddWithCommand(p);
@@ -224,86 +224,74 @@ public class PlayerInteractListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
 	Player p = e.getPlayer();
+
+	// No need to track entities in disabled worlds
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+	    return;
+
 	Entity en = e.getRightClicked();
+	EntityType et = en.getType();
 
-	if (main.infoList.contains(p)) {
-	    main.infoList.remove(p);
-	    e.setCancelled(true);
-
-	    if (Main.isCreative(en)) {
-		// Message none check
-		if (!main.isNone(main.block_info_true))
-		    p.sendMessage(main.prefix + main.block_info_true.replaceAll("%material%", en.getType().toString()));
+	/* Command /block */
+	if (DataHandler.isInfoWithCommand(p)) {
+	    if (DataHandler.isTracked(en)) {
+		Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
+			et.toString()));
 	    } else {
-		// Message none check
-		if (!main.isNone(main.block_info_false))
-		    p.sendMessage(
-			    main.prefix + main.block_info_false.replaceAll("%material%", en.getType().toString()));
+		Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false").replaceAll("%material%",
+			et.toString()));
 	    }
 
-	    return;
-	} else if (main.addList.contains(p)) {
-	    Main.add(en);
-	    main.addList.remove(p);
+	    DataHandler.removeInfoWithCommand(p);
+	    e.setCancelled(true);
+	} else if (DataHandler.isAddWithCommand(p)) {
+	    DataHandler.setAsTracked(en);
+	    DataHandler.removeAddWithCommand(p);
 	    e.setCancelled(true);
 
-	    // Message none check
-	    if (!main.isNone(main.block_added))
-		p.sendMessage(main.prefix + main.block_added.replaceAll("%material%", en.getType().toString()));
-
-	    return;
-	} else if (main.remList.contains(p)) {
-	    Main.remove(en);
-	    main.remList.remove(p);
+	    Utils.sendMessage(p,
+		    getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%", et.toString()));
+	} else if (DataHandler.isRemoveWithCommand(p)) {
+	    DataHandler.removeTracking(en);
+	    DataHandler.removeRemoveWithCommand(p);
 	    e.setCancelled(true);
 
-	    // Message none check
-	    if (!main.isNone(main.block_removed))
-		p.sendMessage(main.prefix + main.block_removed.replaceAll("%material%", en.getType().toString()));
-
-	    return;
+	    Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
+		    et.toString()));
 	}
 
-	// Creative + world check
-	if (main.isDisabledWorld(p.getWorld().getName()) || p.getGameMode() != GameMode.CREATIVE) {
+	// No need to track non-creative players
+	if (p.getGameMode() != GameMode.CREATIVE)
 	    return;
-	}
 
 	// If creative player wants to put something in an empty item frame
-	// + bypass check
-	if (en instanceof ItemFrame && !p.hasPermission("rc.bypass.track.save-blocks")
-		&& main.getItemInHand(p.getInventory()) != null && main.getItemInHand(p.getInventory()) != Material.AIR
-		&& (((ItemFrame) en).getItem() == null || ((ItemFrame) en).getItem().getType() == Material.AIR)) {
-	    if (main.getServer().getVersion().contains("1.10") || main.getServer().getVersion().contains("1.9")
-		    || main.getServer().getVersion().contains("1.8")) {
-		main.ifadd.add(en.getUniqueId());
-		Main.iflist.add(en.getUniqueId());
-	    } else {
-		en.addScoreboardTag("GMC_IF");
+	if (en instanceof ItemFrame && !p.hasPermission("rc.bypass.tracking.blocks")
+		&& !p.hasPermission("rc.bypass.tracking.blocks." + et)) {
+	    ItemStack is = e.getHand() == EquipmentSlot.HAND ? p.getInventory().getItemInMainHand()
+		    : p.getInventory().getItemInOffHand();
+	    ItemFrame frame = (ItemFrame) en;
+	    ItemStack fis = frame.getItem();
+
+	    if ((is != null && is.getType() != Material.AIR) && (fis == null || fis.getType() == Material.AIR)) {
+		DataHandler.setAsTrackedItem(frame);
+		return;
 	    }
-
-	    return;
 	}
 
-	// Bypass + config boolean check
-	if (p.hasPermission("rc.bypass.disable.interact.entities") || !main.dis_inter_ent) {
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("limit.interact.entities"))
 	    return;
-	}
+
+	// No need to track bypassed players
+	if (p.hasPermission("rc.bypass.limit.interact.entities")
+		|| p.hasPermission("rc.bypass.limit.interact.entities." + et))
+	    return;
 
 	e.setCancelled(true);
 
-	// OFF_HAND check if 1.12
-	if (main.getServer().getVersion().contains("1.12")) {
-	    if (e.getHand() != EquipmentSlot.OFF_HAND) {
-		// Message none check
-		if (!main.isNone(main.disabled))
-		    p.sendMessage(main.prefix + main.disabled);
-	    }
-	} else {
-	    // Message none check
-	    if (!main.isNone(main.disabled))
-		p.sendMessage(main.prefix + main.disabled);
-	}
+	// Prevent double message
+	if (e.getHand() != EquipmentSlot.OFF_HAND)
+	    getMain().getUtils().sendMessage(p, true, "disabled.general");
     }
 
     /*
@@ -315,25 +303,22 @@ public class PlayerInteractListener implements Listener {
 	Player p = e.getPlayer();
 	ArmorStand a = e.getRightClicked();
 
-	// Bypass + world + creative + config boolean check
-	if (main.isDisabledWorld(p.getWorld().getName()) || p.hasPermission("rc.bypass.disable.interact.entities")
-		|| !main.dis_inter_ent)
+	// No need to track entities in disabled worlds
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
-	// Disable in older versions
-	if ((Bukkit.getServer().getVersion().contains("1.10") || Bukkit.getServer().getVersion().contains("1.9")
-		|| Bukkit.getServer().getVersion().contains("1.8")) && p.getGameMode() == GameMode.CREATIVE) {
-	    // Message none check
-	    if (!main.isNone(main.disabled))
-		p.sendMessage(main.prefix + main.disabled);
-
-	    e.setCancelled(true);
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("limit.interact.entities"))
 	    return;
-	}
+
+	// No need to track bypassed players
+	if (p.hasPermission("rc.bypass.limit.interact.entities")
+		|| p.hasPermission("rc.bypass.limit.interact.entities." + a.getType()))
+	    return;
 
 	// Survival player is taking creative item from armor stand
 	if (p.getGameMode() != GameMode.CREATIVE && e.getArmorStandItem().getType() != Material.AIR
-		&& Main.isCreativeSlot(a, e.getSlot())) {
+		&& DataHandler.isTrackedSlot(a, e.getSlot())) {
 	    e.setCancelled(true);
 
 	    EntityEquipment inv = a.getEquipment();
@@ -361,9 +346,9 @@ public class PlayerInteractListener implements Listener {
 		break;
 	    }
 
-	    // Message none check
-	    if (!main.isNone(main.inter_disabled))
-		p.sendMessage(main.prefix + main.inter_disabled);
+	    // Prevent double message
+	    if (e.getHand() != EquipmentSlot.OFF_HAND)
+		getMain().getUtils().sendMessage(p, true, "disabled.general");
 
 	    return;
 	}
@@ -373,11 +358,11 @@ public class PlayerInteractListener implements Listener {
 	    return;
 
 	// Creative player is taking a creative item from armor stand
-	if (e.getArmorStandItem().getType() != Material.AIR && Main.isCreativeSlot(a, e.getSlot()))
-	    Main.remove(a, e.getSlot());
+	if (e.getArmorStandItem().getType() != Material.AIR && DataHandler.isTrackedSlot(a, e.getSlot()))
+	    DataHandler.removeSlotTracking(a, e.getSlot());
 
 	// Creative player is putting an item on the armor stand
 	if (e.getPlayerItem().getType() != Material.AIR)
-	    Main.add(a, e.getSlot());
+	    DataHandler.setAsTrackedSlot(a, e.getSlot());
     }
 }

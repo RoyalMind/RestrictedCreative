@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class MainCommand implements CommandExecutor {
     private Main main;
@@ -20,7 +21,7 @@ public class MainCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 	if (args.length == 0) {
-	    main.sendMessage(sender, false, "incorrect.main");
+	    main.getUtils().sendMessage(sender, false, "incorrect.main");
 	    return true;
 	}
 
@@ -44,17 +45,17 @@ public class MainCommand implements CommandExecutor {
 	    }
 	    break;
 	default:
-	    main.sendMessage(sender, true, "incorrect.main");
+	    main.getUtils().sendMessage(sender, true, "incorrect.main");
 	    return true;
 	}
 
-	main.sendMessage(sender, false, "no-permission");
+	main.getUtils().sendMessage(sender, false, "no-permission");
 	return true;
     }
 
     private void reload(CommandSender sender) {
 	main.loadConfig();
-	main.sendMessage(sender, true, "reloaded");
+	main.getUtils().sendMessage(sender, true, "reloaded");
     }
 
     private void delete(CommandSender sender) {
@@ -63,7 +64,7 @@ public class MainCommand implements CommandExecutor {
 	// Loops through worlds
 	for (World w : main.getServer().getWorlds()) {
 	    // Leaves out the disabled ones
-	    if (main.isDisabledWorld(w.getName()))
+	    if (main.getUtils().isDisabledWorld(w.getName()))
 		continue;
 
 	    // Loops through entities
@@ -73,18 +74,19 @@ public class MainCommand implements CommandExecutor {
 	    }
 	}
 
-	main.sendMessage(sender, true, "database.deleted");
+	main.getUtils().sendMessage(sender, true, "database.deleted");
     }
 
     private void block(CommandSender sender, String[] args) {
 	if (args[1] == "stats") {
-	    String msg = main.getMessage(true, "block.stats").replaceAll("%total%", DataHandler.getTotalCount());
-	    main.sendMessage(sender, msg);
+	    String msg = main.getUtils().getMessage(true, "block.stats").replaceAll("%total%",
+		    DataHandler.getTotalCount());
+	    Utils.sendMessage(sender, msg);
 	    return;
 	}
 
 	if (!(sender instanceof Player)) {
-	    main.sendMessage(sender, true, "no-console");
+	    main.getUtils().sendMessage(sender, true, "no-console");
 	    return;
 	}
 
@@ -94,32 +96,32 @@ public class MainCommand implements CommandExecutor {
 	case "add":
 	    if (DataHandler.getAddWithCommand().contains(p)) {
 		DataHandler.getAddWithCommand().remove(p);
-		main.sendMessage(sender, true, "block.cancel");
+		main.getUtils().sendMessage(sender, true, "block.cancel");
 	    } else {
 		DataHandler.getAddWithCommand().add(p);
-		main.sendMessage(sender, true, "block.add.add");
+		main.getUtils().sendMessage(sender, true, "block.add.add");
 	    }
 	    break;
 	case "remove":
 	    if (DataHandler.getRemoveWithCommand().contains(p)) {
 		DataHandler.getRemoveWithCommand().remove(p);
-		main.sendMessage(sender, true, "block.cancel");
+		main.getUtils().sendMessage(sender, true, "block.cancel");
 	    } else {
 		DataHandler.getRemoveWithCommand().add(p);
-		main.sendMessage(sender, true, "block.remove.remove");
+		main.getUtils().sendMessage(sender, true, "block.remove.remove");
 	    }
 	    break;
 	case "info":
 	    if (DataHandler.getInfoWithCommand().contains(p)) {
 		DataHandler.getInfoWithCommand().remove(p);
-		main.sendMessage(sender, true, "block.cancel");
+		main.getUtils().sendMessage(sender, true, "block.cancel");
 	    } else {
 		DataHandler.getInfoWithCommand().add(p);
-		main.sendMessage(sender, true, "block.info.info");
+		main.getUtils().sendMessage(sender, true, "block.info.info");
 	    }
 	    break;
 	default:
-	    main.sendMessage(sender, false, "incorrect.block");
+	    main.getUtils().sendMessage(sender, false, "incorrect.block");
 	}
     }
 }
