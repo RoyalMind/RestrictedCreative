@@ -62,6 +62,10 @@ public class MaterialHandler {
 	    new ItemStack(Material.LEATHER_LEGGINGS), new ItemStack(Material.LEATHER_CHESTPLATE),
 	    new ItemStack(Material.LEATHER_HELMET));
 
+    // Occulding items
+    private static List<Material> occluding = new ArrayList<>(
+	    Arrays.asList(Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS));
+
     public static boolean needsBlockBelow(Block b) {
 	BlockData bd = b.getBlockData();
 	Material m = b.getType();
@@ -156,5 +160,9 @@ public class MaterialHandler {
 
     public static List<ItemStack> getArmorList() {
 	return armorList;
+    }
+
+    public static boolean isOccluding(Material m) {
+	return m.isOccluding() || occluding.contains(m);
     }
 }

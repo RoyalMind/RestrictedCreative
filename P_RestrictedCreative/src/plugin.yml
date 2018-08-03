@@ -49,7 +49,7 @@ permissions:
       rc.bypass.tracking.blocks: true # per Material enum
       rc.bypass.tracking.entities: true # per EntityType enum
       rc.bypass.tracking.worldedit: true
-      rc.bypass.tracking.inventory.*: true
+      rc.bypass.tracking.inventory: true
       rc.bypass.limit.regions.owner-based: true
       rc.bypass.limit.regions.whitelist: true
       rc.bypass.limit.moving: true
@@ -75,7 +75,7 @@ permissions:
       rc.bypass.disable.interacting.on-ground: true # per Material enum
       rc.bypass.disable.breaking: true # per Material enum
 
-  rc.bypass.tracking.inventory.*:
+  rc.bypass.tracking.inventory:
     description: Allows to bypass inventory separation.
     default: false
     children:
