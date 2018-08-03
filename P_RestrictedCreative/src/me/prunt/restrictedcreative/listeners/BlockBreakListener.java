@@ -18,7 +18,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
-import me.prunt.restrictedcreative.storage.MaterialHandler;
+import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class BlockBreakListener implements Listener {

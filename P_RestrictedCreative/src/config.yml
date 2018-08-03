@@ -102,10 +102,10 @@ limit:
     iron-golem: true
   
 confiscate:
-  enabled: true
   invalid-items: true # NBT check requires ProtocolLib
   middle-click: true
   items:
+    enabled: true
     material:
     - 'BARRIER'
     - 'CHAIN_COMMAND_BLOCK'

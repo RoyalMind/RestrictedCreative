@@ -4,15 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
@@ -303,47 +304,56 @@ public class Utils {
 	return false;
     }
 
-    public void confiscate(PlayerInteractEvent e) {
-	Player p = e.getPlayer();
-	ItemStack is = e.getItem();
+    public boolean shouldConfiscate(Player p, ItemStack is) {
 	Material m = is.getType();
 
 	// Invalid items
-	if (!p.hasPermission("rc.bypass.confiscate.invalid-items")) {
+	if (getMain().getSettings().isEnabled("confiscate.invalid-items")
+		&& !p.hasPermission("rc.bypass.confiscate.invalid-items")) {
 	    if ((Utils.isInstalled("ProtocolLib") && getMain().getUtils().isInvalidNBT(is))
-		    || getMain().getUtils().isInvalid(is)) {
-		p.getInventory().remove(is);
-		e.setCancelled(true);
-		return;
-	    }
+		    || getMain().getUtils().isInvalid(is))
+		return true;
 	}
+
+	if (!getMain().getSettings().isEnabled("confiscate.items.enabled"))
+	    return false;
 
 	// Material
 	if (!p.hasPermission("rc.bypass.confiscate.items.material")
 		&& !p.hasPermission("rc.bypass.confiscate.items.material." + m)) {
-	    if (getMain().getUtils().isInvalid(m)) {
-		p.getInventory().remove(is);
-		e.setCancelled(true);
-		return;
-	    }
+	    if (getMain().getUtils().isInvalid(m))
+		return true;
 	}
 
 	// Name
 	if (!p.hasPermission("rc.bypass.confiscate.items.name")) {
-	    if (getMain().getUtils().isBadName(is)) {
-		p.getInventory().remove(is);
-		e.setCancelled(true);
-		return;
-	    }
+	    if (getMain().getUtils().isBadName(is))
+		return true;
 	}
 
 	// Lore
 	if (!p.hasPermission("rc.bypass.confiscate.items.lore")) {
-	    if (getMain().getUtils().isBadLore(is)) {
-		p.getInventory().remove(is);
-		e.setCancelled(true);
-		return;
-	    }
+	    if (getMain().getUtils().isBadLore(is))
+		return true;
 	}
+
+	return false;
+    }
+
+    public void equipArmor(Player p) {
+	Color c = Color.fromRGB(getMain().getSettings().getInt("creative.armor.color"));
+	List<ItemStack> armorList = MaterialHandler.getArmorList();
+
+	for (ItemStack is : armorList) {
+	    LeatherArmorMeta lam = (LeatherArmorMeta) is.getItemMeta();
+	    lam.setColor(c);
+	    is.setItemMeta(lam);
+	}
+
+	ItemStack[] list = new ItemStack[armorList.size()];
+	list = armorList.toArray(list);
+
+	p.getInventory().setArmorContents(list);
+	p.updateInventory();
     }
 }

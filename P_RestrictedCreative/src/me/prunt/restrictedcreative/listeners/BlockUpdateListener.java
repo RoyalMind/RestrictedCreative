@@ -17,7 +17,7 @@ import org.bukkit.material.MaterialData;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
-import me.prunt.restrictedcreative.storage.MaterialHandler;
+import me.prunt.restrictedcreative.utils.MaterialHandler;
 
 @SuppressWarnings("deprecation")
 public class BlockUpdateListener implements Listener {

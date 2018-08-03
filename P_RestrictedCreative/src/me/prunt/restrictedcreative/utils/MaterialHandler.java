@@ -1,4 +1,4 @@
-package me.prunt.restrictedcreative.storage;
+package me.prunt.restrictedcreative.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +26,7 @@ import org.bukkit.block.data.type.Sign;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Switch;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Banner;
 import org.bukkit.material.Button;
 import org.bukkit.material.MaterialData;
@@ -55,6 +56,11 @@ public class MaterialHandler {
 	    Material.MINECART, Material.CHEST_MINECART, Material.COMMAND_BLOCK_MINECART, Material.FURNACE_MINECART,
 	    Material.HOPPER_MINECART, Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT,
 	    Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT, Material.SPRUCE_BOAT));
+
+    // List of colorable leather armor
+    private static List<ItemStack> armorList = Arrays.asList(new ItemStack(Material.LEATHER_BOOTS),
+	    new ItemStack(Material.LEATHER_LEGGINGS), new ItemStack(Material.LEATHER_CHESTPLATE),
+	    new ItemStack(Material.LEATHER_HELMET));
 
     public static boolean needsBlockBelow(Block b) {
 	BlockData bd = b.getBlockData();
@@ -146,5 +152,9 @@ public class MaterialHandler {
 
     public static boolean isPlaceableEntity(Material m) {
 	return entities.contains(m);
+    }
+
+    public static List<ItemStack> getArmorList() {
+	return armorList;
     }
 }

@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
-import me.prunt.restrictedcreative.storage.MaterialHandler;
+import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class PlayerInteractListener implements Listener {
@@ -69,8 +69,10 @@ public class PlayerInteractListener implements Listener {
 	}
 
 	// Confiscate
-	if (getMain().getSettings().isEnabled("confiscate.enabled")) {
-	    getMain().getUtils().confiscate(e);
+	if (getMain().getUtils().shouldConfiscate(p, is)) {
+	    p.getInventory().remove(is);
+	    e.setCancelled(true);
+	    return;
 	}
 
 	// We only need to control right click interactions on blocks
@@ -86,7 +88,7 @@ public class PlayerInteractListener implements Listener {
 
 	// No need to control bypassed players
 	if (p.hasPermission("rc.bypass.disable.interacting.on-ground")
-		&& p.hasPermission("rc.bypass.disable.interacting.on-ground." + m))
+		|| p.hasPermission("rc.bypass.disable.interacting.on-ground." + m))
 	    return;
 
 	// No need to control non-blocked items
