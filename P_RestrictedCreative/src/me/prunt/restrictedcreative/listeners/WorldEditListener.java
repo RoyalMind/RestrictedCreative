@@ -8,11 +8,12 @@ import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.util.eventbus.Subscribe;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.utils.WorldEditLogger;
 
-public class WEListener {
+public class WorldEditListener {
     private Main main;
 
-    public WEListener(Main main) {
+    public WorldEditListener(Main main) {
 	this.main = main;
     }
 
@@ -28,6 +29,6 @@ public class WEListener {
 	if (main.getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
-	e.setExtent(new WELogger(main, p, e.getExtent()));
+	e.setExtent(new WorldEditLogger(main, p, e.getExtent()));
     }
 }

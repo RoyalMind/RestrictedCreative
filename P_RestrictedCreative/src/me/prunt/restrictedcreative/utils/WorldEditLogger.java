@@ -1,4 +1,4 @@
-package me.prunt.restrictedcreative.listeners;
+package me.prunt.restrictedcreative.utils;
 
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
@@ -12,11 +12,11 @@ import com.sk89q.worldedit.extent.logging.AbstractLoggingExtent;
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
 
-public class WELogger extends AbstractLoggingExtent {
+public class WorldEditLogger extends AbstractLoggingExtent {
     private Player p;
     private Main main;
 
-    WELogger(Main main, Player p, Extent extent) {
+    public WorldEditLogger(Main main, Player p, Extent extent) {
 	super(extent);
 	this.p = p;
 	this.main = main;
@@ -34,7 +34,6 @@ public class WELogger extends AbstractLoggingExtent {
 	    DataHandler.removeTracking(b);
 	    return;
 	}
-
 	// The block is changed/placed
 
 	if (p.hasPermission("rc.bypass.tracking.worldedit")

@@ -356,4 +356,18 @@ public class Utils {
 	p.getInventory().setArmorContents(list);
 	p.updateInventory();
     }
+
+    public boolean isHeightOk(Player p) {
+	if (!getMain().getSettings().isEnabled("limit.moving.enabled"))
+	    return true;
+
+	if (p.hasPermission("rc.bypass.limit.moving"))
+	    return true;
+
+	double y = p.getLocation().getY();
+	int above_y = getMain().getSettings().getInt("limit.moving.above-y");
+	int below_y = getMain().getSettings().getInt("limit.moving.below-y");
+
+	return (below_y > 0 && y < below_y) && (above_y > 0 && y > above_y);
+    }
 }

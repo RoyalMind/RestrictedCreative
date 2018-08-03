@@ -3,9 +3,11 @@ package me.prunt.restrictedcreative.storage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,6 +18,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
+import org.primesoft.blockshub.IBlocksHubApi;
+import org.primesoft.blockshub.IBlocksHubApiProvider;
+import org.primesoft.blockshub.api.IPlayer;
+import org.primesoft.blockshub.api.IWorld;
+import org.primesoft.blockshub.api.platform.BukkitBlockData;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.utils.Utils;
@@ -25,6 +32,8 @@ public class DataHandler {
     public static List<String> removeFromDatabase = new ArrayList<>();
 
     private static List<String> trackedLocs = new ArrayList<>();
+
+    private static HashMap<Player, GameMode> previousGameMode = new HashMap<>();
 
     private static boolean usingOldAliases = false;
     private static boolean usingSQLite = false;
@@ -74,22 +83,24 @@ public class DataHandler {
     public static void breakBlock(Block b, Player p, boolean update) {
 	// TODO update
 	// BlocksHub
-	// if (Utils.isInstalled("BlocksHub")) {
-	// IBlocksHubApi blockshub = ((IBlocksHubApiProvider)
-	// Bukkit.getServer().getPluginManager()
-	// .getPlugin("BlocksHub")).getApi();
-	//
-	// Vector location = new Vector(b.getX(), b.getY(), b.getZ());
-	// IPlayer player = p == null ? blockshub.getPlayer("RestrictedCreative")
-	// : blockshub.getPlayer(p.getUniqueId());
-	// IWorld world = blockshub.getWorld(b.getWorld().getUID());
-	// BlockData oldBlock = new BlockData(b.getTypeId(), b.getData());
-	// BlockData newBlock = BlockData.AIR;
-	//
-	// blockshub.logBlock(location, player, world, oldBlock, newBlock);
-	// }
+	if (Utils.isInstalled("BlocksHub")) {
+	    IBlocksHubApi blockshub = ((IBlocksHubApiProvider) Bukkit.getServer().getPluginManager()
+		    .getPlugin("BlocksHub")).getApi();
 
-	b.setType(Material.AIR, update);
+	    IPlayer player = p == null ? blockshub.getPlayer("RestrictedCreative")
+		    : blockshub.getPlayer(p.getUniqueId());
+	    IWorld world = blockshub.getWorld(b.getWorld().getUID());
+	    BukkitBlockData oldBlock = new BukkitBlockData(b.getBlockData());
+
+	    b.setType(Material.AIR, update);
+
+	    BukkitBlockData newBlock = new BukkitBlockData(b.getBlockData());
+
+	    blockshub.logBlock(player, world, b.getX(), b.getY(), b.getZ(), oldBlock, newBlock);
+	} else {
+	    b.setType(Material.AIR, update);
+	}
+
 	removeTracking(b);
     }
 
@@ -175,6 +186,19 @@ public class DataHandler {
     public static void removeFromTrackedLocs(Location loc) {
 	if (isTrackedLoc(loc))
 	    trackedLocs.remove(Utils.getLocString(loc));
+    }
+
+    public static GameMode getPreviousGameMode(Player p) {
+	return previousGameMode.containsKey(p) ? previousGameMode.get(p) : Bukkit.getDefaultGameMode();
+    }
+
+    public static void setPreviousGameMode(Player p, GameMode gm) {
+	previousGameMode.put(p, gm);
+    }
+
+    public static void removePreviousGameMode(Player p) {
+	if (previousGameMode.containsKey(p))
+	    previousGameMode.remove(p);
     }
 
     private static void setTotalCount(int totalCount) {

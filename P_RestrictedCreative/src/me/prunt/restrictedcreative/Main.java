@@ -26,7 +26,7 @@ import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.BlockUpdateListener;
 import me.prunt.restrictedcreative.listeners.EntityCreateListener;
 import me.prunt.restrictedcreative.listeners.EntityDamageListener;
-import me.prunt.restrictedcreative.listeners.WEListener;
+import me.prunt.restrictedcreative.listeners.WorldEditListener;
 import me.prunt.restrictedcreative.storage.ConfigProvider;
 import me.prunt.restrictedcreative.storage.DataHandler;
 import me.prunt.restrictedcreative.storage.Database;
@@ -88,7 +88,7 @@ public class Main extends JavaPlugin {
      */
     private void registerListeners() {
 	if (Utils.isInstalled("WorldEdit") && getSettings().isEnabled("tracking.worldedit.enabled"))
-	    WorldEdit.getInstance().getEventBus().register(new WEListener(this));
+	    WorldEdit.getInstance().getEventBus().register(new WorldEditListener(this));
 
 	getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
