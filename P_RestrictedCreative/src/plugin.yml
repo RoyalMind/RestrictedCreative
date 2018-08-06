@@ -36,6 +36,10 @@ permissions:
       rc.commands.survival: true
       rc.commands.adventure: true
       rc.commands.spectator: true
+      rc.commands.creative.others: true
+      rc.commands.survival.others: true
+      rc.commands.adventure.others: true
+      rc.commands.spectator.others: true
       rc.commands.reload: true
       rc.commands.delete: true
       rc.commands.block: true

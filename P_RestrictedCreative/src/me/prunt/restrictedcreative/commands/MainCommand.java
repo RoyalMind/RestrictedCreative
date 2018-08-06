@@ -20,10 +20,8 @@ public class MainCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-	if (args.length == 0) {
-	    main.getUtils().sendMessage(sender, false, "incorrect.main");
-	    return true;
-	}
+	if (args.length == 0)
+	    return false;
 
 	switch (args[0]) {
 	case "reload":
@@ -45,8 +43,7 @@ public class MainCommand implements CommandExecutor {
 	    }
 	    break;
 	default:
-	    main.getUtils().sendMessage(sender, true, "incorrect.main");
-	    return true;
+	    return false;
 	}
 
 	main.getUtils().sendMessage(sender, false, "no-permission");
@@ -121,7 +118,7 @@ public class MainCommand implements CommandExecutor {
 	    }
 	    break;
 	default:
-	    main.getUtils().sendMessage(sender, false, "incorrect.block");
+	    main.getUtils().sendMessage(sender, false, "usage.block");
 	}
     }
 }

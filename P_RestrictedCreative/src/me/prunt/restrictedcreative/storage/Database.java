@@ -17,10 +17,10 @@ public class Database {
     private int port;
     private Connection connection;
 
-    public Database(Main main, String type) {
+    public Database(Main main) {
 	this.main = main;
 
-	this.type = type.toLowerCase();
+	this.type = main.getSettings().getString("database.type");
 	this.host = main.getSettings().getString("database.host");
 	this.name = main.getSettings().getString("database.database");
 	this.user = main.getSettings().getString("database.username");

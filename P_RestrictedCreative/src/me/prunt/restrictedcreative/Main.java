@@ -18,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.sk89q.worldedit.WorldEdit;
 
 import me.prunt.restrictedcreative.commands.MainCommand;
+import me.prunt.restrictedcreative.commands.SwitchCommand;
 import me.prunt.restrictedcreative.listeners.BlockBreakListener;
 import me.prunt.restrictedcreative.listeners.BlockChangeListener;
 import me.prunt.restrictedcreative.listeners.BlockExplodeListener;
@@ -26,6 +27,10 @@ import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.BlockUpdateListener;
 import me.prunt.restrictedcreative.listeners.EntityCreateListener;
 import me.prunt.restrictedcreative.listeners.EntityDamageListener;
+import me.prunt.restrictedcreative.listeners.PlayerInteractListener;
+import me.prunt.restrictedcreative.listeners.PlayerInventoryListener;
+import me.prunt.restrictedcreative.listeners.PlayerItemListener;
+import me.prunt.restrictedcreative.listeners.PlayerMiscListener;
 import me.prunt.restrictedcreative.listeners.WorldEditListener;
 import me.prunt.restrictedcreative.storage.ConfigProvider;
 import me.prunt.restrictedcreative.storage.DataHandler;
@@ -99,6 +104,11 @@ public class Main extends JavaPlugin {
 
 	getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
 	getServer().getPluginManager().registerEvents(new EntityCreateListener(this), this);
+
+	getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
+	getServer().getPluginManager().registerEvents(new PlayerInventoryListener(this), this);
+	getServer().getPluginManager().registerEvents(new PlayerItemListener(this), this);
+	getServer().getPluginManager().registerEvents(new PlayerMiscListener(this), this);
     }
 
     /**
@@ -113,6 +123,7 @@ public class Main extends JavaPlugin {
 	    cmd.setExecutor(getExecutor(name));
 	    cmd.setPermissionMessage(getMessages().getMessage("no-permission"));
 	    cmd.setDescription(getSettings().getMessage("commands." + name + ".description"));
+	    cmd.setUsage(getSettings().getMessage("commands." + name + ".usage"));
 
 	    // Register aliases
 	    AliasManager aliasManager = new AliasManager(this);
@@ -130,7 +141,7 @@ public class Main extends JavaPlugin {
      * Load data from database
      */
     private void loadData() {
-	setDB(new Database(this, getSettings().getString("database.type")));
+	setDB(new Database(this));
 
 	if (getSettings().getString("database.type").equalsIgnoreCase("mysql")) {
 	    getDB().executeUpdate(
@@ -150,13 +161,13 @@ public class Main extends JavaPlugin {
 	case "rc":
 	    return new MainCommand(this);
 	case "creative":
-	    return null;
+	    return new SwitchCommand(this, GameMode.CREATIVE);
 	case "survival":
-	    return null;
+	    return new SwitchCommand(this, GameMode.SURVIVAL);
 	case "adventure":
-	    return null;
+	    return new SwitchCommand(this, GameMode.ADVENTURE);
 	case "spectator":
-	    return null;
+	    return new SwitchCommand(this, GameMode.SPECTATOR);
 	default:
 	    return null;
 	}

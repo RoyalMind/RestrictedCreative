@@ -2,6 +2,7 @@ prefix: '&2&lCreative > '
 reloaded: '&aConfig reloaded!'
 no-permission: '&cYou don''t have enough permissions to do that!'
 no-console: '&cThis command can only be used in-game.'
+not-found: '&cPlayer %player% is not online!'
 disabled:
   general: '&cYou can''t do that in creative mode.'
   interact: '&cYou can''t do that, because that was modified in creative mode.'
@@ -16,12 +17,19 @@ database:
   deleted: '&eDeleted database. Full restart is required for changes to take effect.'
   done: '&aDone! Took %mills%ms'
 gamemodes:
-  creative: '&aSwitched to creative mode!'
-  survival: '&aSwitched to survival mode!'
-  adventure: '&aSwitched to adventure mode!'
-  spectator: '&aSwitched to spectator mode!'
-incorrect:
-  main: '&cCorrect usage: /rc <reload|block|i-am-sure-i-want-to-delete-all-plugin-data-from-database>'
+  creative:
+    me: '&aSwitched to creative mode!'
+    other: '&aSwitched %player% to creative mode!'
+  survival:
+    me: '&aSwitched to survival mode!'
+    other: '&aSwitched %player% to survival mode!'
+  adventure:
+    me: '&aSwitched to adventure mode!'
+    other: '&aSwitched %player% to adventure mode!'
+  spectator:
+    me: '&aSwitched to spectator mode!'
+    other: '&aSwitched %player% to spectator mode!'
+usage:
   block: '&cCorrect usage: /rc block <add|remove|info|stats>'
 block:
   add:
