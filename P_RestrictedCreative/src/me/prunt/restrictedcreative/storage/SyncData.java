@@ -1,6 +1,7 @@
 package me.prunt.restrictedcreative.storage;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 
@@ -11,11 +12,15 @@ public class SyncData implements Runnable {
     private Main main;
     private List<String> toAdd;
     private List<String> toRemove;
+    private List<UUID> toAddInv;
+    private List<UUID> toRemoveInv;
 
-    public SyncData(Main main, List<String> fadd, List<String> fdel) {
+    public SyncData(Main main, List<String> fAdd, List<String> fDel, List<UUID> fAddInv, List<UUID> fDelInv) {
 	this.main = main;
-	this.toAdd = fadd;
-	this.toRemove = fdel;
+	this.toAdd = fAdd;
+	this.toRemove = fDel;
+	this.toAddInv = fAddInv;
+	this.toRemoveInv = fDelInv;
     }
 
     @Override

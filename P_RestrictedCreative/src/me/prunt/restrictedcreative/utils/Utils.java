@@ -396,17 +396,7 @@ public class Utils {
     }
 
     private void separateInventory(Player p, boolean toCreative) {
-	// Gets the data to save
-	List<ItemStack> storage = Arrays.asList(p.getInventory().getContents());
-	List<ItemStack> armor = Arrays.asList(p.getInventory().getArmorContents());
-	List<ItemStack> extra = Arrays.asList(p.getInventory().getExtraContents());
-
-	Collection<PotionEffect> effects = p.getActivePotionEffects();
-	int xp = p.getTotalExperience();
-	GameMode gm = p.getGameMode();
-
-	// Stores the data into PlayerInfo
-	PlayerInfo pi = new PlayerInfo(storage, armor, extra, effects, xp, gm);
+	PlayerInfo pi = getPlayerInfo(p);
 
 	// Stores Player with PlayerInfo into HashMap
 	if (toCreative) {
@@ -416,6 +406,19 @@ public class Utils {
 	    DataHandler.saveCreativeInv(p, pi);
 	    setInventory(p, DataHandler.getSurvivalInv(p));
 	}
+    }
+
+    private static PlayerInfo getPlayerInfo(Player p) {
+	// Gets the data to save
+	List<ItemStack> storage = Arrays.asList(p.getInventory().getContents());
+	List<ItemStack> armor = Arrays.asList(p.getInventory().getArmorContents());
+	List<ItemStack> extra = Arrays.asList(p.getInventory().getExtraContents());
+
+	Collection<PotionEffect> effects = p.getActivePotionEffects();
+	int xp = p.getTotalExperience();
+	GameMode gm = p.getGameMode();
+
+	return new PlayerInfo(storage, armor, extra, effects, xp, gm);
     }
 
     private void setInventory(Player p, PlayerInfo pi) {
@@ -528,5 +531,35 @@ public class Utils {
 		DataHandler.removePerms(p);
 	    }
 	}
+    }
+
+    public void saveInventory(Player p) {
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("saving.inventories.enabled")) {
+	    p.setGameMode(DataHandler.getPreviousGameMode(p));
+	    return;
+	}
+
+	if (DataHandler.getSurvivalInv(p) == null && DataHandler.getCreativeInv(p) == null)
+	    return;
+
+	PlayerInfo pi;
+	int type;
+	if (p.getGameMode() == GameMode.CREATIVE) {
+	    pi = DataHandler.getSurvivalInv(p);
+	    type = 1;
+	} else {
+	    pi = DataHandler.getCreativeInv(p);
+	    type = 0;
+	}
+
+	getMain().getDB()
+		.executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
+			+ " (player, type, storage, armor, extra, effects, xp) VALUES (" + p.getUniqueId().toString()
+			+ ", " + type + ", " + pi.getStorage() + ", " + pi.getArmor() + ", " + pi.getExtra() + ", "
+			+ pi.getEffects() + ", " + p.getTotalExperience() + ")");
+
+	DataHandler.removeSurvivalInv(p);
+	DataHandler.removeCreativeInv(p);
     }
 }

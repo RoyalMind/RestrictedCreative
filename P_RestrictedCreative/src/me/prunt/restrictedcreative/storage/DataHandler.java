@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -33,6 +34,9 @@ import me.prunt.restrictedcreative.utils.Utils;
 public class DataHandler {
     public static List<String> addToDatabase = new ArrayList<>();
     public static List<String> removeFromDatabase = new ArrayList<>();
+
+    public static List<UUID> addInvToDatabase = new ArrayList<>();
+    public static List<UUID> removeInvFromDatabase = new ArrayList<>();
 
     private static List<String> trackedLocs = new ArrayList<>();
 
@@ -217,12 +221,22 @@ public class DataHandler {
 	return survivalInvs.containsKey(p) ? survivalInvs.get(p) : null;
     }
 
+    public static void removeSurvivalInv(Player p) {
+	if (survivalInvs.containsKey(p))
+	    survivalInvs.remove(p);
+    }
+
     public static void saveCreativeInv(Player p, PlayerInfo pi) {
 	creativeInvs.put(p, pi);
     }
 
     public static PlayerInfo getCreativeInv(Player p) {
 	return creativeInvs.containsKey(p) ? creativeInvs.get(p) : null;
+    }
+
+    public static void removeCreativeInv(Player p) {
+	if (creativeInvs.containsKey(p))
+	    creativeInvs.remove(p);
     }
 
     public static PermissionAttachment getPerms(Player p) {
@@ -334,6 +348,51 @@ public class DataHandler {
 
 		main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.load");
 
+		// Gets all inventories from database
+		ResultSet result = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getInvsTable());
+
+		// Back to sync processing
+		Bukkit.getScheduler().runTask(Main.getInstance(), new Runnable() {
+		    @Override
+		    public void run() {
+			try {
+			    while (result.next()) {
+				UUID uuid = UUID.fromString(result.getString("player"));
+				Player p = Bukkit.getPlayer(uuid);
+
+				if (p == null) {
+				    removeInvFromDatabase.add(uuid);
+				    continue;
+				}
+
+				int type = result.getInt("type");
+				GameMode gm;
+				if (type == 0) {
+				    gm = DataHandler.getPreviousGameMode(p);
+				} else {
+				    gm = GameMode.CREATIVE;
+				}
+
+				String storage = result.getString("storage");
+				String armor = result.getString("armor");
+				String extra = result.getString("extra");
+				String effects = result.getString("effects");
+				int xp = result.getInt("xp");
+
+				PlayerInfo pi = new PlayerInfo(storage, armor, extra, effects, xp, gm);
+
+				if (type == 0) {
+				    saveSurvivalInv(p, pi);
+				} else {
+				    saveCreativeInv(p, pi);
+				}
+			    }
+			} catch (SQLException e) {
+			    e.printStackTrace();
+			}
+		    }
+		});
+
 		// Gets all blocks from database
 		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getBlocksTable());
 
@@ -353,7 +412,7 @@ public class DataHandler {
 				if (b == null || b.isEmpty()) {
 				    removeFromDatabase.add(Utils.getBlockString(b));
 				} else {
-				    setAsTracked(b);
+				    b.setMetadata("GMC", Main.getFMV());
 				}
 			    }
 			} catch (SQLException e) {
@@ -381,10 +440,12 @@ public class DataHandler {
 	Bukkit.getServer().getScheduler().runTaskTimer(main, new Runnable() {
 	    @Override
 	    public void run() {
-		final List<String> fadd = new ArrayList<>(addToDatabase);
-		final List<String> fdel = new ArrayList<>(removeFromDatabase);
+		final List<String> fAdd = new ArrayList<>(addToDatabase);
+		final List<String> fDel = new ArrayList<>(removeFromDatabase);
+		final List<UUID> fAddInv = new ArrayList<>(DataHandler.addInvToDatabase);
+		final List<UUID> fDelInv = new ArrayList<>(DataHandler.removeInvFromDatabase);
 
-		Bukkit.getScheduler().runTaskAsynchronously(main, new SyncData(main, fadd, fdel));
+		Bukkit.getScheduler().runTask(main, new SyncData(main, fAdd, fDel, fAddInv, fDelInv));
 	    }
 	}, interval, interval);
     }

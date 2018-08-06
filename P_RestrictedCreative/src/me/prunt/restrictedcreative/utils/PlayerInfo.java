@@ -15,8 +15,8 @@ public class PlayerInfo {
     int xp;
     GameMode gm;
 
-    PlayerInfo(List<ItemStack> storage, List<ItemStack> armor, List<ItemStack> extra, Collection<PotionEffect> effects,
-	    int xp, GameMode gm) {
+    public PlayerInfo(List<ItemStack> storage, List<ItemStack> armor, List<ItemStack> extra,
+	    Collection<PotionEffect> effects, int xp, GameMode gm) {
 	this.storage = storage;
 	this.armor = armor;
 	this.extra = extra;
@@ -25,7 +25,7 @@ public class PlayerInfo {
 	this.gm = gm;
     }
 
-    PlayerInfo(String storage, String armor, String extra, String effects, int xp, GameMode gm) {
+    public PlayerInfo(String storage, String armor, String extra, String effects, int xp, GameMode gm) {
 	this.storage = getStorage(storage);
 	this.armor = getArmor(armor);
 	this.extra = getExtra(extra);

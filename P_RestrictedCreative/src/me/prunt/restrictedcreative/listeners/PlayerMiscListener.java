@@ -197,7 +197,7 @@ public class PlayerMiscListener implements Listener {
 	if (p.hasPermission("rc.bypass.tracking.inventory.enabled"))
 	    return;
 
-	p.setGameMode(DataHandler.getPreviousGameMode(p));
+	getMain().getUtils().saveInventory(p);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -220,7 +220,7 @@ public class PlayerMiscListener implements Listener {
 	if (p.hasPermission("rc.bypass.tracking.inventory.enabled"))
 	    return;
 
-	p.setGameMode(DataHandler.getPreviousGameMode(p));
+	getMain().getUtils().saveInventory(p);
     }
 
     private boolean illegalContainerOpened(Player p) {
