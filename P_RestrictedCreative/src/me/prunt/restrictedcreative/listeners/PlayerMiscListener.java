@@ -51,13 +51,13 @@ public class PlayerMiscListener implements Listener {
 	    }
 
 	    // Put into creative mode
-	    main.creative(p);
+	    getMain().getUtils().setCreative(p, true);
 	}
 
 	// Player want's to switch out of creative
 	else if (e.getNewGameMode() != GameMode.CREATIVE && p.getGameMode() == GameMode.CREATIVE) {
 	    // Remove creative mode
-	    main.unCreative(p);
+	    getMain().getUtils().setCreative(p, false);
 	}
     }
 
@@ -121,7 +121,7 @@ public class PlayerMiscListener implements Listener {
 
 	// Removes creative mode
 	p.setGameMode(DataHandler.getPreviousGameMode(p));
-	main.unCreative(p);
+	getMain().getUtils().setCreative(p, false);
     }
 
     @EventHandler(ignoreCancelled = true)

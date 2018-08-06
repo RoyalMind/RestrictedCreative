@@ -3,6 +3,7 @@ package me.prunt.restrictedcreative.storage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.permissions.PermissionAttachment;
 import org.primesoft.blockshub.IBlocksHubApi;
 import org.primesoft.blockshub.IBlocksHubApiProvider;
 import org.primesoft.blockshub.api.IPlayer;
@@ -25,6 +27,7 @@ import org.primesoft.blockshub.api.IWorld;
 import org.primesoft.blockshub.api.platform.BukkitBlockData;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.utils.PlayerInfo;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class DataHandler {
@@ -33,7 +36,12 @@ public class DataHandler {
 
     private static List<String> trackedLocs = new ArrayList<>();
 
+    private static HashMap<Player, PlayerInfo> survivalInvs = new HashMap<>();
+    private static HashMap<Player, PlayerInfo> creativeInvs = new HashMap<>();
+
     private static HashMap<Player, GameMode> previousGameMode = new HashMap<>();
+    private static HashMap<Player, List<String>> vaultPerms = new HashMap<>();
+    private static HashMap<Player, PermissionAttachment> permissions = new HashMap<>();
 
     private static boolean usingOldAliases = false;
     private static boolean usingSQLite = false;
@@ -199,6 +207,48 @@ public class DataHandler {
     public static void removePreviousGameMode(Player p) {
 	if (previousGameMode.containsKey(p))
 	    previousGameMode.remove(p);
+    }
+
+    public static void saveSurvivalInv(Player p, PlayerInfo pi) {
+	survivalInvs.put(p, pi);
+    }
+
+    public static PlayerInfo getSurvivalInv(Player p) {
+	return survivalInvs.containsKey(p) ? survivalInvs.get(p) : null;
+    }
+
+    public static void saveCreativeInv(Player p, PlayerInfo pi) {
+	creativeInvs.put(p, pi);
+    }
+
+    public static PlayerInfo getCreativeInv(Player p) {
+	return creativeInvs.containsKey(p) ? creativeInvs.get(p) : null;
+    }
+
+    public static PermissionAttachment getPerms(Player p) {
+	return permissions.containsKey(p) ? permissions.get(p) : null;
+    }
+
+    public static void setPerms(Player p, PermissionAttachment attachment) {
+	permissions.put(p, attachment);
+    }
+
+    public static void removePerms(Player p) {
+	if (permissions.containsKey(p))
+	    permissions.remove(p);
+    }
+
+    public static List<String> getVaultPerms(Player p) {
+	return vaultPerms.containsKey(p) ? vaultPerms.get(p) : null;
+    }
+
+    public static void addVaultPerm(Player p, String perm) {
+	vaultPerms.put(p, new ArrayList<>(Arrays.asList(perm)));
+    }
+
+    public static void removeVaultPerm(Player p) {
+	if (vaultPerms.containsKey(p))
+	    vaultPerms.remove(p);
     }
 
     private static void setTotalCount(int totalCount) {

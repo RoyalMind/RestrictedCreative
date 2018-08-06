@@ -1,10 +1,13 @@
 package me.prunt.restrictedcreative.utils;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -14,6 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.potion.PotionEffect;
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
@@ -23,8 +28,10 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.storage.DataHandler;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import net.milkbowl.vault.permission.Permission;
 
 public class Utils {
     /* --- Static methods --- */
@@ -369,5 +376,157 @@ public class Utils {
 	int below_y = getMain().getSettings().getInt("limit.moving.below-y");
 
 	return (below_y > 0 && y < below_y) && (above_y > 0 && y > above_y);
+    }
+
+    public void setCreative(Player p, boolean toCreative) {
+	// Permissions
+	if (getMain().getSettings().isEnabled("creative.permissions.enabled")
+		&& !p.hasPermission("rc.bypass.creative.permissions"))
+	    setPermissions(p, toCreative);
+
+	// Inventory
+	if (getMain().getSettings().isEnabled("tracking.inventory.enabled")
+		&& !p.hasPermission("rc.bypass.tracking.inventory"))
+	    separateInventory(p, toCreative);
+
+	// Armor
+	if (toCreative && getMain().getSettings().isEnabled("creative.armor.enabled")
+		&& !p.hasPermission("rc.bypass.creative.armor"))
+	    equipArmor(p);
+    }
+
+    private void separateInventory(Player p, boolean toCreative) {
+	// Gets the data to save
+	List<ItemStack> storage = Arrays.asList(p.getInventory().getContents());
+	List<ItemStack> armor = Arrays.asList(p.getInventory().getArmorContents());
+	List<ItemStack> extra = Arrays.asList(p.getInventory().getExtraContents());
+
+	Collection<PotionEffect> effects = p.getActivePotionEffects();
+	int xp = p.getTotalExperience();
+	GameMode gm = p.getGameMode();
+
+	// Stores the data into PlayerInfo
+	PlayerInfo pi = new PlayerInfo(storage, armor, extra, effects, xp, gm);
+
+	// Stores Player with PlayerInfo into HashMap
+	if (toCreative) {
+	    DataHandler.saveSurvivalInv(p, pi);
+	    setInventory(p, DataHandler.getCreativeInv(p));
+	} else {
+	    DataHandler.saveCreativeInv(p, pi);
+	    setInventory(p, DataHandler.getSurvivalInv(p));
+	}
+    }
+
+    private void setInventory(Player p, PlayerInfo pi) {
+	// Clear the inventory
+	if (pi == null) {
+	    if (!p.hasPermission("rc.bypass.tracking.inventory.contents"))
+		p.getInventory().clear();
+
+	    if (!p.hasPermission("rc.bypass.tracking.inventory.xp"))
+		p.setTotalExperience(0);
+
+	    if (!p.hasPermission("rc.bypass.tracking.inventory.effects")) {
+		for (PotionEffect pe : p.getActivePotionEffects()) {
+		    p.removePotionEffect(pe.getType());
+		}
+	    }
+
+	    p.updateInventory();
+	    return;
+	}
+
+	if (!p.hasPermission("rc.bypass.tracking.inventory.contents")) {
+	    ItemStack[] old_storage = new ItemStack[pi.storage.size()];
+	    old_storage = pi.storage.toArray(old_storage);
+	    p.getInventory().setContents(old_storage);
+
+	    ItemStack[] old_armor = new ItemStack[pi.armor.size()];
+	    old_armor = pi.armor.toArray(old_armor);
+	    p.getInventory().setArmorContents(old_armor);
+
+	    ItemStack[] old_extra = new ItemStack[pi.extra.size()];
+	    old_extra = pi.extra.toArray(old_extra);
+	    p.getInventory().setExtraContents(old_extra);
+	}
+
+	if (!p.hasPermission("rc.bypass.tracking.inventory.xp"))
+	    p.setTotalExperience(pi.xp);
+
+	if (!p.hasPermission("rc.bypass.tracking.inventory.effects")) {
+	    for (PotionEffect pe : p.getActivePotionEffects()) {
+		p.removePotionEffect(pe.getType());
+	    }
+	    p.addPotionEffects(pi.effects);
+	}
+
+	p.updateInventory();
+    }
+
+    private void setPermissions(Player p, boolean toCreative) {
+	if (Utils.isInstalled("Vault")) {
+	    Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class).getProvider();
+
+	    if (toCreative) {
+		for (String perm : getMain().getSettings().getStringList("creative.premissions.list")) {
+		    // Remove permission
+		    if (perm.startsWith("-")) {
+			// .substring(1) removes "-" from the front
+			perm = perm.substring(1);
+
+			if (!vault.has(p, perm))
+			    return;
+
+			DataHandler.addVaultPerm(p, perm);
+			vault.playerRemove(p, perm);
+		    }
+
+		    // Add permission
+		    else {
+			if (vault.has(p, perm))
+			    return;
+
+			DataHandler.addVaultPerm(p, perm);
+			vault.playerAdd(p, perm);
+		    }
+		}
+	    } else {
+		if (DataHandler.getVaultPerms(p) == null)
+		    return;
+
+		for (String perm : DataHandler.getVaultPerms(p)) {
+		    if (vault.has(p, perm)) {
+			vault.playerRemove(p, perm);
+		    } else {
+			vault.playerAdd(p, perm);
+		    }
+		}
+
+		DataHandler.removeVaultPerm(p);
+	    }
+	} else {
+	    if (toCreative) {
+		PermissionAttachment attachment = p.addAttachment(getMain());
+
+		for (String perm : getMain().getSettings().getStringList("creative.premissions.list")) {
+		    if (perm.startsWith("-")) {
+			// .substring(1) removes "-" from the front
+			attachment.setPermission(perm.substring(1), false);
+		    } else {
+			attachment.setPermission(perm, true);
+		    }
+		}
+
+		DataHandler.setPerms(p, attachment);
+	    } else {
+		if (DataHandler.getPerms(p) == null)
+		    return;
+
+		PermissionAttachment attachment = DataHandler.getPerms(p);
+		p.removeAttachment(attachment);
+		DataHandler.removePerms(p);
+	    }
+	}
     }
 }
