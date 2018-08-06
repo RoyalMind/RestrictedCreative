@@ -13,7 +13,7 @@ import me.prunt.restrictedcreative.Main;
 public class Database {
     private Main main;
 
-    private String host, name, user, pass, type, table;
+    private String host, name, user, pass, type, table_blocks, table_invs;
     private int port;
     private Connection connection;
 
@@ -26,7 +26,8 @@ public class Database {
 	this.user = main.getSettings().getString("database.username");
 	this.pass = main.getSettings().getString("database.password");
 	this.port = main.getSettings().getInt("database.port");
-	this.table = main.getSettings().getString("database.table");
+	this.table_blocks = main.getSettings().getString("database.table.blocks");
+	this.table_invs = main.getSettings().getString("database.table.inventories");
 
 	openConnection();
     }
@@ -34,8 +35,15 @@ public class Database {
     /**
      * Return table name
      */
-    public String getTableName() {
-	return table;
+    public String getBlocksTable() {
+	return table_blocks;
+    }
+
+    /**
+     * Return table name
+     */
+    public String getInvsTable() {
+	return table_invs;
     }
 
     /**

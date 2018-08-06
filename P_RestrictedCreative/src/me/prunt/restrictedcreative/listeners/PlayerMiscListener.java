@@ -35,8 +35,11 @@ public class PlayerMiscListener implements Listener {
 	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
+	if (e.getNewGameMode() == p.getGameMode())
+	    return;
+
 	// Player wants to switch into creative mode
-	if (e.getNewGameMode() == GameMode.CREATIVE && p.getGameMode() != GameMode.CREATIVE) {
+	if (e.getNewGameMode() == GameMode.CREATIVE) {
 	    // Player height check
 	    if (getMain().getUtils().isHeightOk(p)) {
 		getMain().getUtils().sendMessage(p, true, "disabled.region");
@@ -50,15 +53,19 @@ public class PlayerMiscListener implements Listener {
 		return;
 	    }
 
-	    // Put into creative mode
+	    // Switch inventories, permissions etc
 	    getMain().getUtils().setCreative(p, true);
 	}
 
 	// Player want's to switch out of creative
-	else if (e.getNewGameMode() != GameMode.CREATIVE && p.getGameMode() == GameMode.CREATIVE) {
-	    // Remove creative mode
+	else if (p.getGameMode() == GameMode.CREATIVE) {
+	    // Switch inventories, permissions etc
 	    getMain().getUtils().setCreative(p, false);
+	} else {
+	    return;
 	}
+
+	DataHandler.setPreviousGameMode(p, p.getGameMode());
     }
 
     @EventHandler(ignoreCancelled = true)

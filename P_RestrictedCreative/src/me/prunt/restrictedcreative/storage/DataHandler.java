@@ -335,7 +335,7 @@ public class DataHandler {
 		main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.load");
 
 		// Gets all blocks from database
-		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getTableName());
+		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getBlocksTable());
 
 		// Back to sync processing
 		Bukkit.getScheduler().runTask(Main.getInstance(), new Runnable() {

@@ -6,7 +6,9 @@ database:
   host: localhost
   port: 3306
   database: rc_database
-  table: rc_table
+  table:
+    blocks: rc_blocks
+    inventories: rc_invs
 
 commands:
   rc:

@@ -63,16 +63,15 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
 	for (Player p : getServer().getOnlinePlayers()) {
-	    String name = p.getWorld().getName();
-
-	    if (p.getGameMode() == GameMode.CREATIVE)
+	    // No need to control disabled features
+	    if (!getSettings().isEnabled("saving.inventories.enabled")) {
+		p.setGameMode(DataHandler.getPreviousGameMode(p));
 		continue;
-	    if (getUtils().isDisabledWorld(name))
-		continue;
+	    }
 
-	    // TODO save player's data
 	}
 
+	// Save data for the last time
 	final List<String> fadd = new ArrayList<>(DataHandler.addToDatabase);
 	final List<String> fdel = new ArrayList<>(DataHandler.removeFromDatabase);
 	getServer().getScheduler().runTask(this, new SyncData(this, fadd, fdel));
@@ -143,14 +142,19 @@ public class Main extends JavaPlugin {
     private void loadData() {
 	setDB(new Database(this));
 
+	// Tracked blocks
 	if (getSettings().getString("database.type").equalsIgnoreCase("mysql")) {
 	    getDB().executeUpdate(
-		    "CREATE TABLE IF NOT EXISTS " + getDB().getTableName() + " (block VARCHAR(255), UNIQUE (block))");
+		    "CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255), UNIQUE (block))");
 	} else if (getSettings().getString("database.type").equalsIgnoreCase("sqlite")) {
 	    DataHandler.setUsingSQLite(true);
 	    getDB().executeUpdate(
-		    "CREATE TABLE IF NOT EXISTS " + getDB().getTableName() + " (block VARCHAR(255) UNIQUE)");
+		    "CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255) UNIQUE)");
 	}
+
+	// Tracked inventories
+	getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
+		+ " (uuid VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT)");
 
 	DataHandler.loadFromDatabase(this);
 	DataHandler.startDataSync(this);

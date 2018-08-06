@@ -36,7 +36,7 @@ public class SyncData implements Runnable {
 
 	if (addedCount > 0) {
 	    for (String str : toAdd) {
-		main.getDB().executeUpdate("INSERT " + or + "IGNORE INTO " + main.getDB().getTableName()
+		main.getDB().executeUpdate("INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable()
 			+ " (block) VALUES ('" + str + "')");
 	    }
 	    Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.added")
@@ -45,7 +45,7 @@ public class SyncData implements Runnable {
 	if (removedCount > 0) {
 	    for (String str : toRemove) {
 		main.getDB()
-			.executeUpdate("DELETE FROM " + main.getDB().getTableName() + " WHERE block = '" + str + "'");
+			.executeUpdate("DELETE FROM " + main.getDB().getBlocksTable() + " WHERE block = '" + str + "'");
 	    }
 	    Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.removed")
 		    .replaceAll("%blocks%", String.valueOf(removedCount)));

@@ -56,7 +56,7 @@ public class MainCommand implements CommandExecutor {
     }
 
     private void delete(CommandSender sender) {
-	main.getDB().executeUpdate("DELETE FROM " + main.getDB().getTableName());
+	main.getDB().executeUpdate("DELETE FROM " + main.getDB().getBlocksTable());
 
 	// Loops through worlds
 	for (World w : main.getServer().getWorlds()) {
