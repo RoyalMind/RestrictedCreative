@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -178,24 +179,19 @@ public class PlayerMiscListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onPlayerJoin(PlayerJoinEvent e) {
+	Player p = e.getPlayer();
+
+	getMain().getUtils().loadInventory(p);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerQuit(PlayerQuitEvent e) {
 	Player p = e.getPlayer();
 
 	DataHandler.removeInfoWithCommand(p);
 	DataHandler.removeAddWithCommand(p);
 	DataHandler.removeRemoveWithCommand(p);
-
-	// No need to control inventories in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	// No need to control non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
-
-	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.tracking.inventory.enabled"))
-	    return;
 
 	getMain().getUtils().saveInventory(p);
     }
@@ -207,18 +203,6 @@ public class PlayerMiscListener implements Listener {
 	DataHandler.removeInfoWithCommand(p);
 	DataHandler.removeAddWithCommand(p);
 	DataHandler.removeRemoveWithCommand(p);
-
-	// No need to control inventories in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	// No need to control non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
-
-	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.tracking.inventory.enabled"))
-	    return;
 
 	getMain().getUtils().saveInventory(p);
     }

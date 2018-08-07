@@ -1,5 +1,7 @@
 package me.prunt.restrictedcreative.utils;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -536,9 +538,15 @@ public class Utils {
     public void saveInventory(Player p) {
 	// No need to control disabled features
 	if (!getMain().getSettings().isEnabled("saving.inventories.enabled")) {
-	    p.setGameMode(DataHandler.getPreviousGameMode(p));
+	    // Let the gamemode listener handle switching inventories
+	    if (p.getGameMode() == GameMode.CREATIVE)
+		p.setGameMode(DataHandler.getPreviousGameMode(p));
 	    return;
 	}
+
+	// No need to control bypassed players
+	if (p.hasPermission("rc.bypass.tracking.inventory"))
+	    return;
 
 	if (DataHandler.getSurvivalInv(p) == null && DataHandler.getCreativeInv(p) == null)
 	    return;
@@ -553,13 +561,47 @@ public class Utils {
 	    type = 0;
 	}
 
-	getMain().getDB()
-		.executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
-			+ " (player, type, storage, armor, extra, effects, xp) VALUES (" + p.getUniqueId().toString()
-			+ ", " + type + ", " + pi.getStorage() + ", " + pi.getArmor() + ", " + pi.getExtra() + ", "
-			+ pi.getEffects() + ", " + p.getTotalExperience() + ")");
+	getMain().getDB().executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
+		+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES (" + p.getUniqueId().toString()
+		+ ", " + type + ", " + pi.getStorage() + ", " + pi.getArmor() + ", " + pi.getExtra() + ", "
+		+ pi.getEffects() + ", " + p.getTotalExperience() + ", " + System.currentTimeMillis() / 1000 + ")");
 
 	DataHandler.removeSurvivalInv(p);
 	DataHandler.removeCreativeInv(p);
+    }
+
+    public void loadInventory(Player p) {
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("saving.inventories.enabled"))
+	    return;
+
+	// No need to control bypassed players
+	if (p.hasPermission("rc.bypass.tracking.inventory"))
+	    return;
+
+	ResultSet rs = getMain().getDB().executeQuery("SELECT * FROM " + getMain().getDB().getInvsTable()
+		+ " WHERE player = '" + p.getUniqueId().toString() + "'");
+
+	try {
+	    if (rs.next()) {
+		GameMode gm;
+		if (rs.getInt("type") == 0) {
+		    gm = Bukkit.getDefaultGameMode();
+		} else {
+		    gm = GameMode.CREATIVE;
+		}
+
+		PlayerInfo pi = new PlayerInfo(rs.getString("storage"), rs.getString("armor"), rs.getString("extra"),
+			rs.getString("effects"), rs.getInt("xp"), gm);
+
+		if (rs.getInt("type") == 0) {
+		    DataHandler.saveSurvivalInv(p, pi);
+		} else {
+		    DataHandler.saveCreativeInv(p, pi);
+		}
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
     }
 }

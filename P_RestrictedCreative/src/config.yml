@@ -53,6 +53,9 @@ general:
     interval: 6000
     inventories:
       enabled: true
+      purge:
+        survival: 90
+        creative: 30
   
 creative:
   armor:

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -70,9 +69,7 @@ public class Main extends JavaPlugin {
 	// Save data for the last time
 	final List<String> fAdd = new ArrayList<>(DataHandler.addToDatabase);
 	final List<String> fDel = new ArrayList<>(DataHandler.removeFromDatabase);
-	final List<UUID> fAddInv = new ArrayList<>(DataHandler.addInvToDatabase);
-	final List<UUID> fDelInv = new ArrayList<>(DataHandler.removeInvFromDatabase);
-	getServer().getScheduler().runTask(this, new SyncData(this, fAdd, fDel, fAddInv, fDelInv));
+	getServer().getScheduler().runTask(this, new SyncData(this, fAdd, fDel));
 
 	getDB().closeConnection();
     }
@@ -153,12 +150,19 @@ public class Main extends JavaPlugin {
 	// Tracked inventories
 	if (getSettings().getString("database.type").equalsIgnoreCase("mysql")) {
 	    getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
-		    + " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, UNIQUE (player)");
+		    + " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player))");
 	} else if (getSettings().getString("database.type").equalsIgnoreCase("sqlite")) {
 	    DataHandler.setUsingSQLite(true);
 	    getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
-		    + " (player VARCHAR(36) UNIQUE, type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT");
+		    + " (player VARCHAR(36) UNIQUE, type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11))");
 	}
+
+	if (getSettings().isEnabled("general.saving.inventories.enabled"))
+	    getDB().executeUpdate("DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < "
+		    + (System.currentTimeMillis() / 1000
+			    - 86400 * getSettings().getInt("general.saving.inventories.purge.survival"))
+		    + " OR type = 1 AND lastused < " + +(System.currentTimeMillis() / 1000
+			    - 86400 * getSettings().getInt("general.saving.inventories.purge.creative")));
 
 	DataHandler.loadFromDatabase(this);
 	DataHandler.startDataSync(this);
