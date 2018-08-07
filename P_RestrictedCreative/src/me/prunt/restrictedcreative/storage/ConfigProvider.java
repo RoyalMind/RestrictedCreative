@@ -32,7 +32,7 @@ public class ConfigProvider {
     }
 
     public String getString(String path) {
-	return getConfig().getString(path);
+	return getConfig().getString(path) == null ? "" : getConfig().getString(path);
     }
 
     public int getInt(String path) {
@@ -72,9 +72,9 @@ public class ConfigProvider {
 	}
     }
 
-    public boolean isNone(String... list) {
-	for (String str : list) {
-	    if (!getMessage(str).equalsIgnoreCase(""))
+    public boolean isNone(String... paths) {
+	for (String path : paths) {
+	    if (!getMessage(path).equalsIgnoreCase(""))
 		return false;
 	}
 
@@ -102,6 +102,7 @@ public class ConfigProvider {
     private void loadConfig() {
 	if (isDefault()) {
 	    getMain().saveDefaultConfig();
+	    getMain().reloadConfig();
 	    setConfig(getMain().getConfig());
 	} else {
 	    setConfig(loadCustomConfig(getName()));

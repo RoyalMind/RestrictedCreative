@@ -20,13 +20,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.PermissionAttachment;
-import org.primesoft.blockshub.IBlocksHubApi;
-import org.primesoft.blockshub.IBlocksHubApiProvider;
-import org.primesoft.blockshub.api.IPlayer;
-import org.primesoft.blockshub.api.IWorld;
-import org.primesoft.blockshub.api.platform.BukkitBlockData;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.utils.BlocksHub;
 import me.prunt.restrictedcreative.utils.PlayerInfo;
 import me.prunt.restrictedcreative.utils.Utils;
 
@@ -89,22 +85,9 @@ public class DataHandler {
     }
 
     public static void breakBlock(Block b, Player p, boolean update) {
-	// TODO update
 	// BlocksHub
 	if (Utils.isInstalled("BlocksHub")) {
-	    IBlocksHubApi blockshub = ((IBlocksHubApiProvider) Bukkit.getServer().getPluginManager()
-		    .getPlugin("BlocksHub")).getApi();
-
-	    IPlayer player = p == null ? blockshub.getPlayer("RestrictedCreative")
-		    : blockshub.getPlayer(p.getUniqueId());
-	    IWorld world = blockshub.getWorld(b.getWorld().getUID());
-	    BukkitBlockData oldBlock = new BukkitBlockData(b.getBlockData());
-
-	    b.setType(Material.AIR, update);
-
-	    BukkitBlockData newBlock = new BukkitBlockData(b.getBlockData());
-
-	    blockshub.logBlock(player, world, b.getX(), b.getY(), b.getZ(), oldBlock, newBlock);
+	    new BlocksHub(b, p, update);
 	} else {
 	    b.setType(Material.AIR, update);
 	}
@@ -394,7 +377,7 @@ public class DataHandler {
 		final List<String> fAdd = new ArrayList<>(addToDatabase);
 		final List<String> fDel = new ArrayList<>(removeFromDatabase);
 
-		Bukkit.getScheduler().runTask(main, new SyncData(main, fAdd, fDel));
+		Bukkit.getScheduler().runTask(main, new SyncData(main, fAdd, fDel, false));
 	    }
 	}, interval, interval);
     }

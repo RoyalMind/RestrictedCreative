@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
@@ -36,7 +35,6 @@ import me.prunt.restrictedcreative.storage.ConfigProvider;
 import me.prunt.restrictedcreative.storage.DataHandler;
 import me.prunt.restrictedcreative.storage.Database;
 import me.prunt.restrictedcreative.storage.SyncData;
-import me.prunt.restrictedcreative.utils.AliasManager;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class Main extends JavaPlugin {
@@ -56,7 +54,6 @@ public class Main extends JavaPlugin {
 
 	loadConfig();
 	registerListeners();
-	registerCommands();
 	loadData();
     }
 
@@ -69,7 +66,7 @@ public class Main extends JavaPlugin {
 	// Save data for the last time
 	final List<String> fAdd = new ArrayList<>(DataHandler.addToDatabase);
 	final List<String> fDel = new ArrayList<>(DataHandler.removeFromDatabase);
-	getServer().getScheduler().runTask(this, new SyncData(this, fAdd, fDel));
+	new SyncData(this, fAdd, fDel, true).run();
 
 	getDB().closeConnection();
     }
@@ -80,6 +77,9 @@ public class Main extends JavaPlugin {
     public void loadConfig() {
 	this.config = new ConfigProvider(this, "config.yml");
 	this.messages = new ConfigProvider(this, "messages.yml");
+
+	// Reload command messages, aliases etc as well
+	registerCommands();
     }
 
     /**
@@ -119,14 +119,8 @@ public class Main extends JavaPlugin {
 	    cmd.setDescription(getSettings().getMessage("commands." + name + ".description"));
 	    cmd.setUsage(getSettings().getMessage("commands." + name + ".usage"));
 
-	    // Register aliases
-	    AliasManager aliasManager = new AliasManager(this);
-	    if (!aliasManager.setAdditionalAliases(cmd, getSettings().getStringList("commands." + name + ".aliases"))) {
-		DataHandler.setUsingOldAliases(true);
-		Utils.log("" + ChatColor.RED + ChatColor.BOLD + "Unable to access CommandMap for: " + ChatColor.RESET
-			+ cmd.getName() + ChatColor.YELLOW + ChatColor.BOLD
-			+ ". Plugin will use old (agressive) method to enforce aliases!");
-	    }
+	    // Using old way of handling aliases... TODO
+	    DataHandler.setUsingOldAliases(true);
 	}
 
     }

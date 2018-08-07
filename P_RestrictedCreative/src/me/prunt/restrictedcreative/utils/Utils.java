@@ -74,7 +74,7 @@ public class Utils {
     }
 
     public static void sendMessage(CommandSender sender, String msg) {
-	if (msg != "")
+	if (!msg.equalsIgnoreCase(""))
 	    sender.sendMessage(msg);
     }
 
@@ -152,8 +152,8 @@ public class Utils {
      * @param string
      *                   Paths of messages to send to the player
      */
-    public void sendMessage(CommandSender sender, boolean prefix, String... strings) {
-	sendMessage(sender, getMessage(prefix, strings));
+    public void sendMessage(CommandSender sender, boolean prefix, String... paths) {
+	sendMessage(sender, getMessage(prefix, paths));
     }
 
     /**
@@ -162,12 +162,12 @@ public class Utils {
      * @param string
      *                   Paths of messages to send to the player
      */
-    public String getMessage(boolean prefix, String... strings) {
-	if (getMain().getSettings().isNone(strings))
+    public String getMessage(boolean prefix, String... paths) {
+	if (getMain().getMessages().isNone(paths))
 	    return "";
 
 	String msg = prefix ? getMain().getMessages().getMessage("prefix") : "";
-	for (String path : strings)
+	for (String path : paths)
 	    msg += getMain().getMessages().getMessage(path);
 
 	return msg;
@@ -314,6 +314,9 @@ public class Utils {
     }
 
     public boolean shouldConfiscate(Player p, ItemStack is) {
+	if (is == null)
+	    return false;
+
 	Material m = is.getType();
 
 	// Invalid items

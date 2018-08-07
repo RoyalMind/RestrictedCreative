@@ -75,6 +75,11 @@ public class MainCommand implements CommandExecutor {
     }
 
     private void block(CommandSender sender, String[] args) {
+	if (args.length < 2) {
+	    main.getUtils().sendMessage(sender, false, "usage.block");
+	    return;
+	}
+
 	if (args[1] == "stats") {
 	    String msg = main.getUtils().getMessage(true, "block.stats").replaceAll("%total%",
 		    DataHandler.getTotalCount());

@@ -131,33 +131,33 @@ confiscate:
     - 'VOID_AIR'
     name:
     - 'Cash'
+    - 'Spawn Egg'
+    - 'Sapling'
     lore:
     - '$'
 
 disable:
   placing:
   - 'BEDROCK'
-  - 'ENDER_PORTAL_FRAME'
+  - 'END_PORTAL_FRAME'
   - 'TNT'
-  - 'SAPLING'
   breaking:
   - 'BEDROCK'
-  - 'ENDER_PORTAL_FRAME'
+  - 'END_PORTAL_FRAME'
   interacting:
     in-hand:
     - 'SPLASH_POTION'
-    - 'LINGERING_POTION' 
-    - 'MONSTER_EGG'
+    - 'LINGERING_POTION'
     - 'FLINT_AND_STEEL'
-    - 'FIREBALL'
-    - 'EXP_BOTTLE'
-    - 'INK_SACK'
-    - 'EYE_OF_ENDER'
+    - 'FIRE_CHARGE'
+    - 'EXPERIENCE_BOTTLE'
+    - 'INK_SAC'
+    - 'ENDER_EYE'
     - 'EGG'
     - 'LAVA_BUCKET'
     on-ground:
     - 'JUKEBOX'
     - 'FLOWER_POT'
-    - 'SIGN_POST'
+    - 'SIGN'
     - 'WALL_SIGN'
     

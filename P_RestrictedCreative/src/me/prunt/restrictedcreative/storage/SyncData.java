@@ -11,11 +11,13 @@ public class SyncData implements Runnable {
     private Main main;
     private List<String> toAdd;
     private List<String> toRemove;
+    private boolean onDisable;
 
-    public SyncData(Main main, List<String> fAdd, List<String> fDel) {
+    public SyncData(Main main, List<String> fAdd, List<String> fDel, boolean onDisable) {
 	this.main = main;
 	this.toAdd = fAdd;
 	this.toRemove = fDel;
+	this.onDisable = onDisable;
     }
 
     @Override
@@ -28,7 +30,7 @@ public class SyncData implements Runnable {
 	    return;
 
 	long start = System.currentTimeMillis();
-	String or = DataHandler.isUsingSQLite() ? "or" : "";
+	String or = DataHandler.isUsingSQLite() ? "OR " : "";
 
 	main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.save");
 
@@ -54,7 +56,7 @@ public class SyncData implements Runnable {
 	main.getDB().commit();
 	main.getDB().setAutoCommit(true);
 
-	Bukkit.getScheduler().runTask(main, new Runnable() {
+	Runnable runnable = new Runnable() {
 	    @Override
 	    public void run() {
 		DataHandler.addToDatabase.removeAll(toAdd);
@@ -65,6 +67,12 @@ public class SyncData implements Runnable {
 		Utils.sendMessage(Bukkit.getConsoleSender(),
 			main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
 	    }
-	});
+	};
+
+	if (onDisable) {
+	    runnable.run();
+	} else {
+	    Bukkit.getScheduler().runTask(main, runnable);
+	}
     }
 }

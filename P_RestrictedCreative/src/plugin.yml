@@ -4,7 +4,7 @@ description: Extremely lightweight, but fully-featured and customizable Creative
 author: Prunt
 main: me.prunt.restrictedcreative.Main
 website: 'https://www.spigotmc.org/resources/restrictedcreative.42790/'
-softdepend: [ProtocolLib, WorldEdit, WorldGuard, GriefPrevention, Vault]
+softdepend: [ProtocolLib, WorldEdit, WorldGuard, GriefPrevention, Vault, BlocksHub]
 api-version: 1.13
 
 commands:

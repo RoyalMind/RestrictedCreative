@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.prunt.restrictedcreative.Main;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class SwitchCommand implements CommandExecutor {
     private Main main;
@@ -22,10 +23,8 @@ public class SwitchCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 	switch (args.length) {
 	case 0:
-	    if (!(sender instanceof Player)) {
-		main.getUtils().sendMessage(sender, true, "no-console");
-		return true;
-	    }
+	    if (!(sender instanceof Player))
+		return false;
 
 	    Player p = (Player) sender;
 
@@ -37,7 +36,8 @@ public class SwitchCommand implements CommandExecutor {
 		Player p1 = Bukkit.getPlayer(args[0]);
 
 		if (p1 == null || !p1.isOnline()) {
-		    main.getUtils().sendMessage(sender, false, "not-found");
+		    Utils.sendMessage(Bukkit.getConsoleSender(),
+			    main.getUtils().getMessage(true, "not-found").replaceAll("%player%", args[0]));
 		    return true;
 		}
 

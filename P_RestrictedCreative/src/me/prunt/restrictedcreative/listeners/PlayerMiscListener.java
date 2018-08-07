@@ -3,6 +3,7 @@ package me.prunt.restrictedcreative.listeners;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -28,7 +29,7 @@ public class PlayerMiscListener implements Listener {
 	return this.main;
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerGameModeChange(PlayerGameModeChangeEvent e) {
 	Player p = e.getPlayer();
 
@@ -42,7 +43,7 @@ public class PlayerMiscListener implements Listener {
 	// Player wants to switch into creative mode
 	if (e.getNewGameMode() == GameMode.CREATIVE) {
 	    // Player height check
-	    if (getMain().getUtils().isHeightOk(p)) {
+	    if (!getMain().getUtils().isHeightOk(p)) {
 		getMain().getUtils().sendMessage(p, true, "disabled.region");
 		return;
 	    }
