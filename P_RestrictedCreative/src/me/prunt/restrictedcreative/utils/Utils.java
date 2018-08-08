@@ -95,7 +95,7 @@ public class Utils {
      * @return Whether the plugin is disabled in the given world
      */
     public boolean isDisabledWorld(String name) {
-	return getMain().getSettings().getStringList("general.worlds.disable-plugin").contains(name);
+	return getMain().getSettings().getStringList("general.disabled-worlds").contains(name);
     }
 
     /**
@@ -477,7 +477,7 @@ public class Utils {
 	    Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class).getProvider();
 
 	    if (toCreative) {
-		for (String perm : getMain().getSettings().getStringList("creative.premissions.list")) {
+		for (String perm : getMain().getSettings().getStringList("creative.permissions.list")) {
 		    // Remove permission
 		    if (perm.startsWith("-")) {
 			// .substring(1) removes "-" from the front
@@ -517,7 +517,7 @@ public class Utils {
 	    if (toCreative) {
 		PermissionAttachment attachment = p.addAttachment(getMain());
 
-		for (String perm : getMain().getSettings().getStringList("creative.premissions.list")) {
+		for (String perm : getMain().getSettings().getStringList("creative.permissions.list")) {
 		    if (perm.startsWith("-")) {
 			// .substring(1) removes "-" from the front
 			attachment.setPermission(perm.substring(1), false);

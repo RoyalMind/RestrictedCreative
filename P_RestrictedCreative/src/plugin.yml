@@ -103,6 +103,18 @@ permissions:
   rc.commands.spectator:
     description: Allows to enter the spectator mode.
     default: OP
+  rc.commands.creative.others:
+    description: Allows to put other players to creative mode.
+    default: OP
+  rc.commands.survival.others:
+    description: Allows to put other players to survival mode.
+    default: OP
+  rc.commands.adventure.others:
+    description: Allows to put other players to adventure mode.
+    default: OP
+  rc.commands.spectator.others:
+    description: Allows to put other players to spectator mode.
+    default: OP
   rc.commands.reload:
     description: Allows to use the reload command.
     default: OP

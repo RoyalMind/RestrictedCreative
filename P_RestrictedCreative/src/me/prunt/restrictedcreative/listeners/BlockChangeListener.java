@@ -75,6 +75,7 @@ public class BlockChangeListener implements Listener {
 	// Lily pad broken by boat
 	if (b.getType() == Material.LILY_PAD) {
 	    DataHandler.breakBlock(b, null);
+	    return;
 	}
 
 	// Falling block transforming into regular block and vice versa

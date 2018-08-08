@@ -45,13 +45,14 @@ public class PlayerMiscListener implements Listener {
 	    // Player height check
 	    if (!getMain().getUtils().isHeightOk(p)) {
 		getMain().getUtils().sendMessage(p, true, "disabled.region");
+		e.setCancelled(true);
 		return;
 	    }
 
 	    // Prevents opening a container, switching to creative mode, and dumping items
 	    if (illegalContainerOpened(p)) {
-		e.setCancelled(true);
 		getMain().getUtils().sendMessage(p, true, "disabled.general");
+		e.setCancelled(true);
 		return;
 	    }
 
@@ -80,7 +81,7 @@ public class PlayerMiscListener implements Listener {
 	    // Loop through command list
 	    for (String cmd : getMain().getSettings().getConfig().getConfigurationSection("commands").getKeys(false)) {
 		// Loop through alias list
-		for (String alias : getMain().getSettings().getStringList("")) {
+		for (String alias : getMain().getSettings().getStringList("commands." + cmd + ".aliases")) {
 		    // If the message matches or starts with the alias
 		    // (+ space to not catch other commands)
 		    if (command.startsWith("/" + alias + " ") || command.equalsIgnoreCase("/" + alias)) {
@@ -121,7 +122,7 @@ public class PlayerMiscListener implements Listener {
 	Player p = e.getPlayer();
 
 	// No need to control world changing in enabled worlds
-	if (!getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+	if (!getMain().getUtils().isDisabledWorld(e.getFrom().getName()))
 	    return;
 
 	// No need to control non-creative players

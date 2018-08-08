@@ -118,11 +118,10 @@ public class Main extends JavaPlugin {
 	    cmd.setPermissionMessage(getMessages().getMessage("no-permission"));
 	    cmd.setDescription(getSettings().getMessage("commands." + name + ".description"));
 	    cmd.setUsage(getSettings().getMessage("commands." + name + ".usage"));
-
-	    // Using old way of handling aliases... TODO
-	    DataHandler.setUsingOldAliases(true);
 	}
 
+	// Using old way of handling aliases... TODO
+	DataHandler.setUsingOldAliases(true);
     }
 
     /**

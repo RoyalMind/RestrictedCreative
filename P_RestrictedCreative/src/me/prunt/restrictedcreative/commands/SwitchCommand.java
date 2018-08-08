@@ -36,14 +36,15 @@ public class SwitchCommand implements CommandExecutor {
 		Player p1 = Bukkit.getPlayer(args[0]);
 
 		if (p1 == null || !p1.isOnline()) {
-		    Utils.sendMessage(Bukkit.getConsoleSender(),
+		    Utils.sendMessage(sender,
 			    main.getUtils().getMessage(true, "not-found").replaceAll("%player%", args[0]));
 		    return true;
 		}
 
 		p1.setGameMode(this.gm);
 		main.getUtils().sendMessage(p1, true, "gamemodes." + getName() + ".me");
-		main.getUtils().sendMessage(sender, true, "gamemodes." + getName() + ".other");
+		Utils.sendMessage(sender, main.getUtils().getMessage(true, "gamemodes." + getName() + ".other")
+			.replaceAll("%player%", p1.getName()));
 		return true;
 	    }
 

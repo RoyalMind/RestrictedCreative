@@ -43,9 +43,6 @@ commands:
     
 
 general:
-  converter:
-    creative-control: cc_
-    share-control: blocks
   disabled-worlds:
    - 'pure-survival-world'
    - 'pure-creative-world'
@@ -70,8 +67,7 @@ creative:
 tracking:
   blocks:
     enabled: true
-    exclude:
-    - 'AIR'
+    exclude: []
   worldedit:
     enabled: false
     extended: false
