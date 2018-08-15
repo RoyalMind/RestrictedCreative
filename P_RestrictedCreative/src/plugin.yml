@@ -47,7 +47,7 @@ permissions:
     description: Allows to bypass everything.
     default: false
     children:
-      rc.bypass.general.worlds.disable-plugin: true
+      rc.bypass.general.disable-worlds: true
       rc.bypass.creative.armor: true
       rc.bypass.creative.permissions: true
       rc.bypass.tracking.blocks: true # per Material enum
@@ -86,7 +86,6 @@ permissions:
       rc.bypass.tracking.inventory.contents: true
       rc.bypass.tracking.inventory.xp: true
       rc.bypass.tracking.inventory.effects: true
-    
     
   rc.commands.rc:
     description: Allows to use the main command.
@@ -128,12 +127,57 @@ permissions:
     description: Allows to use the block info command.
     default: OP
     
-  rc.bypass.general.worlds.disable-plugin:
+  rc.bypass.general.disable-worlds:
     description: Allows to go into disabled worlds in creative mode.
     default: false
   rc.bypass.limit.regions.whitelist:
     description: Allows to enter creative mode and place blocks/items outside whitelisted regions in creative mode.
     default: false
+  rc.bypass.creative.armor:
+    description: Allows to bypass armor forcing in creative mode.
+    default: false
+  rc.bypass.creative.permissions:
+    description: Allows to bypass permission changing in creative mode.
+    default: false
+  rc.bypass.tracking.blocks:
+    description: Allows to bypass tracking of blocks placed in creative mode.
+    default: false
+  rc.bypass.tracking.blocks.drops:
+    description: Allows to bypass tracking of blocks placed in creative mode.
+    default: false
+  rc.bypass.tracking.entities:
+    description: Allows to bypass tracking of entities created in creative mode.
+    default: false
+  rc.bypass.tracking.worldedit:
+    description: Allows to bypass tracking of blocks placed using WorldEdit.
+    default: false
+  rc.bypass.tracking.inventory:
+    description: Allows to bypass tracking of creative inventories.
+    default: false
+  rc.bypass.limit.regions.owner-based: true
+  rc.bypass.limit.regions.whitelist: true
+  rc.bypass.limit.moving: true
+  rc.bypass.limit.interact.inventories: true # per InventoryType enum
+  rc.bypass.limit.interact.entities: true # per EntityType enum
+  rc.bypass.limit.interact.breeding: true # per EntityType enum
+  rc.bypass.limit.item.drop: true # per Material enum
+  rc.bypass.limit.item.pickup: true # per Material enum
+  rc.bypass.limit.item.throw: true # per Material enum
+  rc.bypass.limit.commands: true
+  rc.bypass.limit.combat.pvp: true
+  rc.bypass.limit.combat.pve: true # per EntityType enum
+  rc.bypass.limit.creation.wither: true
+  rc.bypass.limit.creation.snow-golem: true
+  rc.bypass.limit.creation.iron-golem: true
+  rc.bypass.confiscate.invalid-items: true
+  rc.bypass.confiscate.middle-click: true
+  rc.bypass.confiscate.items.material: true # per Material enum
+  rc.bypass.confiscate.items.name: true
+  rc.bypass.confiscate.items.lore: true
+  rc.bypass.disable.placing: true # per Material enum
+  rc.bypass.disable.interacting.in-hand: true # per Material enum
+  rc.bypass.disable.interacting.on-ground: true # per Material enum
+  rc.bypass.disable.breaking: true # per Material enum
     
   rc.bypass.separate-invs:
     description: Allows to have same inventory for both creative and survival/adventure.
@@ -143,12 +187,6 @@ permissions:
     default: false
   rc.bypass.remove-invalid-items:
     description: Allows to use invalid items (also items with custom NBT).
-    default: false
-  rc.bypass.armor:
-    description: Allows to bypass armor forcing in creative mode.
-    default: false
-  rc.bypass.track.save-blocks:
-    description: Allows to place blocks in creative mode (and/or using WorldEdit) that will not be saved.
     default: false
   rc.bypass.track.remove-drops:
     description: Allows to get drops from blocks placed in creative mode.

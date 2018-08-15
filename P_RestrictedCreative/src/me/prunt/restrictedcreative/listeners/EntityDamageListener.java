@@ -2,6 +2,7 @@ package me.prunt.restrictedcreative.listeners;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.LivingEntity;
@@ -12,6 +13,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
@@ -52,7 +56,43 @@ public class EntityDamageListener implements Listener {
 		return;
 
 	    DataHandler.removeItem(frame);
-	    return;
+	}
+
+	// Armor stand
+	if (en instanceof ArmorStand) {
+	    ArmorStand a = (ArmorStand) en;
+
+	    for (EquipmentSlot slot : EquipmentSlot.values()) {
+		if (!DataHandler.isTrackedSlot(a, slot))
+		    continue;
+
+		EntityEquipment inv = a.getEquipment();
+
+		switch (slot) {
+		case CHEST:
+		    a.setChestplate(new ItemStack(Material.AIR));
+		    break;
+		case FEET:
+		    a.setBoots(new ItemStack(Material.AIR));
+		    break;
+		case HEAD:
+		    a.setHelmet(new ItemStack(Material.AIR));
+		    break;
+		case LEGS:
+		    a.setLeggings(new ItemStack(Material.AIR));
+		    break;
+		case HAND:
+		    inv.setItemInMainHand(new ItemStack(Material.AIR));
+		    break;
+		case OFF_HAND:
+		    inv.setItemInOffHand(new ItemStack(Material.AIR));
+		    break;
+		default:
+		    break;
+		}
+
+		DataHandler.removeSlotTracking(a, slot);
+	    }
 	}
 
 	// PVP and PVE
