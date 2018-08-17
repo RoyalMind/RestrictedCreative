@@ -309,14 +309,17 @@ public class PlayerInteractListener implements Listener {
 	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
-	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("limit.interact.entities"))
-	    return;
-
 	// No need to track bypassed players
 	if (p.hasPermission("rc.bypass.limit.interact.entities")
 		|| p.hasPermission("rc.bypass.limit.interact.entities." + a.getType()))
 	    return;
+
+	// No need to control disabled features
+	if (p.getGameMode() == GameMode.CREATIVE && getMain().getSettings().isEnabled("limit.interact.entities")) {
+	    getMain().getUtils().sendMessage(p, true, "disabled.general");
+	    e.setCancelled(true);
+	    return;
+	}
 
 	// Survival player is taking creative item from armor stand
 	if (p.getGameMode() != GameMode.CREATIVE && e.getArmorStandItem().getType() != Material.AIR
