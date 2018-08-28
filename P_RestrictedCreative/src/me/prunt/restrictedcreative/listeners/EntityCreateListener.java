@@ -44,7 +44,7 @@ public class EntityCreateListener implements Listener {
 	Location loc = e.getLocation();
 
 	// No need to track non-tracked entities
-	if (DataHandler.isTrackedLoc(loc))
+	if (!DataHandler.isTrackedLoc(loc))
 	    return;
 
 	DataHandler.removeFromTrackedLocs(loc);
@@ -65,7 +65,7 @@ public class EntityCreateListener implements Listener {
 	Location loc = en.getLocation();
 
 	// No need to track non-tracked entities
-	if (DataHandler.isTrackedLoc(loc))
+	if (!DataHandler.isTrackedLoc(loc))
 	    return;
 
 	DataHandler.removeFromTrackedLocs(loc);
