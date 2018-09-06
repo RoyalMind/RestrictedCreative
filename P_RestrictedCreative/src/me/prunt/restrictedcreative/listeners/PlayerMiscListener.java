@@ -1,5 +1,9 @@
 package me.prunt.restrictedcreative.listeners;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -85,7 +89,13 @@ public class PlayerMiscListener implements Listener {
 		    // If the message matches or starts with the alias
 		    // (+ space to not catch other commands)
 		    if (command.startsWith("/" + alias + " ") || command.equalsIgnoreCase("/" + alias)) {
-			main.getCommand(cmd).execute(p, alias, new String[0]);
+			List<String> argList = new ArrayList<>(
+				Arrays.asList(command.substring(alias.length() + 1).split(" ")));
+			// Remove empty strings caused by double spaces and such
+			argList.removeAll(Arrays.asList("", null));
+			String[] arguments = argList.toArray(new String[0]);
+
+			main.getCommand(cmd).execute(p, alias, arguments);
 			e.setCancelled(true);
 			return;
 		    }

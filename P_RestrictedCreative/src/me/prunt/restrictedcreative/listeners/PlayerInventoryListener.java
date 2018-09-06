@@ -63,7 +63,7 @@ public class PlayerInventoryListener implements Listener {
 	    // If it's a block (not a potion etc)
 	    if (is != null && is.getType().isBlock()) {
 		// Replaces it with a new one, but without inventory etc
-		e.setCursor(new ItemStack(is.getType(), is.getAmount(), is.getDurability()));
+		e.setCursor(new ItemStack(is.getType(), is.getAmount()));
 		return;
 	    }
 	}

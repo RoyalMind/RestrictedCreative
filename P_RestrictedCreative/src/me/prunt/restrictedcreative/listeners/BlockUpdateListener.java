@@ -8,18 +8,14 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
-import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.material.Attachable;
-import org.bukkit.material.MaterialData;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
 
-@SuppressWarnings("deprecation")
 public class BlockUpdateListener implements Listener {
     private Main main;
 
@@ -40,7 +36,6 @@ public class BlockUpdateListener implements Listener {
     public void onBlockUpdate(BlockPhysicsEvent e) {
 	Block b = e.getBlock();
 	BlockData bd = b.getBlockData();
-	MaterialData md = b.getState().getData();
 
 	// No need to control blocks in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
@@ -112,15 +107,10 @@ public class BlockUpdateListener implements Listener {
 	}
 
 	/* Attachable */
-	else if (md instanceof Attachable) {
-	    Attachable at = (Attachable) b.getState().getData();
-	    Block bl = b.getRelative(at.getAttachedFace());
+	else if (MaterialHandler.getNeededFace(b) != null) {
+	    Block bl = b.getRelative(MaterialHandler.getNeededFace(b));
 
-	    // Trapdoors can hold their own
-	    if (bd instanceof TrapDoor)
-		return;
-
-	    // If the block (to which the first block is attached to) isn't solid
+	    // If the block (to which the first block is attached to) is solid
 	    if (isSolid(bl))
 		return;
 

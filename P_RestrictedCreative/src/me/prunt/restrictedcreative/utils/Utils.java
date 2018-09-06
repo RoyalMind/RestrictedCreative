@@ -277,10 +277,6 @@ public class Utils {
 		return true;
 	}
 
-	// Invalid anvil check
-	if (is.getType() == Material.ANVIL && is.getDurability() > 2)
-	    return true;
-
 	return false;
     }
 

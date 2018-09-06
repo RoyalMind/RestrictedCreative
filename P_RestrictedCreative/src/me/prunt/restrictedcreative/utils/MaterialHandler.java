@@ -100,7 +100,7 @@ public class MaterialHandler {
 	if (bd instanceof Snow)
 	    return true;
 
-	if (getNeededSide(b) == BlockFace.DOWN)
+	if (getNeededFace(b) == BlockFace.DOWN)
 	    return true;
 
 	if (top.contains(m))
@@ -113,7 +113,7 @@ public class MaterialHandler {
 	return false;
     }
 
-    public static BlockFace getNeededSide(Block b) {
+    public static BlockFace getNeededFace(Block b) {
 	BlockData bd = b.getBlockData();
 
 	if (!(bd instanceof Directional))
