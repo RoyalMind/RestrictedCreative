@@ -38,6 +38,8 @@ import me.prunt.restrictedcreative.storage.SyncData;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class Main extends JavaPlugin {
+    public static boolean DEBUG = false;
+
     private Database database;
 
     private Utils utils;

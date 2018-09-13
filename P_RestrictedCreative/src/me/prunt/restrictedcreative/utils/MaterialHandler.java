@@ -79,6 +79,10 @@ public class MaterialHandler {
 	if (Tag.WOODEN_PRESSURE_PLATES.isTagged(m))
 	    return true;
 
+	// Standing banners are not directional
+	if (Tag.BANNERS.isTagged(m) && !(bd instanceof Directional))
+	    return true;
+
 	if (bd instanceof Cake)
 	    return true;
 	if (bd instanceof Comparator)
@@ -115,24 +119,30 @@ public class MaterialHandler {
 
     public static BlockFace getNeededFace(Block b) {
 	BlockData bd = b.getBlockData();
+	Material m = b.getType();
 
 	if (!(bd instanceof Directional))
 	    return null;
 
 	Directional d = (Directional) bd;
 
+	// getOppositeFace() because getFacing() returns where the item is "looking",
+	// opposite of where it is attached
 	if (bd instanceof Cocoa)
-	    return d.getFacing();
+	    return d.getFacing().getOppositeFace();
 	if (bd instanceof Ladder)
-	    return d.getFacing();
+	    return d.getFacing().getOppositeFace();
 	if (bd instanceof Switch)
-	    return d.getFacing();
+	    return d.getFacing().getOppositeFace();
 	if (bd instanceof CoralWallFan)
-	    return d.getFacing();
+	    return d.getFacing().getOppositeFace();
 	if (bd instanceof RedstoneWallTorch)
-	    return d.getFacing();
+	    return d.getFacing().getOppositeFace();
 	if (bd instanceof WallSign)
-	    return d.getFacing();
+	    return d.getFacing().getOppositeFace();
+
+	if (Tag.BANNERS.isTagged(m))
+	    return d.getFacing().getOppositeFace();
 
 	MaterialData md = b.getState().getData();
 

@@ -49,6 +49,9 @@ public class BlockUpdateListener implements Listener {
 	if (!DataHandler.isTracked(b))
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onBlockUpdate: " + b.getType());
+
 	/* Rail */
 	if (bd instanceof Rail) {
 	    Block bl = b.getRelative(BlockFace.DOWN);
@@ -79,6 +82,9 @@ public class BlockUpdateListener implements Listener {
 	    Material m = b.getType();
 	    Material ma = bl.getType();
 
+	    if (Main.DEBUG)
+		System.out.println("needsBlockBelow: " + ma);
+
 	    // Needs to be checked BEFORE isSolid()
 	    if (m == Material.LILY_PAD && ma != Material.WATER) {
 		e.setCancelled(true);
@@ -92,6 +98,10 @@ public class BlockUpdateListener implements Listener {
 
 	    // Needs to be checked BEFORE isSolid()
 	    if (m == Material.SUGAR_CANE && isSugarCaneOk(b))
+		return;
+
+	    // Needs to be checked BEFORE isSolid()
+	    if (MaterialHandler.isDoublePlant(b) && isDoublePlantOk(b))
 		return;
 
 	    if (isSolid(bl))
@@ -109,6 +119,9 @@ public class BlockUpdateListener implements Listener {
 	/* Attachable */
 	else if (MaterialHandler.getNeededFace(b) != null) {
 	    Block bl = b.getRelative(MaterialHandler.getNeededFace(b));
+
+	    if (Main.DEBUG)
+		System.out.println("getNeededFace: " + bl.getType() + " " + b.getFace(bl));
 
 	    // If the block (to which the first block is attached to) is solid
 	    if (isSolid(bl))
@@ -181,12 +194,17 @@ public class BlockUpdateListener implements Listener {
     }
 
     private boolean isCactusOk(Block b) {
-	boolean nothingAround = b.getRelative(BlockFace.EAST).isEmpty() && b.getRelative(BlockFace.WEST).isEmpty()
-		&& b.getRelative(BlockFace.NORTH).isEmpty() && b.getRelative(BlockFace.SOUTH).isEmpty();
+	boolean nothingAround = isAroundCactusOk(b.getRelative(BlockFace.EAST))
+		&& isAroundCactusOk(b.getRelative(BlockFace.WEST)) && isAroundCactusOk(b.getRelative(BlockFace.NORTH))
+		&& isAroundCactusOk(b.getRelative(BlockFace.SOUTH));
 	boolean belowOk = b.getRelative(BlockFace.DOWN).getType() == Material.SAND
 		|| b.getRelative(BlockFace.DOWN).getType() == Material.CACTUS;
 
 	return nothingAround && belowOk;
+    }
+
+    private boolean isAroundCactusOk(Block b) {
+	return b.getType() == Material.AIR || b.getType() == Material.WATER;
     }
 
     private boolean isSugarCaneOk(Block b) {
@@ -195,9 +213,28 @@ public class BlockUpdateListener implements Listener {
 	if (bl.getType() == Material.SUGAR_CANE)
 	    return true;
 
-	return bl.getRelative(BlockFace.EAST).getType() == Material.WATER
+	boolean soil = bl.getType() == Material.GRASS || bl.getType() == Material.DIRT || bl.getType() == Material.SAND
+		|| bl.getType() == Material.PODZOL || bl.getType() == Material.COARSE_DIRT
+		|| bl.getType() == Material.RED_SAND;
+
+	boolean water = bl.getRelative(BlockFace.EAST).getType() == Material.WATER
 		|| bl.getRelative(BlockFace.WEST).getType() == Material.WATER
 		|| bl.getRelative(BlockFace.NORTH).getType() == Material.WATER
 		|| bl.getRelative(BlockFace.SOUTH).getType() == Material.WATER;
+	boolean frosted_ice = bl.getRelative(BlockFace.EAST).getType() == Material.FROSTED_ICE
+		|| bl.getRelative(BlockFace.WEST).getType() == Material.FROSTED_ICE
+		|| bl.getRelative(BlockFace.NORTH).getType() == Material.FROSTED_ICE
+		|| bl.getRelative(BlockFace.SOUTH).getType() == Material.FROSTED_ICE;
+
+	return soil && (water || frosted_ice);
+    }
+
+    private boolean isDoublePlantOk(Block b) {
+	// Both up and down must be OK
+	if (isSolid(b.getRelative(BlockFace.DOWN)))
+	    return b.getRelative(BlockFace.UP).getType() == b.getType();
+
+	// Below is not solid
+	return b.getRelative(BlockFace.DOWN).getType() == b.getType();
     }
 }

@@ -58,10 +58,6 @@ public class BlockBreakListener implements Listener {
 	if (getMain().getUtils().isExcluded(b.getType()))
 	    return;
 
-	// No need to control non-tracked blocks
-	if (!DataHandler.isTracked(b))
-	    return;
-
 	/* Disabled blocks for creative players */
 	if (p.getGameMode() == GameMode.CREATIVE && getMain().getUtils().isDisabledBreaking(m)
 		&& !p.hasPermission("rc.bypass.disable.breaking")
@@ -70,6 +66,25 @@ public class BlockBreakListener implements Listener {
 	    e.setCancelled(true);
 	    return;
 	}
+
+	// Piston head
+	// needs to be BEFORE isTracked() because PistonHead is not tracked
+	if (bd instanceof PistonHead) {
+	    PistonHead head = (PistonHead) bd;
+	    Block piston = b.getRelative(head.getFacing().getOppositeFace());
+
+	    if (Main.DEBUG)
+		System.out.println("PistonHead: " + piston.getType());
+
+	    remove(e, p, false, piston);
+	}
+
+	// No need to control non-tracked blocks
+	if (!DataHandler.isTracked(b))
+	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onBlockBreak: " + bd);
 
 	// Door
 	if (bd instanceof Door) {
@@ -97,14 +112,6 @@ public class BlockBreakListener implements Listener {
 	    }
 
 	    remove(e, p, false, bl);
-	}
-
-	// Piston head
-	else if (bd instanceof PistonHead) {
-	    PistonHead head = (PistonHead) bd;
-	    Block piston = b.getRelative(head.getFacing().getOppositeFace());
-
-	    remove(e, p, false, piston);
 	}
 
 	// Double plant

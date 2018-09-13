@@ -127,6 +127,7 @@ public class BlockPlaceListener implements Listener {
 	switch (head.getType()) {
 	// Wither
 	case WITHER_SKELETON_SKULL:
+	case WITHER_SKELETON_WALL_SKULL:
 	    if (!getMain().getSettings().isEnabled("limit.creation.wither"))
 		return;
 
@@ -142,6 +143,7 @@ public class BlockPlaceListener implements Listener {
 	    return;
 	// Golem
 	case PUMPKIN:
+	case CARVED_PUMPKIN:
 	case JACK_O_LANTERN:
 	    // Iron golem
 	    if (getMain().getSettings().isEnabled("limit.creation.iron-golem") && couldIronGolemBeBuilt(head)) {
@@ -250,6 +252,10 @@ public class BlockPlaceListener implements Listener {
 	boolean headBottom = DataHandler.isTracked(head) || DataHandler.isTracked(bottom);
 
 	return !(headBottom || middleRow);
+    }
+
+    BlockFace getRowDirection(Block middle) {
+	return getRowDirection(middle, middle.getType());
     }
 
     // Return the direction in which the row is located
@@ -379,7 +385,7 @@ public class BlockPlaceListener implements Listener {
     // (whether a survival player should be allowed to create a wither from it)
     public boolean canSurvivalBuildWither(Block head) {
 	head = getMiddleHead(head);
-	BlockFace headDir = getRowDirection(head, Material.WITHER_SKELETON_SKULL);
+	BlockFace headDir = getRowDirection(head);
 	Block head1 = head.getRelative(headDir);
 	Block head2 = head.getRelative(headDir.getOppositeFace());
 

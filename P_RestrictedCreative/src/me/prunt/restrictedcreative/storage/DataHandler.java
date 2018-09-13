@@ -81,7 +81,7 @@ public class DataHandler {
     }
 
     public static void breakBlock(Block b, Player p) {
-	breakBlock(b, p, false);
+	breakBlock(b, p, true);
     }
 
     public static void breakBlock(Block b, Player p, boolean update) {
