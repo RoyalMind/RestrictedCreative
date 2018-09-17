@@ -1,5 +1,7 @@
 package me.prunt.restrictedcreative.listeners;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.GameMode;
@@ -260,7 +262,9 @@ public class BlockPlaceListener implements Listener {
 
     // Return the direction in which the row is located
     // or null if the given block isn't in the middle
-    BlockFace getRowDirection(Block middle, Material type) {
+    BlockFace getRowDirection(Block middle, Material... type) {
+	List<Material> types = new ArrayList<>(Arrays.asList(type));
+
 	Block east = middle.getRelative(BlockFace.EAST);
 	Block west = middle.getRelative(BlockFace.WEST);
 	Block north = middle.getRelative(BlockFace.NORTH);
@@ -268,9 +272,9 @@ public class BlockPlaceListener implements Listener {
 	Block up = middle.getRelative(BlockFace.UP);
 	Block down = middle.getRelative(BlockFace.DOWN);
 
-	boolean eastwest = east.getType() == type && west.getType() == type;
-	boolean northsouth = north.getType() == type && south.getType() == type;
-	boolean updown = up.getType() == type && down.getType() == type;
+	boolean eastwest = types.contains(east.getType()) && types.contains(west.getType());
+	boolean northsouth = types.contains(north.getType()) && types.contains(south.getType());
+	boolean updown = types.contains(up.getType()) && types.contains(down.getType());
 
 	if (eastwest) {
 	    return BlockFace.EAST;
@@ -285,7 +289,8 @@ public class BlockPlaceListener implements Listener {
 
     // Return the wither's middle head as a block or null if there is no middle head
     Block getMiddleHead(Block head) {
-	boolean isMiddleHead = getRowDirection(head, Material.WITHER_SKELETON_SKULL) != null;
+	boolean isMiddleHead = getRowDirection(head, Material.WITHER_SKELETON_SKULL,
+		Material.WITHER_SKELETON_WALL_SKULL) != null;
 
 	if (isMiddleHead)
 	    return head;
@@ -320,8 +325,10 @@ public class BlockPlaceListener implements Listener {
 
 	    newHead = head.getRelative(bf);
 
-	    if (newHead.getType() == Material.WITHER_SKELETON_SKULL)
-		isMiddleHead = getRowDirection(newHead, Material.WITHER_SKELETON_SKULL) != null;
+	    if (newHead.getType() == Material.WITHER_SKELETON_SKULL
+		    || newHead.getType() == Material.WITHER_SKELETON_WALL_SKULL)
+		isMiddleHead = getRowDirection(newHead, Material.WITHER_SKELETON_SKULL,
+			Material.WITHER_SKELETON_WALL_SKULL) != null;
 	}
 
 	return newHead;
@@ -385,7 +392,7 @@ public class BlockPlaceListener implements Listener {
     // (whether a survival player should be allowed to create a wither from it)
     public boolean canSurvivalBuildWither(Block head) {
 	head = getMiddleHead(head);
-	BlockFace headDir = getRowDirection(head);
+	BlockFace headDir = getRowDirection(head, Material.WITHER_SKELETON_SKULL, Material.WITHER_SKELETON_WALL_SKULL);
 	Block head1 = head.getRelative(headDir);
 	Block head2 = head.getRelative(headDir.getOppositeFace());
 

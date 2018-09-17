@@ -8,12 +8,12 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Comparator;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.type.Cake;
 import org.bukkit.block.data.type.Cocoa;
+import org.bukkit.block.data.type.Comparator;
 import org.bukkit.block.data.type.CoralWallFan;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Ladder;
@@ -25,9 +25,9 @@ import org.bukkit.block.data.type.SeaPickle;
 import org.bukkit.block.data.type.Sign;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Switch;
+import org.bukkit.block.data.type.TripwireHook;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Banner;
 import org.bukkit.material.Button;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Torch;
@@ -37,11 +37,12 @@ public class MaterialHandler {
     // Items that will break if block below is air
     private static List<Material> top = new ArrayList<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
 	    Material.DANDELION_YELLOW, Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP,
-	    Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY, Material.RED_MUSHROOM,
-	    Material.BROWN_MUSHROOM, Material.SUGAR_CANE, Material.MELON_STEM, Material.PUMPKIN_STEM,
-	    Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM, Material.CACTUS, Material.LILY_PAD,
-	    Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS, Material.STONE_PRESSURE_PLATE,
-	    Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
+	    Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY, Material.AZURE_BLUET,
+	    Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.SUGAR_CANE, Material.MELON_STEM,
+	    Material.PUMPKIN_STEM, Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM, Material.CACTUS,
+	    Material.LILY_PAD, Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS,
+	    Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
+	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
 
     // Crops
     private static List<Material> crops = new ArrayList<>(
@@ -104,14 +105,14 @@ public class MaterialHandler {
 	if (bd instanceof Snow)
 	    return true;
 
-	if (getNeededFace(b) == BlockFace.DOWN)
-	    return true;
-
 	if (top.contains(m))
 	    return true;
 	if (crops.contains(m))
 	    return true;
 	if (doublePlants.contains(m))
+	    return true;
+
+	if (getNeededFace(b) == BlockFace.DOWN)
 	    return true;
 
 	return false;
@@ -132,22 +133,30 @@ public class MaterialHandler {
 	    return d.getFacing().getOppositeFace();
 	if (bd instanceof Ladder)
 	    return d.getFacing().getOppositeFace();
-	if (bd instanceof Switch)
-	    return d.getFacing().getOppositeFace();
 	if (bd instanceof CoralWallFan)
 	    return d.getFacing().getOppositeFace();
 	if (bd instanceof RedstoneWallTorch)
 	    return d.getFacing().getOppositeFace();
+	if (bd instanceof TripwireHook)
+	    return d.getFacing().getOppositeFace();
 	if (bd instanceof WallSign)
 	    return d.getFacing().getOppositeFace();
+	if (bd instanceof Switch) {
+	    switch (((Switch) bd).getFace()) {
+	    case CEILING:
+		return BlockFace.UP;
+	    case FLOOR:
+		return BlockFace.DOWN;
+	    case WALL:
+		return d.getFacing().getOppositeFace();
+	    }
+	}
 
 	if (Tag.BANNERS.isTagged(m))
 	    return d.getFacing().getOppositeFace();
 
 	MaterialData md = b.getState().getData();
 
-	if (md instanceof Banner)
-	    return ((Banner) md).getAttachedFace();
 	if (md instanceof Button)
 	    return ((Button) md).getAttachedFace();
 	if (md instanceof Torch)
