@@ -219,7 +219,7 @@ public class Utils {
 
 	    // Owner check
 	    if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")) {
-		if (claim.getOwnerName() == p.getName())
+		if (claim.getOwnerName().equalsIgnoreCase(p.getName()))
 		    return true;
 
 		// Member check

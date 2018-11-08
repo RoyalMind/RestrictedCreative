@@ -1,3 +1,6 @@
+# Check out the default messages: https://bitbucket.org/Prunt/restrictedcreative/wiki/Default%20messages
+# Messages explanation: https://bitbucket.org/Prunt/restrictedcreative/wiki/Home#markdown-header-messages
+#
 prefix: '&2&lCreative > '
 reloaded: '&aConfig reloaded!'
 no-permission: '&cYou don''t have enough permissions to do that!'

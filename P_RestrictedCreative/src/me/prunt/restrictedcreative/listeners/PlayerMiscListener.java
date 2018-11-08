@@ -112,8 +112,8 @@ public class PlayerMiscListener implements Listener {
 	    return;
 
 	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.limit.item.drop")
-		|| p.hasPermission("rc.bypass.limit.item.drop." + command.split(" ")[0]))
+	if (p.hasPermission("rc.bypass.limit.commands")
+		|| p.hasPermission("rc.bypass.limit.commands." + command.split(" ")[0]))
 	    return;
 
 	// Loops through all disabled commands

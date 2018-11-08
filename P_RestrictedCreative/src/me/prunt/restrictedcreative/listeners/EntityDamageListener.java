@@ -111,7 +111,7 @@ public class EntityDamageListener implements Listener {
 
 		// No need to control bypassed players
 		if (p.hasPermission("rc.bypass.limit.combat.pve")
-			|| p.hasPermission("rc.bypass.limit.compat.pve." + en.getType()))
+			|| p.hasPermission("rc.bypass.limit.combat.pve." + en.getType()))
 		    return;
 
 		e.setCancelled(true);

@@ -1,5 +1,5 @@
 name: RestrictedCreative
-version: 2.0e-LITTLE-BUGGY
+version: 2.0f-BIT-BUGGY
 description: Extremely lightweight, but fully-featured and customizable Creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
@@ -65,7 +65,7 @@ permissions:
       rc.bypass.limit.item.drop: true # per Material enum
       rc.bypass.limit.item.pickup: true # per Material enum
       rc.bypass.limit.item.throw: true # per Material enum
-      rc.bypass.limit.commands: true
+      rc.bypass.limit.commands: true # per command
       rc.bypass.limit.combat.pvp: true
       rc.bypass.limit.combat.pve: true # per EntityType enum
       rc.bypass.limit.creation.wither: true

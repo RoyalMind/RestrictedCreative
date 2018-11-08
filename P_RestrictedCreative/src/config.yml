@@ -1,4 +1,6 @@
-# Config explanation - https://github.com/Prunt/RestrictedCreative/wiki/Config-explanation
+# Check out the default config: https://bitbucket.org/Prunt/restrictedcreative/wiki/Default%20config
+# Config explanation: https://bitbucket.org/Prunt/restrictedcreative/wiki/Home#markdown-header-config-explanation
+#
 database:
   type: sqlite
   username: root
@@ -145,9 +147,9 @@ disable:
     - 'FLINT_AND_STEEL'
     - 'FIRE_CHARGE'
     - 'EXPERIENCE_BOTTLE'
-    - 'INK_SAC'
     - 'ENDER_EYE'
     - 'EGG'
+    - 'BONE_MEAL'
     - 'LAVA_BUCKET'
     - 'BAT_SPAWN_EGG'
     - 'BLAZE_SPAWN_EGG'

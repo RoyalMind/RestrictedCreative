@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -39,7 +40,7 @@ public class PlayerInteractListener implements Listener {
      * Represents an event that is called when a player interacts with an object or
      * air, potentially fired once for each hand. The hand can be determined using
      * getHand().
-     * 
+     *
      * This event will fire as cancelled if the vanilla behavior is to do nothing
      * (e.g interacting with air)
      */
@@ -80,11 +81,12 @@ public class PlayerInteractListener implements Listener {
 	    return;
 
 	Block b = e.getClickedBlock();
-	Material m = b.getType();
 
 	// If block doesn't exist
 	if (b == null || b.getType() == Material.AIR)
 	    return;
+
+	Material m = b.getType();
 
 	// No need to control bypassed players
 	if (p.hasPermission("rc.bypass.disable.interacting.on-ground")
@@ -106,7 +108,7 @@ public class PlayerInteractListener implements Listener {
      * Represents an event that is called when a player interacts with an object or
      * air, potentially fired once for each hand. The hand can be determined using
      * getHand().
-     * 
+     *
      * This event will fire as cancelled if the vanilla behavior is to do nothing
      * (e.g interacting with air)
      */
@@ -150,7 +152,7 @@ public class PlayerInteractListener implements Listener {
      * Represents an event that is called when a player interacts with an object or
      * air, potentially fired once for each hand. The hand can be determined using
      * getHand().
-     * 
+     *
      * This event will fire as cancelled if the vanilla behavior is to do nothing
      * (e.g interacting with air)
      */
@@ -369,5 +371,38 @@ public class PlayerInteractListener implements Listener {
 	// Creative player is putting an item on the armor stand
 	if (e.getPlayerItem().getType() != Material.AIR)
 	    DataHandler.setAsTrackedSlot(a, e.getSlot());
+    }
+
+    /*
+     * Called when one Entity breeds with another Entity.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityBreed(EntityBreedEvent e) {
+	// Only players going forward
+	if (!(e.getBreeder() instanceof Player))
+	    return;
+
+	Player p = (Player) e.getBreeder();
+
+	// No need to track entities in disabled worlds
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+	    return;
+
+	// No need to track non-creative players
+	if (p.getGameMode() != GameMode.CREATIVE)
+	    return;
+
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("limit.interact.breeding"))
+	    return;
+
+	EntityType et = e.getEntityType();
+
+	// No need to track bypassed players
+	if (p.hasPermission("rc.bypass.limit.interact.breeding")
+		|| p.hasPermission("rc.bypass.limit.interact.breeding." + et))
+	    return;
+
+	e.setCancelled(true);
     }
 }
