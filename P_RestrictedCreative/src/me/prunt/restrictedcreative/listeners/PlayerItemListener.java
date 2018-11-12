@@ -3,6 +3,7 @@ package me.prunt.restrictedcreative.listeners;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,7 +14,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
-import me.prunt.restrictedcreative.utils.MaterialHandler;
 
 public class PlayerItemListener implements Listener {
     private Main main;
@@ -33,23 +33,27 @@ public class PlayerItemListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent e) {
 	Player p = e.getPlayer();
-	Block b = e.getBlockClicked();
+	Block b = e.getBlockClicked().getRelative(e.getBlockFace());
 	Material m = b.getType();
 
 	// No need to control buckets in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
 
+	// Waterloggable blocks don't drop when filled with water
+	if (e.getBlockClicked().getBlockData() instanceof Waterlogged)
+	    return;
+
+	// No need to control excluded blocks
+	if (getMain().getUtils().isExcluded(m))
+	    return;
+
 	// No need to control bypassed players
 	if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
 	    return;
 
-	// The clicked block is a regular block,
-	// not a placed item (torch, pressure plate etc)
-	if (MaterialHandler.isOccluding(m))
-	    // Gets the block on the side on which player clicked on,
-	    // that's where the liquid will be placed
-	    b = e.getBlockClicked().getRelative(e.getBlockFace());
+	if (Main.DEBUG)
+	    System.out.println("onPlayerBucketEmpty: " + m);
 
 	// This prevents players from pouring liquids directly onto tracked items
 	// and thus getting the drops
@@ -81,7 +85,11 @@ public class PlayerItemListener implements Listener {
 		|| p.hasPermission("rc.bypass.limit.item.drop." + e.getItemDrop().getItemStack().getType()))
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onPlayerDropItem: " + e.getItemDrop().getType());
+
 	e.setCancelled(true);
+	p.updateInventory();
 	getMain().getUtils().sendMessage(p, true, "disabled.general");
     }
 
@@ -111,6 +119,9 @@ public class PlayerItemListener implements Listener {
 	if (p.hasPermission("rc.bypass.limit.item.pickup")
 		|| p.hasPermission("rc.bypass.limit.item.pickup." + e.getItem().getItemStack().getType()))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onPlayerPickupItem: " + e.getItem().getType());
 
 	e.setCancelled(true);
     }

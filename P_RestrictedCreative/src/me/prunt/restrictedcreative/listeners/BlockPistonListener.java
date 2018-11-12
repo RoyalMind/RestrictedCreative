@@ -3,6 +3,7 @@ package me.prunt.restrictedcreative.listeners;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.block.data.BlockData;
@@ -47,8 +48,18 @@ public class BlockPistonListener implements Listener {
 
 	// Loop through pulled blocks
 	for (Block b : e.getBlocks()) {
+	    // Slime blocks will create chaos when they latch onto everything and take those
+	    // with them
+	    if (b.getType() == Material.SLIME_BLOCK) {
+		e.setCancelled(true);
+		return;
+	    }
+
 	    if (!DataHandler.isTracked(b))
 		return;
+
+	    if (Main.DEBUG)
+		System.out.println("onBlockPull: " + b.getType());
 
 	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
 		DataHandler.breakBlock(b, null);
@@ -82,6 +93,13 @@ public class BlockPistonListener implements Listener {
 
 	// Loop through pushed blocks
 	for (Block b : e.getBlocks()) {
+	    // Slime blocks will create chaos when they latch onto everything and take those
+	    // with them
+	    if (b.getType() == Material.SLIME_BLOCK) {
+		e.setCancelled(true);
+		return;
+	    }
+
 	    if (!DataHandler.isTracked(b))
 		return;
 
@@ -97,7 +115,7 @@ public class BlockPistonListener implements Listener {
 			: b.getRelative(bed.getFacing().getOppositeFace());
 
 		if (Main.DEBUG)
-		    System.out.println("bed: " + b.getType() + " " + bl.getType());
+		    System.out.println("bedPush: " + b.getType() + " " + bl.getType());
 
 		DataHandler.breakBlock(b, null, false);
 		DataHandler.breakBlock(bl, null, false);

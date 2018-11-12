@@ -133,30 +133,19 @@ public class Main extends JavaPlugin {
 	setDB(new Database(this));
 
 	// Tracked blocks
-	if (getSettings().getString("database.type").equalsIgnoreCase("mysql")) {
-	    getDB().executeUpdate(
-		    "CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255), UNIQUE (block))");
-	} else if (getSettings().getString("database.type").equalsIgnoreCase("sqlite")) {
-	    DataHandler.setUsingSQLite(true);
-	    getDB().executeUpdate(
-		    "CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255) UNIQUE)");
-	}
+	getDB().executeUpdate(
+		"CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255), UNIQUE (block))");
+	DataHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
 
 	// Tracked inventories
-	if (getSettings().getString("database.type").equalsIgnoreCase("mysql")) {
-	    getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
-		    + " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player))");
-	} else if (getSettings().getString("database.type").equalsIgnoreCase("sqlite")) {
-	    DataHandler.setUsingSQLite(true);
-	    getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
-		    + " (player VARCHAR(36) UNIQUE, type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11))");
-	}
+	getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
+		+ " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player, type))");
 
 	if (getSettings().isEnabled("general.saving.inventories.enabled"))
 	    getDB().executeUpdate("DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < "
 		    + (System.currentTimeMillis() / 1000
 			    - 86400 * getSettings().getInt("general.saving.inventories.purge.survival"))
-		    + " OR type = 1 AND lastused < " + +(System.currentTimeMillis() / 1000
+		    + " OR type = 1 AND lastused < " + (System.currentTimeMillis() / 1000
 			    - 86400 * getSettings().getInt("general.saving.inventories.purge.creative")));
 
 	DataHandler.loadFromDatabase(this);

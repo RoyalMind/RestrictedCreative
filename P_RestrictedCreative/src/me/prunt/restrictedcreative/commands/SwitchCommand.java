@@ -19,6 +19,10 @@ public class SwitchCommand implements CommandExecutor {
 	this.gm = gm;
     }
 
+    private Main getMain() {
+	return this.main;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 	switch (args.length) {
@@ -27,6 +31,12 @@ public class SwitchCommand implements CommandExecutor {
 		return false;
 
 	    Player p = (Player) sender;
+
+	    // Don't switch to creative mode when it's not allowed at player's height
+	    if (this.gm == GameMode.CREATIVE && !getMain().getUtils().isHeightOk(p)) {
+		getMain().getUtils().sendMessage(p, true, "disabled.region");
+		return true;
+	    }
 
 	    p.setGameMode(this.gm);
 	    main.getUtils().sendMessage(p, true, "gamemodes." + getName() + ".me");

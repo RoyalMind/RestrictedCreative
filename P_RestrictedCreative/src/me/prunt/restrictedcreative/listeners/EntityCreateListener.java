@@ -30,7 +30,7 @@ public class EntityCreateListener implements Listener {
 
     /*
      * Called when a creature is spawned into a world.
-     * 
+     *
      * If a Creature Spawn event is cancelled, the creature will not spawn.
      */
     @EventHandler(ignoreCancelled = true)
@@ -46,6 +46,9 @@ public class EntityCreateListener implements Listener {
 	// No need to track non-tracked entities
 	if (!DataHandler.isTrackedLoc(loc))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onCreatureSpawn: " + en.getType());
 
 	DataHandler.removeFromTrackedLocs(loc);
 	DataHandler.setAsTracked(en);
@@ -68,6 +71,9 @@ public class EntityCreateListener implements Listener {
 	if (!DataHandler.isTrackedLoc(loc))
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onVehicleCreate: " + en.getType());
+
 	DataHandler.removeFromTrackedLocs(loc);
 	DataHandler.setAsTracked(en);
     }
@@ -87,7 +93,7 @@ public class EntityCreateListener implements Listener {
 	    return;
 
 	// No need to track disabled features
-	if (!getMain().getUtils().isTrackingOn())
+	if (!getMain().getUtils().isTrackingEnabled())
 	    return;
 
 	// No need to track non-creative players
@@ -97,6 +103,9 @@ public class EntityCreateListener implements Listener {
 	// No need to track bypassed players
 	if (p.hasPermission("rc.bypass.tracking.entities") || p.hasPermission("rc.bypass.tracking.entities." + et))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onHangingPlace: " + et);
 
 	DataHandler.setAsTracked(en);
     }
@@ -130,6 +139,9 @@ public class EntityCreateListener implements Listener {
 	// No need to track bypassed players
 	if (p.hasPermission("rc.bypass.limit.item.throw") || p.hasPermission("rc.bypass.limit.item.throw." + et))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onShoot: " + et);
 
 	e.setCancelled(true);
 	getMain().getUtils().sendMessage(p, true, "disabled.general");

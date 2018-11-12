@@ -28,6 +28,10 @@ public class PlayerInventoryListener implements Listener {
      * This event is called when a player in creative mode puts down or picks up an
      * item in their inventory / hotbar and when they drop items from their
      * Inventory while in creative mode.
+     *
+     * e.getAction() is always PLACE_ALL for some reason
+     *
+     * e.getClick() is always CREATIVE
      */
     @EventHandler(ignoreCancelled = true)
     public void onInventoryCreative(InventoryCreativeEvent e) {
@@ -37,6 +41,9 @@ public class PlayerInventoryListener implements Listener {
 	// No need to control inventories in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onInventoryCreative: " + e.getClick());
 
 	// Creative armor
 	if (getMain().getSettings().isEnabled("creative.armor.enabled")
@@ -60,15 +67,19 @@ public class PlayerInventoryListener implements Listener {
 	/* Middle-click check */
 	if (getMain().getSettings().isEnabled("confiscate.middle-click")
 		&& !p.hasPermission("rc.bypass.confiscate.middle-click")) {
-	    // If it's a block (not a potion etc)
+	    // If it's a block (not an item)
 	    if (is != null && is.getType().isBlock()) {
-		// Replaces it with a new one, but without inventory etc
+		if (Main.DEBUG)
+		    System.out.println("middleClick: " + is.getType());
+
+		// Replaces it with a new one, but without NBT data
 		e.setCursor(new ItemStack(is.getType(), is.getAmount()));
 		return;
 	    }
 	}
 
 	// Checks if cursor item exists
+	// Not above because it needs specifically that kind of ItemStack
 	if (is == null || is.getType() == Material.AIR)
 	    is = e.getCurrentItem();
 
@@ -78,6 +89,9 @@ public class PlayerInventoryListener implements Listener {
 	    e.setCursor(new ItemStack(Material.AIR));
 	    e.setResult(Result.DENY);
 	    e.setCancelled(true);
+
+	    if (Main.DEBUG)
+		System.out.println("confiscate: " + is.getType());
 	}
     }
 
@@ -104,6 +118,9 @@ public class PlayerInventoryListener implements Listener {
 	if (p.hasPermission("rc.bypass.limit.interact.inventories")
 		|| p.hasPermission("rc.bypass.limit.interact.inventories." + e.getView().getType()))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onInventoryOpen: " + e.getInventory().getType());
 
 	e.setCancelled(true);
 	getMain().getUtils().sendMessage(p, true, "disabled.general");

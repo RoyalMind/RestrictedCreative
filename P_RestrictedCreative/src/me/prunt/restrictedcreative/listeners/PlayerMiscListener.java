@@ -191,9 +191,7 @@ public class PlayerMiscListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent e) {
-	Player p = e.getPlayer();
-
-	getMain().getUtils().loadInventory(p);
+	getMain().getUtils().loadInventory(e.getPlayer());
     }
 
     @EventHandler(ignoreCancelled = true)

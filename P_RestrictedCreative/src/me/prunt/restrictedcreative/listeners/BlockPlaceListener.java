@@ -60,6 +60,9 @@ public class BlockPlaceListener implements Listener {
 	if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onBlockMultiPlace: " + b.getType());
+
 	/* Disabled blocks */
 	if (getMain().getUtils().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
 		&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
@@ -74,7 +77,7 @@ public class BlockPlaceListener implements Listener {
 
     /*
      * Called when a block is placed by a player.
-     * 
+     *
      * If a Block Place event is cancelled, the block will not be placed.
      */
     // HIGHEST required for WorldGuard and similar plugins
@@ -100,6 +103,9 @@ public class BlockPlaceListener implements Listener {
 	if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onBlockPlace: " + b.getType());
+
 	/* Disabled blocks */
 	if (getMain().getUtils().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
 		&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
@@ -113,7 +119,7 @@ public class BlockPlaceListener implements Listener {
 
     /*
      * Called when a block is placed by a player.
-     * 
+     *
      * If a Block Place event is cancelled, the block will not be placed.
      */
     // HIGHEST required for WorldGuard and similar plugins

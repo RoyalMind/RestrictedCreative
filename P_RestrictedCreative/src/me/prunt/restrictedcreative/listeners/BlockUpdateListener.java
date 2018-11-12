@@ -61,6 +61,9 @@ public class BlockUpdateListener implements Listener {
 	    if (isSolid(bl) && isSlopeOk(b))
 		return;
 
+	    if (Main.DEBUG)
+		System.out.println("Rail: " + bl);
+
 	    e.setCancelled(true);
 	    DataHandler.breakBlock(b, null);
 	    return;
@@ -70,6 +73,9 @@ public class BlockUpdateListener implements Listener {
 	else if (b.getType() == Material.CHORUS_PLANT) {
 	    if (!willChorusDrop(b))
 		return;
+
+	    if (Main.DEBUG)
+		System.out.println("willChorusDrop: true");
 
 	    e.setCancelled(true);
 	    DataHandler.breakBlock(b, null, true);
@@ -102,6 +108,10 @@ public class BlockUpdateListener implements Listener {
 
 	    // Needs to be checked BEFORE isSolid()
 	    if (MaterialHandler.isDoublePlant(b) && isDoublePlantOk(b))
+		return;
+
+	    // Needs to be checked BEFORE isSolid()
+	    if (MaterialHandler.isCarpet(b) && !isBelowEmpty(b))
 		return;
 
 	    if (isSolid(bl))
@@ -236,5 +246,9 @@ public class BlockUpdateListener implements Listener {
 
 	// Below is not solid
 	return b.getRelative(BlockFace.DOWN).getType() == b.getType();
+    }
+
+    private boolean isBelowEmpty(Block b) {
+	return b.getRelative(BlockFace.DOWN).isEmpty();
     }
 }

@@ -46,14 +46,18 @@ public class EntityDamageListener implements Listener {
 	// Item frame
 	if (en instanceof ItemFrame) {
 	    ItemFrame frame = (ItemFrame) en;
+	    ItemStack is = frame.getItem();
 
 	    // The item isn't going to pop off
-	    if (frame.getItem() == null || frame.getItem().getType() == Material.AIR)
+	    if (is == null || is.getType() == Material.AIR)
 		return;
 
 	    // Item frame doesn't contain creative items
 	    if (!DataHandler.hasTrackedItem(frame))
 		return;
+
+	    if (Main.DEBUG)
+		System.out.println("removeItem: " + is.getType());
 
 	    DataHandler.removeItem(frame);
 	}
@@ -67,29 +71,33 @@ public class EntityDamageListener implements Listener {
 		    continue;
 
 		EntityEquipment inv = a.getEquipment();
+		ItemStack air = new ItemStack(Material.AIR);
 
 		switch (slot) {
 		case CHEST:
-		    a.setChestplate(new ItemStack(Material.AIR));
+		    a.setChestplate(air);
 		    break;
 		case FEET:
-		    a.setBoots(new ItemStack(Material.AIR));
+		    a.setBoots(air);
 		    break;
 		case HEAD:
-		    a.setHelmet(new ItemStack(Material.AIR));
+		    a.setHelmet(air);
 		    break;
 		case LEGS:
-		    a.setLeggings(new ItemStack(Material.AIR));
+		    a.setLeggings(air);
 		    break;
 		case HAND:
-		    inv.setItemInMainHand(new ItemStack(Material.AIR));
+		    inv.setItemInMainHand(air);
 		    break;
 		case OFF_HAND:
-		    inv.setItemInOffHand(new ItemStack(Material.AIR));
+		    inv.setItemInOffHand(air);
 		    break;
 		default:
 		    break;
 		}
+
+		if (Main.DEBUG)
+		    System.out.println("removeSlotTracking: " + slot);
 
 		DataHandler.removeSlotTracking(a, slot);
 	    }
@@ -114,6 +122,9 @@ public class EntityDamageListener implements Listener {
 			|| p.hasPermission("rc.bypass.limit.combat.pve." + en.getType()))
 		    return;
 
+		if (Main.DEBUG)
+		    System.out.println("PVE: " + en.getType());
+
 		e.setCancelled(true);
 		getMain().getUtils().sendMessage(p, true, "disabled.general");
 		return;
@@ -129,6 +140,9 @@ public class EntityDamageListener implements Listener {
 		if (p.hasPermission("rc.bypass.limit.combat.pvp"))
 		    return;
 
+		if (Main.DEBUG)
+		    System.out.println("PVP: " + en.getName());
+
 		e.setCancelled(true);
 		getMain().getUtils().sendMessage(p, true, "disabled.general");
 		return;
@@ -138,6 +152,9 @@ public class EntityDamageListener implements Listener {
 	// No need to control non-tracked entities
 	if (!DataHandler.isTracked(en))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onEntityDamage: " + en.getType());
 
 	// Remove armor stands etc.
 	en.remove();
@@ -161,6 +178,9 @@ public class EntityDamageListener implements Listener {
 	if (!DataHandler.isTracked(en))
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onVehicleDestroy: " + en.getType());
+
 	// Remove boats, carts etc.
 	en.remove();
 	e.setCancelled(true);
@@ -180,12 +200,21 @@ public class EntityDamageListener implements Listener {
 
 	if (!DataHandler.isTracked(en)) {
 	    if (en instanceof ItemFrame) {
-		if (DataHandler.hasTrackedItem((ItemFrame) en))
+		ItemFrame frame = (ItemFrame) en;
+
+		if (DataHandler.hasTrackedItem(frame)) {
 		    en.remove();
+
+		    if (Main.DEBUG)
+			System.out.println("removeTrackedItem: " + frame.getItem().getType());
+		}
 	    }
 
 	    return;
 	}
+
+	if (Main.DEBUG)
+	    System.out.println("onHangingBreak: " + en.getType());
 
 	en.remove();
 	e.setCancelled(true);

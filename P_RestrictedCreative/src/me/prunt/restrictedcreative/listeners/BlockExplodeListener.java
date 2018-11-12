@@ -39,6 +39,9 @@ public class BlockExplodeListener implements Listener {
 	    if (!DataHandler.isTracked(b))
 		continue;
 
+	    if (Main.DEBUG)
+		System.out.println("onBlockExplode: " + b.getType());
+
 	    DataHandler.breakBlock(b, null);
 	}
     }
@@ -54,14 +57,17 @@ public class BlockExplodeListener implements Listener {
 	    return;
 
 	// Loops through all broken blocks
-	for (Block bl : e.blockList()) {
-	    if (getMain().getUtils().isExcluded(bl.getType()))
+	for (Block b : e.blockList()) {
+	    if (getMain().getUtils().isExcluded(b.getType()))
 		continue;
 
-	    if (!DataHandler.isTracked(bl))
+	    if (!DataHandler.isTracked(b))
 		continue;
 
-	    DataHandler.breakBlock(bl, null);
+	    if (Main.DEBUG)
+		System.out.println("onEntityExplode: " + b.getType());
+
+	    DataHandler.breakBlock(b, null);
 	}
     }
 }

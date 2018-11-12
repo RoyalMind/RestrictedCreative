@@ -34,11 +34,11 @@ public class BlockBreakListener implements Listener {
 
     /*
      * Called when a block is broken by a player.
-     * 
+     *
      * Note: Plugins wanting to simulate a traditional block drop should set the
      * block to air and utilize their own methods for determining what the default
      * drop for the block being broken is and what to do about it, if anything.
-     * 
+     *
      * If a Block Break event is cancelled, the block will not break and experience
      * will not drop.
      */
@@ -68,7 +68,7 @@ public class BlockBreakListener implements Listener {
 	}
 
 	// Piston head
-	// needs to be BEFORE isTracked() because PistonHead is not tracked
+	// Needs to be BEFORE isTracked() because PistonHead is not tracked
 	if (bd instanceof PistonHead) {
 	    PistonHead head = (PistonHead) bd;
 	    Block piston = b.getRelative(head.getFacing().getOppositeFace());
@@ -84,7 +84,7 @@ public class BlockBreakListener implements Listener {
 	    return;
 
 	if (Main.DEBUG)
-	    System.out.println("onBlockBreak: " + bd);
+	    System.out.println("onBlockBreak: " + m);
 
 	// Door
 	if (bd instanceof Door) {

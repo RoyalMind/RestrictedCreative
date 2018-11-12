@@ -2,6 +2,7 @@ package me.prunt.restrictedcreative.utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -103,7 +104,7 @@ public class Utils {
      *              Material type
      * @return Whether tracking is enabled in the config
      */
-    public boolean isTrackingOn() {
+    public boolean isTrackingEnabled() {
 	return getMain().getSettings().isEnabled("tracking.blocks.enabled");
     }
 
@@ -113,7 +114,8 @@ public class Utils {
      * @return Whether the given type should be excluded from tracking
      */
     public boolean isExcluded(Material m) {
-	return getMain().getSettings().getMaterialList("tracking.blocks.exclude").contains(m) || !isTrackingOn();
+	return getMain().getSettings().getMaterialList("tracking.blocks.exclude").contains(m) || !isTrackingEnabled()
+		|| m == Material.AIR;
     }
 
     private boolean isInvalid(Material m) {
@@ -432,9 +434,8 @@ public class Utils {
 		p.setTotalExperience(0);
 
 	    if (!p.hasPermission("rc.bypass.tracking.inventory.effects")) {
-		for (PotionEffect pe : p.getActivePotionEffects()) {
+		for (PotionEffect pe : p.getActivePotionEffects())
 		    p.removePotionEffect(pe.getType());
-		}
 	    }
 
 	    p.updateInventory();
@@ -459,9 +460,8 @@ public class Utils {
 	    p.setTotalExperience(pi.xp);
 
 	if (!p.hasPermission("rc.bypass.tracking.inventory.effects")) {
-	    for (PotionEffect pe : p.getActivePotionEffects()) {
+	    for (PotionEffect pe : p.getActivePotionEffects())
 		p.removePotionEffect(pe.getType());
-	    }
 	    p.addPotionEffects(pi.effects);
 	}
 
@@ -536,10 +536,11 @@ public class Utils {
 
     public void saveInventory(Player p) {
 	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("saving.inventories.enabled")) {
+	if (!getMain().getSettings().isEnabled("general.saving.inventories.enabled")) {
 	    // Let the gamemode listener handle switching inventories
 	    if (p.getGameMode() == GameMode.CREATIVE)
 		p.setGameMode(DataHandler.getPreviousGameMode(p));
+
 	    return;
 	}
 
@@ -554,16 +555,37 @@ public class Utils {
 	int type;
 	if (p.getGameMode() == GameMode.CREATIVE) {
 	    pi = DataHandler.getSurvivalInv(p);
-	    type = 1;
+	    type = 0;
 	} else {
 	    pi = DataHandler.getCreativeInv(p);
-	    type = 0;
+	    type = 1;
 	}
 
-	getMain().getDB().executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
-		+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES (" + p.getUniqueId().toString()
-		+ ", " + type + ", " + pi.getStorage() + ", " + pi.getArmor() + ", " + pi.getExtra() + ", "
-		+ pi.getEffects() + ", " + p.getTotalExperience() + ", " + System.currentTimeMillis() / 1000 + ")");
+	if (DataHandler.isUsingSQLite()) {
+	    // Inserts a new row if it doesn't exists already and updates it with new values
+	    getMain().getDB()
+		    .executeUpdate("INSERT OR IGNORE INTO " + getMain().getDB().getInvsTable()
+			    + " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
+			    + p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '"
+			    + pi.getArmor() + "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', "
+			    + p.getTotalExperience() + ", " + Instant.now().getEpochSecond() + ")");
+	    getMain().getDB()
+		    .executeUpdate("UPDATE " + getMain().getDB().getInvsTable() + " SET storage = '" + pi.getStorage()
+			    + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra() + "', effects = '"
+			    + pi.getEffects() + "', xp = " + p.getTotalExperience() + ", lastused = "
+			    + Instant.now().getEpochSecond() + " WHERE player = '" + p.getUniqueId().toString()
+			    + "' AND type = " + type);
+	} else {
+	    // Inserts a new row or updates the old one if it already exists
+	    getMain().getDB().executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
+		    + " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
+		    + p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '" + pi.getArmor()
+		    + "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', " + p.getTotalExperience() + ", "
+		    + Instant.now().getEpochSecond() + ") ON DUPLICATE KEY UPDATE type = " + type + ", storage = '"
+		    + pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra()
+		    + "', effects = '" + pi.getEffects() + "', xp = " + p.getTotalExperience() + ", lastused = "
+		    + Instant.now().getEpochSecond());
+	}
 
 	DataHandler.removeSurvivalInv(p);
 	DataHandler.removeCreativeInv(p);
@@ -571,7 +593,7 @@ public class Utils {
 
     public void loadInventory(Player p) {
 	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("saving.inventories.enabled"))
+	if (!getMain().getSettings().isEnabled("general.saving.inventories.enabled"))
 	    return;
 
 	// No need to control bypassed players
@@ -582,14 +604,8 @@ public class Utils {
 		+ " WHERE player = '" + p.getUniqueId().toString() + "'");
 
 	try {
-	    if (rs.next()) {
-		GameMode gm;
-		if (rs.getInt("type") == 0) {
-		    gm = Bukkit.getDefaultGameMode();
-		} else {
-		    gm = GameMode.CREATIVE;
-		}
-
+	    while (rs.next()) {
+		GameMode gm = (rs.getInt("type") == 0) ? Bukkit.getDefaultGameMode() : GameMode.CREATIVE;
 		PlayerInfo pi = new PlayerInfo(rs.getString("storage"), rs.getString("armor"), rs.getString("extra"),
 			rs.getString("effects"), rs.getInt("xp"), gm);
 

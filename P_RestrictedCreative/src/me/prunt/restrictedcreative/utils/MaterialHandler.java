@@ -63,16 +63,10 @@ public class MaterialHandler {
 	    new ItemStack(Material.LEATHER_LEGGINGS), new ItemStack(Material.LEATHER_CHESTPLATE),
 	    new ItemStack(Material.LEATHER_HELMET));
 
-    // Occulding items
-    private static List<Material> occluding = new ArrayList<>(
-	    Arrays.asList(Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS));
-
     public static boolean needsBlockBelow(Block b) {
 	BlockData bd = b.getBlockData();
 	Material m = b.getType();
 
-	if (Tag.CARPETS.isTagged(m))
-	    return true;
 	if (Tag.CORALS.isTagged(m))
 	    return true;
 	if (Tag.FLOWER_POTS.isTagged(m))
@@ -107,9 +101,11 @@ public class MaterialHandler {
 
 	if (top.contains(m))
 	    return true;
-	if (crops.contains(m))
+	if (isCrop(b))
 	    return true;
-	if (doublePlants.contains(m))
+	if (isDoublePlant(b))
+	    return true;
+	if (isCarpet(b))
 	    return true;
 
 	if (getNeededFace(b) == BlockFace.DOWN)
@@ -173,15 +169,15 @@ public class MaterialHandler {
 	return doublePlants.contains(b.getType());
     }
 
+    public static boolean isCarpet(Block b) {
+	return Tag.CARPETS.isTagged(b.getType());
+    }
+
     public static boolean isPlaceableEntity(Material m) {
 	return entities.contains(m);
     }
 
     public static List<ItemStack> getArmorList() {
 	return armorList;
-    }
-
-    public static boolean isOccluding(Material m) {
-	return m.isOccluding() || occluding.contains(m);
     }
 }

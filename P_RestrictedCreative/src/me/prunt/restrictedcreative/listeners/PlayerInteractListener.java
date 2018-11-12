@@ -73,6 +73,10 @@ public class PlayerInteractListener implements Listener {
 	if (getMain().getUtils().shouldConfiscate(p, is)) {
 	    p.getInventory().remove(is);
 	    e.setCancelled(true);
+
+	    if (Main.DEBUG)
+		System.out.println("shouldConfiscate: " + is.getType());
+
 	    return;
 	}
 
@@ -306,6 +310,7 @@ public class PlayerInteractListener implements Listener {
     public void onPlayerArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
 	Player p = e.getPlayer();
 	ArmorStand a = e.getRightClicked();
+	EquipmentSlot slot = e.getSlot();
 
 	// No need to track entities in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
@@ -319,43 +324,53 @@ public class PlayerInteractListener implements Listener {
 	// No need to control disabled features
 	if (p.getGameMode() == GameMode.CREATIVE && getMain().getSettings().isEnabled("limit.interact.entities")) {
 	    getMain().getUtils().sendMessage(p, true, "disabled.general");
+
+	    if (Main.DEBUG)
+		System.out.println("cancelEvent: " + slot);
+
 	    e.setCancelled(true);
 	    return;
 	}
 
 	// Survival player is taking creative item from armor stand
 	if (p.getGameMode() != GameMode.CREATIVE && e.getArmorStandItem().getType() != Material.AIR
-		&& DataHandler.isTrackedSlot(a, e.getSlot())) {
+		&& DataHandler.isTrackedSlot(a, slot)) {
 	    e.setCancelled(true);
 
 	    EntityEquipment inv = a.getEquipment();
+	    ItemStack air = new ItemStack(Material.AIR);
 
-	    switch (e.getSlot()) {
+	    switch (slot) {
 	    case CHEST:
-		a.setChestplate(new ItemStack(Material.AIR));
+		a.setChestplate(air);
 		break;
 	    case FEET:
-		a.setBoots(new ItemStack(Material.AIR));
+		a.setBoots(air);
 		break;
 	    case HEAD:
-		a.setHelmet(new ItemStack(Material.AIR));
+		a.setHelmet(air);
 		break;
 	    case LEGS:
-		a.setLeggings(new ItemStack(Material.AIR));
+		a.setLeggings(air);
 		break;
 	    case HAND:
-		inv.setItemInMainHand(new ItemStack(Material.AIR));
+		inv.setItemInMainHand(air);
 		break;
 	    case OFF_HAND:
-		inv.setItemInOffHand(new ItemStack(Material.AIR));
+		inv.setItemInOffHand(air);
 		break;
 	    default:
 		break;
 	    }
 
+	    if (Main.DEBUG)
+		System.out.println("removeSlotTracking: " + slot);
+
+	    DataHandler.removeSlotTracking(a, slot);
+
 	    // Prevent double message
 	    if (e.getHand() != EquipmentSlot.OFF_HAND)
-		getMain().getUtils().sendMessage(p, true, "disabled.general");
+		getMain().getUtils().sendMessage(p, true, "disabled.interact");
 
 	    return;
 	}
@@ -364,13 +379,16 @@ public class PlayerInteractListener implements Listener {
 	if (p.getGameMode() != GameMode.CREATIVE)
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onPlayerArmorStandManipulate: " + slot);
+
 	// Creative player is taking a creative item from armor stand
-	if (e.getArmorStandItem().getType() != Material.AIR && DataHandler.isTrackedSlot(a, e.getSlot()))
-	    DataHandler.removeSlotTracking(a, e.getSlot());
+	if (e.getArmorStandItem().getType() != Material.AIR && DataHandler.isTrackedSlot(a, slot))
+	    DataHandler.removeSlotTracking(a, slot);
 
 	// Creative player is putting an item on the armor stand
 	if (e.getPlayerItem().getType() != Material.AIR)
-	    DataHandler.setAsTrackedSlot(a, e.getSlot());
+	    DataHandler.setAsTrackedSlot(a, slot);
     }
 
     /*
@@ -402,6 +420,9 @@ public class PlayerInteractListener implements Listener {
 	if (p.hasPermission("rc.bypass.limit.interact.breeding")
 		|| p.hasPermission("rc.bypass.limit.interact.breeding." + et))
 	    return;
+
+	if (Main.DEBUG)
+	    System.out.println("onEntityBreed: " + et);
 
 	e.setCancelled(true);
     }

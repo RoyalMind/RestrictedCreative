@@ -2,6 +2,7 @@ package me.prunt.restrictedcreative.listeners;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
@@ -27,7 +28,7 @@ public class BlockChangeListener implements Listener {
     /*
      * Represents events with a source block and a destination block, currently only
      * applies to liquid (lava and water) and teleporting dragon eggs.
-     * 
+     *
      * If a Block From To event is cancelled, the block will not move (the liquid
      * will not flow).
      */
@@ -41,6 +42,10 @@ public class BlockChangeListener implements Listener {
 
 	// No need to control excluded blocks
 	if (getMain().getUtils().isExcluded(b.getType()))
+	    return;
+
+	// Waterloggable blocks won't be affected by liquids
+	if (b.getBlockData() instanceof Waterlogged)
 	    return;
 
 	// No need to control non-tracked blocks
