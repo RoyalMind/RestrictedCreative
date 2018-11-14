@@ -561,30 +561,32 @@ public class Utils {
 	    type = 1;
 	}
 
-	if (DataHandler.isUsingSQLite()) {
-	    // Inserts a new row if it doesn't exists already and updates it with new values
-	    getMain().getDB()
-		    .executeUpdate("INSERT OR IGNORE INTO " + getMain().getDB().getInvsTable()
-			    + " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
-			    + p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '"
-			    + pi.getArmor() + "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', "
-			    + p.getTotalExperience() + ", " + Instant.now().getEpochSecond() + ")");
-	    getMain().getDB()
-		    .executeUpdate("UPDATE " + getMain().getDB().getInvsTable() + " SET storage = '" + pi.getStorage()
-			    + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra() + "', effects = '"
-			    + pi.getEffects() + "', xp = " + p.getTotalExperience() + ", lastused = "
-			    + Instant.now().getEpochSecond() + " WHERE player = '" + p.getUniqueId().toString()
-			    + "' AND type = " + type);
-	} else {
-	    // Inserts a new row or updates the old one if it already exists
-	    getMain().getDB().executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
-		    + " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
-		    + p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '" + pi.getArmor()
-		    + "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', " + p.getTotalExperience() + ", "
-		    + Instant.now().getEpochSecond() + ") ON DUPLICATE KEY UPDATE type = " + type + ", storage = '"
-		    + pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra()
-		    + "', effects = '" + pi.getEffects() + "', xp = " + p.getTotalExperience() + ", lastused = "
-		    + Instant.now().getEpochSecond());
+	if (pi != null) {
+	    if (DataHandler.isUsingSQLite()) {
+		// Inserts a new row if it doesn't exists already and updates it with new values
+		getMain().getDB()
+			.executeUpdate("INSERT OR IGNORE INTO " + getMain().getDB().getInvsTable()
+				+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
+				+ p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '"
+				+ pi.getArmor() + "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', "
+				+ p.getTotalExperience() + ", " + Instant.now().getEpochSecond() + ")");
+		getMain().getDB()
+			.executeUpdate("UPDATE " + getMain().getDB().getInvsTable() + " SET storage = '"
+				+ pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra()
+				+ "', effects = '" + pi.getEffects() + "', xp = " + p.getTotalExperience()
+				+ ", lastused = " + Instant.now().getEpochSecond() + " WHERE player = '"
+				+ p.getUniqueId().toString() + "' AND type = " + type);
+	    } else {
+		// Inserts a new row or updates the old one if it already exists
+		getMain().getDB().executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
+			+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
+			+ p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '" + pi.getArmor()
+			+ "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', " + p.getTotalExperience() + ", "
+			+ Instant.now().getEpochSecond() + ") ON DUPLICATE KEY UPDATE type = " + type + ", storage = '"
+			+ pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra()
+			+ "', effects = '" + pi.getEffects() + "', xp = " + p.getTotalExperience() + ", lastused = "
+			+ Instant.now().getEpochSecond());
+	    }
 	}
 
 	DataHandler.removeSurvivalInv(p);

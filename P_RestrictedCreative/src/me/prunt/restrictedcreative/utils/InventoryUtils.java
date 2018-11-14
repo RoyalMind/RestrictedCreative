@@ -87,7 +87,7 @@ public class InventoryUtils {
     }
 
     public static String toBase64(Collection<PotionEffect> effects) {
-	return toBase64(effects.toArray(new ItemStack[effects.size()]));
+	return toBase64(effects.toArray(new PotionEffect[effects.size()]));
     }
 
     public static Collection<PotionEffect> effectsFromData(String data) {
