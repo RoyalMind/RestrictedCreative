@@ -9,6 +9,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 
@@ -32,7 +33,7 @@ public class BlockUpdateListener implements Listener {
     /*
      * Thrown when a block physics check is called
      */
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     public void onBlockUpdate(BlockPhysicsEvent e) {
 	Block b = e.getBlock();
 	BlockData bd = b.getBlockData();
