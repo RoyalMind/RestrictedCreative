@@ -66,14 +66,18 @@ public class BlockChangeListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onEntityChangeBlock(EntityChangeBlockEvent e) {
 	Block b = e.getBlock();
+	Material m = b.getType();
 	Entity en = e.getEntity();
+
+	if (Main.DEBUG)
+	    System.out.println("onEntityChangeBlock: " + e.getTo());
 
 	// No need to control blocks in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
 	    return;
 
-	// No need to control excluded blocks
-	if (getMain().getUtils().isExcluded(b.getType()))
+	// No need to control excluded blocks (except AIR)
+	if (getMain().getUtils().isExcluded(m) && m != Material.AIR)
 	    return;
 
 	// No need to control non-tracked blocks and entities
@@ -94,11 +98,17 @@ public class BlockChangeListener implements Listener {
 		DataHandler.setAsTracked(en);
 
 		((FallingBlock) en).setDropItem(false);
+
+		if (Main.DEBUG)
+		    System.out.println("blockToFallingblock: " + b.getType());
 	    }
 
 	    // FALLING_BLOCK is transforming into regular block
 	    else {
 		DataHandler.setAsTracked(b);
+
+		if (Main.DEBUG)
+		    System.out.println("fallingblockToBlock: " + e.getTo());
 	    }
 	}
     }
