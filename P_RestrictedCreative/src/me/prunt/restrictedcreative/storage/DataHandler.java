@@ -343,7 +343,10 @@ public class DataHandler {
 				String str = rs.getString("block");
 				Block b = Utils.getBlock(str);
 
-				if (b == null || b.isEmpty()) {
+				if (b == null)
+				    continue;
+
+				if (b.isEmpty()) {
 				    removeFromDatabase.add(Utils.getBlockString(b));
 				} else {
 				    b.setMetadata("GMC", Main.getFMV());
