@@ -25,10 +25,13 @@ import org.bukkit.potion.PotionEffect;
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
@@ -187,7 +190,8 @@ public class Utils {
 	    LocalPlayer lp = wg.wrapPlayer(p);
 
 	    // Gets all regions covering the block or player location
-	    ApplicableRegionSet set = wg.getRegionManager(p.getWorld()).getApplicableRegions(loc);
+	    RegionQuery rq = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+	    ApplicableRegionSet set = rq.getApplicableRegions(BukkitAdapter.adapt(loc));
 
 	    // Loops through applicable regions
 	    for (ProtectedRegion rg : set) {
