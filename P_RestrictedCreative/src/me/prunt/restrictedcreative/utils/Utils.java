@@ -567,7 +567,7 @@ public class Utils {
 
 	if (pi != null) {
 	    if (DataHandler.isUsingSQLite()) {
-		// Inserts a new row if it doesn't exists already and updates it with new values
+		// Inserts a new row if it doesn't exist already and updates it with new values
 		getMain().getDB()
 			.executeUpdate("INSERT OR IGNORE INTO " + getMain().getDB().getInvsTable()
 				+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"

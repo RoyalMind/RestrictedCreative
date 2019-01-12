@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.ItemStack;
 
 import me.prunt.restrictedcreative.Main;
@@ -43,25 +42,22 @@ public class PlayerInventoryListener implements Listener {
 	    return;
 
 	if (Main.DEBUG)
-	    System.out.println("onInventoryCreative: " + e.getClick());
+	    System.out.println("onInventoryCreative: " + is.getType());
 
 	// Creative armor
 	if (getMain().getSettings().isEnabled("creative.armor.enabled")
 		&& !p.hasPermission("rc.bypass.creative.armor")) {
 	    // Armor exists check
-	    if (p.getInventory().getArmorContents()[2] == null)
+	    if (!armorIsEquipped(p.getInventory().getArmorContents())) {
 		getMain().getUtils().equipArmor(p);
 
-	    // Armor move check
-	    if (e.getSlotType() == SlotType.ARMOR) {
-		e.setResult(Result.DENY);
-		e.setCancelled(true);
-		p.closeInventory();
+		if (Main.DEBUG)
+		    System.out.println("armorEquipped: " + e.getSlotType());
 
 		getMain().getUtils().sendMessage(p, true, "disabled.general");
+		e.setResult(Result.DENY);
 		return;
 	    }
-
 	}
 
 	/* Middle-click check */
@@ -124,5 +120,13 @@ public class PlayerInventoryListener implements Listener {
 
 	e.setCancelled(true);
 	getMain().getUtils().sendMessage(p, true, "disabled.general");
+    }
+
+    private boolean armorIsEquipped(ItemStack[] armorContents) {
+	for (ItemStack is : armorContents)
+	    if (is == null)
+		return false;
+
+	return true;
     }
 }

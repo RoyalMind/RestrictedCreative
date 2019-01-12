@@ -1,5 +1,6 @@
 package me.prunt.restrictedcreative;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -143,9 +144,9 @@ public class Main extends JavaPlugin {
 
 	if (getSettings().isEnabled("general.saving.inventories.enabled"))
 	    getDB().executeUpdate("DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < "
-		    + (System.currentTimeMillis() / 1000
+		    + (Instant.now().getEpochSecond()
 			    - 86400 * getSettings().getInt("general.saving.inventories.purge.survival"))
-		    + " OR type = 1 AND lastused < " + (System.currentTimeMillis() / 1000
+		    + " OR type = 1 AND lastused < " + (Instant.now().getEpochSecond()
 			    - 86400 * getSettings().getInt("general.saving.inventories.purge.creative")));
 
 	DataHandler.loadFromDatabase(this);
