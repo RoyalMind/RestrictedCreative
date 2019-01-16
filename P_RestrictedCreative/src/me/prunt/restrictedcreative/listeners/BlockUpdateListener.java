@@ -50,7 +50,7 @@ public class BlockUpdateListener implements Listener {
 	if (!DataHandler.isTracked(b))
 	    return;
 
-	if (Main.DEBUG)
+	if (Main.DEBUG && Main.EXTRADEBUG)
 	    System.out.println("onBlockUpdate: " + b.getType());
 
 	/* Rail */
@@ -90,7 +90,7 @@ public class BlockUpdateListener implements Listener {
 	    Material ma = bl.getType();
 
 	    if (Main.DEBUG)
-		System.out.println("needsBlockBelow: " + ma);
+		System.out.println("needsBlockBelow: " + m + " " + ma);
 
 	    // Needs to be checked BEFORE isSolid()
 	    if (m == Material.LILY_PAD && ma != Material.WATER) {
@@ -115,11 +115,7 @@ public class BlockUpdateListener implements Listener {
 	    if (MaterialHandler.isCarpet(b) && !isBelowEmpty(b))
 		return;
 
-	    if (isSolid(bl))
-		return;
-
-	    // Needs to be checked AFTER isSolid()
-	    if (MaterialHandler.isCrop(b) && isLightingOk(b))
+	    if (isSolid(bl) && (!MaterialHandler.isCrop(b) || isLightingOk(b)))
 		return;
 
 	    e.setCancelled(true);
@@ -132,7 +128,7 @@ public class BlockUpdateListener implements Listener {
 	    Block bl = b.getRelative(MaterialHandler.getNeededFace(b));
 
 	    if (Main.DEBUG)
-		System.out.println("getNeededFace: " + bl.getType() + " " + b.getFace(bl));
+		System.out.println("getNeededFace: " + b.getType() + " " + b.getFace(bl));
 
 	    // If the block (to which the first block is attached to) is solid
 	    if (isSolid(bl))
@@ -177,12 +173,13 @@ public class BlockUpdateListener implements Listener {
     }
 
     private boolean isBelowChorusOk(Block b) {
-	return b.getRelative(BlockFace.DOWN).getType() == Material.END_STONE
-		|| b.getRelative(BlockFace.DOWN).getType() == Material.CHORUS_PLANT;
+	Material m = b.getRelative(BlockFace.DOWN).getType();
+	return m == Material.END_STONE || m == Material.CHORUS_PLANT;
     }
 
     private boolean isSolid(Block b) {
-	return b.getType().isSolid() && b.getType() != Material.PISTON && b.getType() != Material.STICKY_PISTON;
+	Material m = b.getType();
+	return m.isSolid() && m != Material.PISTON && m != Material.STICKY_PISTON;
     }
 
     private List<Block> getValidHorisontalChoruses(Block b) {

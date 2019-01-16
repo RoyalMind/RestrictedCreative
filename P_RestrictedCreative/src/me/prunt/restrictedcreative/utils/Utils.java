@@ -545,6 +545,9 @@ public class Utils {
 	    if (p.getGameMode() == GameMode.CREATIVE)
 		p.setGameMode(DataHandler.getPreviousGameMode(p));
 
+	    DataHandler.removeSurvivalInv(p);
+	    DataHandler.removeCreativeInv(p);
+
 	    return;
 	}
 
@@ -598,10 +601,6 @@ public class Utils {
     }
 
     public void loadInventory(Player p) {
-	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("general.saving.inventories.enabled"))
-	    return;
-
 	// No need to control bypassed players
 	if (p.hasPermission("rc.bypass.tracking.inventory"))
 	    return;

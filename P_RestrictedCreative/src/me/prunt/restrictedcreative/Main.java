@@ -40,6 +40,7 @@ import me.prunt.restrictedcreative.utils.Utils;
 
 public class Main extends JavaPlugin {
     public static boolean DEBUG = false;
+    public static boolean EXTRADEBUG = false;
 
     private Database database;
 

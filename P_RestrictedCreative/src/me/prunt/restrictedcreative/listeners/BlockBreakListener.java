@@ -76,7 +76,7 @@ public class BlockBreakListener implements Listener {
 	    if (Main.DEBUG)
 		System.out.println("PistonHead: " + piston.getType());
 
-	    remove(e, p, false, piston);
+	    remove(e, p, false, piston, b);
 	}
 
 	// No need to control non-tracked blocks

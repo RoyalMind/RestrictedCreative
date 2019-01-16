@@ -30,6 +30,7 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Button;
 import org.bukkit.material.MaterialData;
+import org.bukkit.material.RedstoneTorch;
 import org.bukkit.material.Torch;
 
 @SuppressWarnings("deprecation")
@@ -38,10 +39,10 @@ public class MaterialHandler {
     private static List<Material> top = new ArrayList<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
 	    Material.DANDELION_YELLOW, Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP,
 	    Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY, Material.AZURE_BLUET,
-	    Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.SUGAR_CANE, Material.MELON_STEM,
-	    Material.PUMPKIN_STEM, Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM, Material.CACTUS,
-	    Material.LILY_PAD, Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS,
-	    Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
+	    Material.OXEYE_DAISY, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.SUGAR_CANE,
+	    Material.MELON_STEM, Material.PUMPKIN_STEM, Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM,
+	    Material.CACTUS, Material.LILY_PAD, Material.KELP_PLANT, Material.GRASS, Material.FERN,
+	    Material.TALL_SEAGRASS, Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
 	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
 
     // Crops
@@ -117,6 +118,15 @@ public class MaterialHandler {
     public static BlockFace getNeededFace(Block b) {
 	BlockData bd = b.getBlockData();
 	Material m = b.getType();
+	MaterialData md = b.getState().getData();
+
+	// Some of the MaterialData instances aren't directional
+	if (md instanceof Button)
+	    return ((Button) md).getAttachedFace();
+	if (md instanceof Torch)
+	    return ((Torch) md).getAttachedFace();
+	if (md instanceof RedstoneTorch)
+	    return ((RedstoneTorch) md).getAttachedFace();
 
 	if (!(bd instanceof Directional))
 	    return null;
@@ -150,13 +160,6 @@ public class MaterialHandler {
 
 	if (Tag.BANNERS.isTagged(m))
 	    return d.getFacing().getOppositeFace();
-
-	MaterialData md = b.getState().getData();
-
-	if (md instanceof Button)
-	    return ((Button) md).getAttachedFace();
-	if (md instanceof Torch)
-	    return ((Torch) md).getAttachedFace();
 
 	return null;
     }

@@ -34,7 +34,6 @@ public class PlayerItemListener implements Listener {
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent e) {
 	Player p = e.getPlayer();
 	Block b = e.getBlockClicked().getRelative(e.getBlockFace());
-	Material m = b.getType();
 
 	// No need to control buckets in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
@@ -43,6 +42,8 @@ public class PlayerItemListener implements Listener {
 	// Waterloggable blocks don't drop when filled with water
 	if (e.getBlockClicked().getBlockData() instanceof Waterlogged)
 	    return;
+
+	Material m = b.getType();
 
 	// No need to control excluded blocks
 	if (getMain().getUtils().isExcluded(m))
@@ -80,13 +81,15 @@ public class PlayerItemListener implements Listener {
 	if (!getMain().getSettings().isEnabled("limit.item.drop"))
 	    return;
 
+	Material m = e.getItemDrop().getItemStack().getType();
+
 	// No need to control bypassed players
 	if (p.hasPermission("rc.bypass.limit.item.drop")
-		|| p.hasPermission("rc.bypass.limit.item.drop." + e.getItemDrop().getItemStack().getType()))
+		|| p.hasPermission("rc.bypass.limit.item.drop." + m))
 	    return;
 
 	if (Main.DEBUG)
-	    System.out.println("onPlayerDropItem: " + e.getItemDrop().getType());
+	    System.out.println("onPlayerDropItem: " + m);
 
 	e.setCancelled(true);
 	p.updateInventory();
@@ -115,13 +118,15 @@ public class PlayerItemListener implements Listener {
 	if (!getMain().getSettings().isEnabled("limit.item.pickup"))
 	    return;
 
+	Material m = e.getItem().getItemStack().getType();
+
 	// No need to control bypassed players
 	if (p.hasPermission("rc.bypass.limit.item.pickup")
-		|| p.hasPermission("rc.bypass.limit.item.pickup." + e.getItem().getItemStack().getType()))
+		|| p.hasPermission("rc.bypass.limit.item.pickup." + m))
 	    return;
 
-	if (Main.DEBUG)
-	    System.out.println("onPlayerPickupItem: " + e.getItem().getType());
+	if (Main.DEBUG && Main.EXTRADEBUG)
+	    System.out.println("onPlayerPickupItem: " + m);
 
 	e.setCancelled(true);
     }
