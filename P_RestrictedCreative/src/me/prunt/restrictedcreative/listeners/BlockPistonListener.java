@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
@@ -13,6 +14,7 @@ import org.bukkit.block.data.type.Bed.Part;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPistonEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 
@@ -54,18 +56,21 @@ public class BlockPistonListener implements Listener {
 
 	// Loop through pulled blocks
 	for (Block b : e.getBlocks()) {
-	    checkSurroundingBlocks(b, blockfaces);
+	    checkSurroundingBlocks(e, b, blockfaces);
+
+	    if (e.isCancelled())
+		return;
 
 	    if (!DataHandler.isTracked(b))
 		break;
 
 	    if (Main.DEBUG)
-		System.out.println("onBlockPull: " + b.getType());
+		System.out.println("onBlockPull: " + b.getType() + " " + b.getPistonMoveReaction());
 
 	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
 		DataHandler.breakBlock(b, null);
 
-	    // If it's on top of another moving block
+	    // If it's on top of another moving block and need a block below
 	    if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
 		DataHandler.breakBlock(b, null);
 
@@ -107,13 +112,16 @@ public class BlockPistonListener implements Listener {
 
 	// Loop through pushed blocks
 	for (Block b : e.getBlocks()) {
-	    checkSurroundingBlocks(b, blockfaces);
+	    checkSurroundingBlocks(e, b, blockfaces);
+
+	    if (e.isCancelled())
+		return;
 
 	    if (!DataHandler.isTracked(b))
 		break;
 
 	    if (Main.DEBUG)
-		System.out.println("onBlockPush: " + b.getType());
+		System.out.println("onBlockPush: " + b.getType() + " " + b.getPistonMoveReaction());
 
 	    BlockData bd = b.getBlockData();
 
@@ -134,7 +142,7 @@ public class BlockPistonListener implements Listener {
 	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
 		DataHandler.breakBlock(b, null);
 
-	    // If it's on top of another moving block
+	    // If it's on top of another moving block and need a block below
 	    if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
 		DataHandler.breakBlock(b, null);
 
@@ -188,7 +196,7 @@ public class BlockPistonListener implements Listener {
 	return Arrays.asList(bf1, bf2, bf3, bf4, bf5);
     }
 
-    private void checkSurroundingBlocks(Block b, List<BlockFace> sides) {
+    private void checkSurroundingBlocks(BlockPistonEvent e, Block b, List<BlockFace> sides) {
 	for (BlockFace bf : sides) {
 	    Block bl = b.getRelative(bf);
 
@@ -197,9 +205,25 @@ public class BlockPistonListener implements Listener {
 		continue;
 
 	    // If it's attached to the moving block
-	    if (bl.getFace(b) == BlockFace.DOWN && MaterialHandler.needsBlockBelow(bl)
-		    || bl.getFace(b) == MaterialHandler.getNeededFace(bl))
+	    if (bl.getFace(b) == BlockFace.DOWN && MaterialHandler.needsBlockBelow(bl)) {
+		// Rails don't cooperate with slime blocks
+		if (MaterialHandler.isRail(bl) && b.getType() == Material.SLIME_BLOCK) {
+		    e.setCancelled(true);
+		    return;
+		}
+
+		if (Main.DEBUG)
+		    System.out.println("removeSurroundingBlock: " + bl.getType());
+
 		DataHandler.breakBlock(bl, null);
+	    }
+
+	    if (bl.getFace(b) == MaterialHandler.getNeededFace(bl)) {
+		if (Main.DEBUG)
+		    System.out.println("removeSurroundingBlock: " + bl.getType());
+
+		DataHandler.breakBlock(bl, null);
+	    }
 	}
     }
 }

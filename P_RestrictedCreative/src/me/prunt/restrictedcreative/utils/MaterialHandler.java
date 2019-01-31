@@ -85,8 +85,6 @@ public class MaterialHandler {
 	    return true;
 	if (bd instanceof Door)
 	    return true;
-	if (bd instanceof Rail)
-	    return true;
 	if (bd instanceof RedstoneWire)
 	    return true;
 	if (bd instanceof Repeater)
@@ -103,6 +101,8 @@ public class MaterialHandler {
 	if (top.contains(m))
 	    return true;
 	if (isCrop(b))
+	    return true;
+	if (isRail(b))
 	    return true;
 	if (isDoublePlant(b))
 	    return true;
@@ -166,6 +166,10 @@ public class MaterialHandler {
 
     public static boolean isCrop(Block b) {
 	return crops.contains(b.getType());
+    }
+
+    public static boolean isRail(Block b) {
+	return b.getBlockData() instanceof Rail;
     }
 
     public static boolean isDoublePlant(Block b) {
