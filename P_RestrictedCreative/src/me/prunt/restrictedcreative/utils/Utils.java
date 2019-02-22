@@ -94,8 +94,7 @@ public class Utils {
     }
 
     /**
-     * @param name
-     *                 World name
+     * @param name World name
      * @return Whether the plugin is disabled in the given world
      */
     public boolean isDisabledWorld(String name) {
@@ -103,8 +102,7 @@ public class Utils {
     }
 
     /**
-     * @param m
-     *              Material type
+     * @param m Material type
      * @return Whether tracking is enabled in the config
      */
     public boolean isTrackingEnabled() {
@@ -112,8 +110,7 @@ public class Utils {
     }
 
     /**
-     * @param m
-     *              Material type
+     * @param m Material type
      * @return Whether the given type should be excluded from tracking
      */
     public boolean isExcluded(Material m) {
@@ -126,8 +123,7 @@ public class Utils {
     }
 
     /**
-     * @param m
-     *              Material type
+     * @param m Material type
      * @return Whether the given type should be disabled from placing by creative
      *         players
      */
@@ -136,8 +132,7 @@ public class Utils {
     }
 
     /**
-     * @param m
-     *              Material type
+     * @param m Material type
      * @return Whether the given type should be disabled from breaking by creative
      *         players
      */
@@ -150,22 +145,17 @@ public class Utils {
     }
 
     /**
-     * @param sender
-     *                   Player to send the message to
-     * @param prefix
-     *                   Whether to include a prefix in the message
-     * @param string
-     *                   Paths of messages to send to the player
+     * @param sender Player to send the message to
+     * @param prefix Whether to include a prefix in the message
+     * @param string Paths of messages to send to the player
      */
     public void sendMessage(CommandSender sender, boolean prefix, String... paths) {
 	sendMessage(sender, getMessage(prefix, paths));
     }
 
     /**
-     * @param prefix
-     *                   Whether to include a prefix in the message
-     * @param string
-     *                   Paths of messages to send to the player
+     * @param prefix Whether to include a prefix in the message
+     * @param string Paths of messages to send to the player
      */
     public String getMessage(boolean prefix, String... paths) {
 	if (getMain().getMessages().isNone(paths))
@@ -272,10 +262,8 @@ public class Utils {
 	ItemMeta im = is.getItemMeta();
 
 	// Displayname length check
-	if (im.getDisplayName() != null) {
-	    if (im.getDisplayName().length() > 30)
-		return true;
-	}
+	if (im.getDisplayName() != null && im.getDisplayName().length() > 30)
+	    return true;
 
 	// Enchantments check
 	for (Map.Entry<Enchantment, Integer> ench : is.getEnchantments().entrySet()) {
@@ -473,7 +461,7 @@ public class Utils {
     }
 
     private void setPermissions(Player p, boolean toCreative) {
-	if (Utils.isInstalled("Vault")) {
+	if (Utils.isInstalled("Vault") && getMain().getSettings().isEnabled("creative.permissions.use-vault")) {
 	    Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class).getProvider();
 
 	    if (toCreative) {

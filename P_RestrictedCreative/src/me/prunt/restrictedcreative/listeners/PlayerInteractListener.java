@@ -211,6 +211,14 @@ public class PlayerInteractListener implements Listener {
 
 	Material m = e.getItem().getType();
 
+	// Pumpkins can be carved with shears and they drop seeds
+	if (DataHandler.isTracked(b) && m == Material.SHEARS && b.getType() == Material.PUMPKIN) {
+	    getMain().getUtils().sendMessage(p, true, "disabled.interact");
+
+	    e.setCancelled(true);
+	    return;
+	}
+
 	// No need to track non-creative players
 	if (p.getGameMode() != GameMode.CREATIVE)
 	    return;

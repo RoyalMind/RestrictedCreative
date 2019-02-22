@@ -32,6 +32,12 @@ public class SwitchCommand implements CommandExecutor {
 
 	    Player p = (Player) sender;
 
+	    // Commands shouldn't work in disabled worlds
+	    if (getMain().getUtils().isDisabledWorld(p.getWorld().getName())) {
+		getMain().getUtils().sendMessage(p, true, "disabled.region");
+		return true;
+	    }
+
 	    // Don't switch to creative mode when it's not allowed at player's height
 	    if (this.gm == GameMode.CREATIVE && !getMain().getUtils().isHeightOk(p)) {
 		getMain().getUtils().sendMessage(p, true, "disabled.region");
@@ -48,6 +54,12 @@ public class SwitchCommand implements CommandExecutor {
 		if (p1 == null || !p1.isOnline()) {
 		    Utils.sendMessage(sender,
 			    main.getUtils().getMessage(true, "not-found").replaceAll("%player%", args[0]));
+		    return true;
+		}
+
+		// Commands shouldn't work in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p1.getWorld().getName())) {
+		    getMain().getUtils().sendMessage(sender, true, "disabled.region");
 		    return true;
 		}
 

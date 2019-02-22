@@ -127,12 +127,16 @@ public class PlayerMiscListener implements Listener {
 	}
     }
 
+    /*
+     * Called when a player switches to another world.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
 	Player p = e.getPlayer();
 
-	// No need to control world changing in enabled worlds
-	if (!getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+	// No need to control world changing when both worlds are enabled or disabled
+	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()) == getMain().getUtils()
+		.isDisabledWorld(e.getFrom().getName()))
 	    return;
 
 	// No need to control non-creative players
@@ -141,6 +145,9 @@ public class PlayerMiscListener implements Listener {
 
 	// Removes creative mode
 	p.setGameMode(DataHandler.getPreviousGameMode(p));
+
+	// Switch inventories, permissions etc
+	getMain().getUtils().setCreative(p, false);
     }
 
     @EventHandler(ignoreCancelled = true)
