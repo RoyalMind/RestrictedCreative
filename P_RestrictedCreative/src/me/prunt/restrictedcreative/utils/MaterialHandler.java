@@ -41,7 +41,7 @@ public class MaterialHandler {
 	    Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY, Material.AZURE_BLUET,
 	    Material.OXEYE_DAISY, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.SUGAR_CANE,
 	    Material.MELON_STEM, Material.PUMPKIN_STEM, Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM,
-	    Material.CACTUS, Material.LILY_PAD, Material.KELP_PLANT, Material.GRASS, Material.FERN,
+	    Material.CACTUS, Material.LILY_PAD, Material.KELP, Material.KELP_PLANT, Material.GRASS, Material.FERN,
 	    Material.TALL_SEAGRASS, Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
 	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
 

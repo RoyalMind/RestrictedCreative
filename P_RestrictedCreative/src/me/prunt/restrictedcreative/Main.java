@@ -200,8 +200,7 @@ public class Main extends JavaPlugin {
     }
 
     /**
-     * @param fmv
-     *                FixedMetadataValue used by RestrictedCreative
+     * @param fmv FixedMetadataValue used by RestrictedCreative
      */
     public static void setFMV(FixedMetadataValue fmv) {
 	Main.fmv = fmv;

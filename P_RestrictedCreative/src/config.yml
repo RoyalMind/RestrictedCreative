@@ -66,6 +66,11 @@ creative:
     list:
     - 'prefix.creative'
     - '-prefix.survival'
+  groups:
+    enabled: false
+    list:
+    - 'creative'
+    - '-survival'
 
 tracking:
   blocks:

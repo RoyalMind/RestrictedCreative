@@ -379,6 +379,11 @@ public class Utils {
 		&& !p.hasPermission("rc.bypass.creative.permissions"))
 	    setPermissions(p, toCreative);
 
+	// Groups
+	if (Utils.isInstalled("Vault") && getMain().getSettings().isEnabled("creative.groups.enabled")
+		&& !p.hasPermission("rc.bypass.creative.groups"))
+	    setGroups(p, toCreative);
+
 	// Inventory
 	if (getMain().getSettings().isEnabled("tracking.inventory.enabled")
 		&& !p.hasPermission("rc.bypass.tracking.inventory"))
@@ -458,6 +463,48 @@ public class Utils {
 	}
 
 	p.updateInventory();
+    }
+
+    private void setGroups(Player p, boolean toCreative) {
+	Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class).getProvider();
+
+	if (toCreative) {
+	    for (String group : getMain().getSettings().getStringList("creative.groups.list")) {
+		// Remove group
+		if (group.startsWith("-")) {
+		    // .substring(1) removes "-" from the front
+		    group = group.substring(1);
+
+		    if (!vault.playerInGroup(p, group))
+			return;
+
+		    DataHandler.addVaultGroup(p, group);
+		    vault.playerRemoveGroup(p, group);
+		}
+
+		// Add group
+		else {
+		    if (vault.playerInGroup(p, group))
+			return;
+
+		    DataHandler.addVaultGroup(p, group);
+		    vault.playerAddGroup(p, group);
+		}
+	    }
+	} else {
+	    if (DataHandler.getVaultGroups(p) == null)
+		return;
+
+	    for (String group : DataHandler.getVaultGroups(p)) {
+		if (vault.playerInGroup(p, group)) {
+		    vault.playerRemoveGroup(p, group);
+		} else {
+		    vault.playerAddGroup(p, group);
+		}
+	    }
+
+	    DataHandler.removeVaultGroup(p);
+	}
     }
 
     private void setPermissions(Player p, boolean toCreative) {

@@ -1,5 +1,5 @@
 name: RestrictedCreative
-version: 2.0.2
+version: 2.1
 description: Extremely lightweight, but fully-featured and customizable Creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
@@ -52,6 +52,7 @@ permissions:
       rc.bypass.general.disable-worlds: true
       rc.bypass.creative.armor: true
       rc.bypass.creative.permissions: true
+      rc.bypass.creative.groups: true
       rc.bypass.tracking.blocks: true # per Material enum
       rc.bypass.tracking.entities: true # per EntityType enum
       rc.bypass.tracking.worldedit: true
@@ -142,6 +143,9 @@ permissions:
     default: false
   rc.bypass.creative.permissions:
     description: Allows to bypass permission changing in creative mode.
+    default: false
+  rc.bypass.creative.groups:
+    description: Allows to bypass group changing in creative mode.
     default: false
     
   rc.bypass.tracking.blocks:

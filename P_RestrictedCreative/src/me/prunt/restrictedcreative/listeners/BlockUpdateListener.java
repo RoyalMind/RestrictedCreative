@@ -99,6 +99,9 @@ public class BlockUpdateListener implements Listener {
 		return;
 	    }
 
+	    if ((m == Material.KELP || m == Material.KELP_PLANT) && isKelpOk(b))
+		return;
+
 	    // Needs to be checked BEFORE isSolid()
 	    if (m == Material.CACTUS && isCactusOk(b))
 		return;
@@ -235,6 +238,13 @@ public class BlockUpdateListener implements Listener {
 		|| bl.getRelative(BlockFace.SOUTH).getType() == Material.FROSTED_ICE;
 
 	return soil && (water || frosted_ice);
+    }
+
+    private boolean isKelpOk(Block b) {
+	Block bl = b.getRelative(BlockFace.DOWN);
+	Material m = bl.getType();
+
+	return m == Material.KELP || m == Material.KELP_PLANT || isSolid(bl);
     }
 
     private boolean isDoublePlantOk(Block b) {
