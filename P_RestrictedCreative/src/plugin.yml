@@ -1,5 +1,5 @@
 name: RestrictedCreative
-version: 2.1
+version: 2.1.1
 description: Extremely lightweight, but fully-featured and customizable Creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main

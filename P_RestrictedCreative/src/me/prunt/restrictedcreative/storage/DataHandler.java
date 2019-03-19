@@ -70,6 +70,9 @@ public class DataHandler {
 	b.setMetadata("GMC", Main.getFMV());
 	addToDatabase.add(Utils.getBlockString(b));
 	removeFromDatabase.remove(Utils.getBlockString(b));
+
+	if (Main.DEBUG)
+	    System.out.println("setAsTracked");
     }
 
     public static void removeTracking(Block b) {
@@ -357,14 +360,15 @@ public class DataHandler {
 		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getBlocksTable());
 
 		// Back to sync processing
-		Bukkit.getScheduler().runTask(Main.getInstance(), new Runnable() {
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getInstance(), new Runnable() {
 		    @Override
 		    public void run() {
-			int count = 0;
-
 			try {
+			    if (Main.DEBUG)
+				System.out.println("loadFromDatabase: " + rs.getRow());
+
 			    while (rs.next()) {
-				count++;
+				setTotalCount(rs.getRow());
 
 				String str = rs.getString("block");
 				Block b = Utils.getBlock(str);
@@ -377,12 +381,15 @@ public class DataHandler {
 				} else {
 				    b.setMetadata("GMC", Main.getFMV());
 				}
+
+				if (rs.getRow() % 500 == 0) {
+				    this.run();
+				    return;
+				}
 			    }
 			} catch (SQLException e) {
 			    e.printStackTrace();
 			}
-
-			setTotalCount(count);
 
 			Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")
 				.replaceAll("%blocks%", getTotalCount()));
@@ -392,7 +399,7 @@ public class DataHandler {
 			Utils.sendMessage(Bukkit.getConsoleSender(),
 				main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
 		    }
-		});
+		}, 1);
 	    }
 	});
     }

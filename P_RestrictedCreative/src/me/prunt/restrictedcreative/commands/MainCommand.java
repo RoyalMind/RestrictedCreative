@@ -52,6 +52,7 @@ public class MainCommand implements CommandExecutor {
 
     private void reload(CommandSender sender) {
 	main.loadConfig();
+	main.registerListeners();
 	main.getUtils().sendMessage(sender, true, "reloaded");
     }
 
@@ -80,7 +81,7 @@ public class MainCommand implements CommandExecutor {
 	    return;
 	}
 
-	if (args[1] == "stats") {
+	if (args[1].equalsIgnoreCase("stats")) {
 	    String msg = main.getUtils().getMessage(true, "block.stats").replaceAll("%total%",
 		    DataHandler.getTotalCount());
 	    Utils.sendMessage(sender, msg);

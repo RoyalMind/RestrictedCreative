@@ -11,6 +11,7 @@ import org.bukkit.GameMode;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -89,9 +90,12 @@ public class Main extends JavaPlugin {
     /**
      * Register event listeners
      */
-    private void registerListeners() {
+    public void registerListeners() {
 	if (Utils.isInstalled("WorldEdit") && getSettings().isEnabled("tracking.worldedit.enabled"))
 	    WorldEdit.getInstance().getEventBus().register(new WorldEditListener(this));
+
+	// In case of plugin reload
+	HandlerList.unregisterAll(this);
 
 	getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
@@ -134,21 +138,25 @@ public class Main extends JavaPlugin {
     private void loadData() {
 	setDB(new Database(this));
 
+	DataHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
+
 	// Tracked blocks
 	getDB().executeUpdate(
 		"CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255), UNIQUE (block))");
-	DataHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
 
 	// Tracked inventories
 	getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
 		+ " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player, type))");
 
-	if (getSettings().isEnabled("general.saving.inventories.enabled"))
-	    getDB().executeUpdate("DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < "
-		    + (Instant.now().getEpochSecond()
-			    - 86400 * getSettings().getInt("general.saving.inventories.purge.survival"))
-		    + " OR type = 1 AND lastused < " + (Instant.now().getEpochSecond()
-			    - 86400 * getSettings().getInt("general.saving.inventories.purge.creative")));
+	if (getSettings().isEnabled("general.saving.inventories.enabled")) {
+	    long survival = Instant.now().getEpochSecond()
+		    - 86400 * getSettings().getInt("general.saving.inventories.purge.survival");
+	    long creative = Instant.now().getEpochSecond()
+		    - 86400 * getSettings().getInt("general.saving.inventories.purge.creative");
+
+	    getDB().executeUpdate("DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < " + survival
+		    + " OR type = 1 AND lastused < " + creative);
+	}
 
 	DataHandler.loadFromDatabase(this);
 	DataHandler.startDataSync(this);
