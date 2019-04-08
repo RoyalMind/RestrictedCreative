@@ -36,24 +36,27 @@ public class BlockUpdateListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     public void onBlockUpdate(BlockPhysicsEvent e) {
 	Block b = e.getBlock();
-	BlockData bd = b.getBlockData();
-
-	// No need to control blocks in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
-	    return;
-
-	// No need to control excluded blocks
-	if (getMain().getUtils().isExcluded(b.getType()))
-	    return;
 
 	// No need to control non-tracked blocks
 	if (!DataHandler.isTracked(b))
 	    return;
 
-	if (Main.DEBUG && Main.EXTRADEBUG)
-	    System.out.println("onBlockUpdate: " + b.getType());
+	// No need to control blocks in disabled worlds
+	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
+	    return;
 
-	/* Rail */
+	Material m = b.getType();
+
+	// No need to control excluded blocks
+	if (getMain().getUtils().isExcluded(m))
+	    return;
+
+	BlockData bd = b.getBlockData();
+
+	if (Main.DEBUG && Main.EXTRADEBUG)
+	    System.out.println("onBlockUpdate: " + m);
+
+	/* 1.-2. Rail */
 	if (bd instanceof Rail) {
 	    Block bl = b.getRelative(BlockFace.DOWN);
 
@@ -70,8 +73,8 @@ public class BlockUpdateListener implements Listener {
 	    return;
 	}
 
-	/* Chorus */
-	else if (b.getType() == Material.CHORUS_PLANT) {
+	/* 1.-2. Chorus */
+	if (m == Material.CHORUS_PLANT) {
 	    if (!willChorusDrop(b))
 		return;
 
@@ -83,10 +86,9 @@ public class BlockUpdateListener implements Listener {
 	    return;
 	}
 
-	/* Top blocks */
+	/* 3. Top blocks */
 	if (MaterialHandler.needsBlockBelow(b)) {
 	    Block bl = b.getRelative(BlockFace.DOWN);
-	    Material m = b.getType();
 	    Material ma = bl.getType();
 
 	    if (Main.DEBUG)
@@ -99,6 +101,7 @@ public class BlockUpdateListener implements Listener {
 		return;
 	    }
 
+	    // Needs to be checked BEFORE isSolid()
 	    if ((m == Material.KELP || m == Material.KELP_PLANT) && isKelpOk(b))
 		return;
 
@@ -126,12 +129,13 @@ public class BlockUpdateListener implements Listener {
 	    return;
 	}
 
-	/* Attachable */
-	else if (MaterialHandler.getNeededFace(b) != null) {
-	    Block bl = b.getRelative(MaterialHandler.getNeededFace(b));
+	/* 4. Attachable */
+	BlockFace bf = MaterialHandler.getNeededFace(b);
+	if (bf != null) {
+	    Block bl = b.getRelative(bf);
 
 	    if (Main.DEBUG)
-		System.out.println("getNeededFace: " + b.getType() + " " + b.getFace(bl));
+		System.out.println("getNeededFace: " + m + " " + b.getFace(bl));
 
 	    // If the block (to which the first block is attached to) is solid
 	    if (isSolid(bl))
@@ -161,18 +165,15 @@ public class BlockUpdateListener implements Listener {
     }
 
     private boolean willChorusDrop(Block b) {
-	boolean isVerticalEmpty = b.getRelative(BlockFace.UP).getType() == Material.AIR
-		|| b.getRelative(BlockFace.DOWN).getType() == Material.AIR;
-
 	List<Block> horisontals = getValidHorisontalChoruses(b);
 
 	if (!isBelowChorusOk(b) && horisontals.isEmpty())
 	    return true;
 
-	if (!horisontals.isEmpty() && !isVerticalEmpty)
-	    return true;
+	boolean isVerticalEmpty = b.getRelative(BlockFace.UP).getType() == Material.AIR
+		|| b.getRelative(BlockFace.DOWN).getType() == Material.AIR;
 
-	return false;
+	return !horisontals.isEmpty() && !isVerticalEmpty;
     }
 
     private boolean isBelowChorusOk(Block b) {
@@ -191,10 +192,13 @@ public class BlockUpdateListener implements Listener {
 	for (BlockFace bf : horisontal) {
 	    Block bl = b.getRelative(bf);
 
-	    if (bl.getType() == Material.CHORUS_PLANT && isBelowChorusOk(bl)) {
-		list.add(bl);
-		break;
-	    }
+	    if (bl.getType() != Material.CHORUS_PLANT)
+		continue;
+
+	    if (!isBelowChorusOk(bl))
+		continue;
+
+	    list.add(bl);
 	}
 
 	return list;
@@ -208,34 +212,37 @@ public class BlockUpdateListener implements Listener {
 	boolean nothingAround = isAroundCactusOk(b.getRelative(BlockFace.EAST))
 		&& isAroundCactusOk(b.getRelative(BlockFace.WEST)) && isAroundCactusOk(b.getRelative(BlockFace.NORTH))
 		&& isAroundCactusOk(b.getRelative(BlockFace.SOUTH));
-	boolean belowOk = b.getRelative(BlockFace.DOWN).getType() == Material.SAND
-		|| b.getRelative(BlockFace.DOWN).getType() == Material.CACTUS;
+
+	Material m = b.getRelative(BlockFace.DOWN).getType();
+	boolean belowOk = m == Material.SAND || m == Material.CACTUS;
 
 	return nothingAround && belowOk;
     }
 
     private boolean isAroundCactusOk(Block b) {
-	return b.getType() == Material.AIR || b.getType() == Material.WATER;
+	Material m = b.getType();
+	return m == Material.AIR || m == Material.WATER;
     }
 
     private boolean isSugarCaneOk(Block b) {
 	Block bl = b.getRelative(BlockFace.DOWN);
+	Material ma = bl.getType();
 
-	if (bl.getType() == Material.SUGAR_CANE)
+	if (ma == Material.SUGAR_CANE)
 	    return true;
 
-	boolean soil = bl.getType() == Material.GRASS || bl.getType() == Material.DIRT || bl.getType() == Material.SAND
-		|| bl.getType() == Material.PODZOL || bl.getType() == Material.COARSE_DIRT
-		|| bl.getType() == Material.RED_SAND;
+	boolean soil = ma == Material.GRASS || ma == Material.DIRT || ma == Material.SAND || ma == Material.PODZOL
+		|| ma == Material.COARSE_DIRT || ma == Material.RED_SAND;
 
-	boolean water = bl.getRelative(BlockFace.EAST).getType() == Material.WATER
-		|| bl.getRelative(BlockFace.WEST).getType() == Material.WATER
-		|| bl.getRelative(BlockFace.NORTH).getType() == Material.WATER
-		|| bl.getRelative(BlockFace.SOUTH).getType() == Material.WATER;
-	boolean frosted_ice = bl.getRelative(BlockFace.EAST).getType() == Material.FROSTED_ICE
-		|| bl.getRelative(BlockFace.WEST).getType() == Material.FROSTED_ICE
-		|| bl.getRelative(BlockFace.NORTH).getType() == Material.FROSTED_ICE
-		|| bl.getRelative(BlockFace.SOUTH).getType() == Material.FROSTED_ICE;
+	Material east = bl.getRelative(BlockFace.EAST).getType();
+	Material west = bl.getRelative(BlockFace.WEST).getType();
+	Material north = bl.getRelative(BlockFace.NORTH).getType();
+	Material south = bl.getRelative(BlockFace.SOUTH).getType();
+
+	boolean water = east == Material.WATER || west == Material.WATER || north == Material.WATER
+		|| south == Material.WATER;
+	boolean frosted_ice = east == Material.FROSTED_ICE || west == Material.FROSTED_ICE
+		|| north == Material.FROSTED_ICE || south == Material.FROSTED_ICE;
 
 	return soil && (water || frosted_ice);
     }

@@ -1,7 +1,7 @@
 package me.prunt.restrictedcreative.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -36,7 +36,7 @@ import org.bukkit.material.Torch;
 @SuppressWarnings("deprecation")
 public class MaterialHandler {
     // Items that will break if block below is air
-    private static List<Material> top = new ArrayList<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
+    private static HashSet<Material> top = new HashSet<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
 	    Material.DANDELION_YELLOW, Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP,
 	    Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY, Material.AZURE_BLUET,
 	    Material.OXEYE_DAISY, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.SUGAR_CANE,
@@ -46,15 +46,15 @@ public class MaterialHandler {
 	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
 
     // Crops
-    private static List<Material> crops = new ArrayList<>(
+    private static HashSet<Material> crops = new HashSet<>(
 	    Arrays.asList(Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS));
 
     // Double plants
-    private static List<Material> doublePlants = new ArrayList<>(Arrays.asList(Material.TALL_GRASS, Material.SUNFLOWER,
+    private static HashSet<Material> doublePlants = new HashSet<>(Arrays.asList(Material.TALL_GRASS, Material.SUNFLOWER,
 	    Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.LARGE_FERN));
 
     // Placeable entities (but not hangables)
-    private static List<Material> entities = new ArrayList<>(Arrays.asList(Material.END_CRYSTAL, Material.ARMOR_STAND,
+    private static HashSet<Material> entities = new HashSet<>(Arrays.asList(Material.END_CRYSTAL, Material.ARMOR_STAND,
 	    Material.MINECART, Material.CHEST_MINECART, Material.COMMAND_BLOCK_MINECART, Material.FURNACE_MINECART,
 	    Material.HOPPER_MINECART, Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT,
 	    Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT, Material.SPRUCE_BOAT));
@@ -68,15 +68,7 @@ public class MaterialHandler {
 	BlockData bd = b.getBlockData();
 	Material m = b.getType();
 
-	if (Tag.CORALS.isTagged(m))
-	    return true;
-	if (Tag.FLOWER_POTS.isTagged(m))
-	    return true;
-	if (Tag.WOODEN_PRESSURE_PLATES.isTagged(m))
-	    return true;
-
-	// Standing banners are not directional
-	if (Tag.BANNERS.isTagged(m) && !(bd instanceof Directional))
+	if (top.contains(m))
 	    return true;
 
 	if (bd instanceof Cake)
@@ -98,8 +90,16 @@ public class MaterialHandler {
 	if (bd instanceof Snow)
 	    return true;
 
-	if (top.contains(m))
+	// Standing banners are not directional
+	if (Tag.BANNERS.isTagged(m) && !(bd instanceof Directional))
 	    return true;
+	if (Tag.CORALS.isTagged(m))
+	    return true;
+	if (Tag.FLOWER_POTS.isTagged(m))
+	    return true;
+	if (Tag.WOODEN_PRESSURE_PLATES.isTagged(m))
+	    return true;
+
 	if (isCrop(b))
 	    return true;
 	if (isRail(b))
@@ -117,16 +117,6 @@ public class MaterialHandler {
 
     public static BlockFace getNeededFace(Block b) {
 	BlockData bd = b.getBlockData();
-	Material m = b.getType();
-	MaterialData md = b.getState().getData();
-
-	// Some of the MaterialData instances aren't directional
-	if (md instanceof Button)
-	    return ((Button) md).getAttachedFace();
-	if (md instanceof Torch)
-	    return ((Torch) md).getAttachedFace();
-	if (md instanceof RedstoneTorch)
-	    return ((RedstoneTorch) md).getAttachedFace();
 
 	if (!(bd instanceof Directional))
 	    return null;
@@ -158,8 +148,20 @@ public class MaterialHandler {
 	    }
 	}
 
+	Material m = b.getType();
+
 	if (Tag.BANNERS.isTagged(m))
 	    return d.getFacing().getOppositeFace();
+
+	MaterialData md = b.getState().getData();
+
+	// Some of the MaterialData instances aren't directional
+	if (md instanceof Button)
+	    return ((Button) md).getAttachedFace();
+	if (md instanceof Torch)
+	    return ((Torch) md).getAttachedFace();
+	if (md instanceof RedstoneTorch)
+	    return ((RedstoneTorch) md).getAttachedFace();
 
 	return null;
     }

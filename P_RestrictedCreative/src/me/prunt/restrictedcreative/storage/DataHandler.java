@@ -359,47 +359,32 @@ public class DataHandler {
 		// Gets all blocks from database
 		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getBlocksTable());
 
-		// Back to sync processing
-		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getInstance(), new Runnable() {
-		    @Override
-		    public void run() {
-			try {
-			    if (Main.DEBUG)
-				System.out.println("loadFromDatabase: " + rs.getRow());
+		int count = 0;
+		try {
+		    while (rs.next()) {
+			String block = rs.getString("block");
+			Block b = Utils.getBlock(block);
 
-			    while (rs.next()) {
-				setTotalCount(rs.getRow());
-
-				String str = rs.getString("block");
-				Block b = Utils.getBlock(str);
-
-				if (b == null)
-				    continue;
-
-				if (b.isEmpty()) {
-				    removeFromDatabase.add(Utils.getBlockString(b));
-				} else {
-				    b.setMetadata("GMC", Main.getFMV());
-				}
-
-				if (rs.getRow() % 500 == 0) {
-				    this.run();
-				    return;
-				}
-			    }
-			} catch (SQLException e) {
-			    e.printStackTrace();
+			if (b == null || b.isEmpty()) {
+			    removeFromDatabase.add(block);
+			} else {
+			    count++;
+			    b.setMetadata("GMC", Main.getFMV());
 			}
-
-			Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")
-				.replaceAll("%blocks%", getTotalCount()));
-
-			String took = String.valueOf(System.currentTimeMillis() - start);
-
-			Utils.sendMessage(Bukkit.getConsoleSender(),
-				main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
 		    }
-		}, 1);
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		}
+
+		setTotalCount(count);
+
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+			main.getUtils().getMessage(true, "database.loaded").replaceAll("%blocks%", getTotalCount()));
+
+		String took = String.valueOf(System.currentTimeMillis() - start);
+
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+			main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
 	    }
 	});
     }
