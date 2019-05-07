@@ -3,7 +3,9 @@ package me.prunt.restrictedcreative.utils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -11,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Rail;
+import org.bukkit.block.data.type.Bell;
 import org.bukkit.block.data.type.Cake;
 import org.bukkit.block.data.type.Cocoa;
 import org.bukkit.block.data.type.Comparator;
@@ -33,16 +36,18 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.material.RedstoneTorch;
 import org.bukkit.material.Torch;
 
+import me.prunt.restrictedcreative.Main;
+
 @SuppressWarnings("deprecation")
 public class MaterialHandler {
     // Items that will break if block below is air
     private static HashSet<Material> top = new HashSet<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
-	    Material.DANDELION_YELLOW, Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP,
-	    Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY, Material.AZURE_BLUET,
-	    Material.OXEYE_DAISY, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.SUGAR_CANE,
-	    Material.MELON_STEM, Material.PUMPKIN_STEM, Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM,
-	    Material.CACTUS, Material.LILY_PAD, Material.KELP, Material.KELP_PLANT, Material.GRASS, Material.FERN,
-	    Material.TALL_SEAGRASS, Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
+	    Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP, Material.WHITE_TULIP, Material.BLUE_ORCHID,
+	    Material.ALLIUM, Material.POPPY, Material.AZURE_BLUET, Material.OXEYE_DAISY, Material.RED_MUSHROOM,
+	    Material.BROWN_MUSHROOM, Material.SUGAR_CANE, Material.MELON_STEM, Material.PUMPKIN_STEM,
+	    Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM, Material.CACTUS, Material.LILY_PAD,
+	    Material.KELP, Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS,
+	    Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
 	    Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
 
     // Crops
@@ -68,7 +73,10 @@ public class MaterialHandler {
 	BlockData bd = b.getBlockData();
 	Material m = b.getType();
 
-	if (top.contains(m))
+	if (Main.DEBUG && Main.EXTRADEBUG)
+	    Bukkit.getLogger().log(Level.FINE, "needsBlockBelow: " + m);
+
+	if (getTop().contains(m))
 	    return true;
 
 	if (bd instanceof Cake)
@@ -117,6 +125,18 @@ public class MaterialHandler {
 
     public static BlockFace getNeededFace(Block b) {
 	BlockData bd = b.getBlockData();
+	MaterialData md = b.getState().getData();
+
+	if (Main.DEBUG && Main.EXTRADEBUG)
+	    Bukkit.getLogger().log(Level.FINE, "getNeededFace: " + b.getType());
+
+	// Some of the MaterialData instances aren't directional
+	if (md instanceof Button)
+	    return ((Button) md).getAttachedFace();
+	if (md instanceof Torch)
+	    return ((Torch) md).getAttachedFace();
+	if (md instanceof RedstoneTorch)
+	    return ((RedstoneTorch) md).getAttachedFace();
 
 	if (!(bd instanceof Directional))
 	    return null;
@@ -147,21 +167,22 @@ public class MaterialHandler {
 		return d.getFacing().getOppositeFace();
 	    }
 	}
+	if (Bukkit.getVersion().contains("1.14") && bd instanceof Bell) {
+	    switch (((Bell) bd).getAttachment()) {
+	    case CEILING:
+		return BlockFace.UP;
+	    case FLOOR:
+		return BlockFace.DOWN;
+	    case SINGLE_WALL:
+	    case DOUBLE_WALL:
+		return d.getFacing();
+	    }
+	}
 
 	Material m = b.getType();
 
 	if (Tag.BANNERS.isTagged(m))
 	    return d.getFacing().getOppositeFace();
-
-	MaterialData md = b.getState().getData();
-
-	// Some of the MaterialData instances aren't directional
-	if (md instanceof Button)
-	    return ((Button) md).getAttachedFace();
-	if (md instanceof Torch)
-	    return ((Torch) md).getAttachedFace();
-	if (md instanceof RedstoneTorch)
-	    return ((RedstoneTorch) md).getAttachedFace();
 
 	return null;
     }
@@ -188,5 +209,19 @@ public class MaterialHandler {
 
     public static List<ItemStack> getArmorList() {
 	return armorList;
+    }
+
+    private static HashSet<Material> getTop() {
+	if (Bukkit.getVersion().contains("1.14")) {
+	    top.add(Material.valueOf("BAMBOO"));
+	    top.add(Material.valueOf("BAMBOO_SAPLING"));
+	    top.add(Material.valueOf("CORNFLOWER"));
+	    top.add(Material.valueOf("LILY_OF_THE_VALLEY"));
+	    top.add(Material.valueOf("WITHER_ROSE"));
+	    top.add(Material.valueOf("SWEET_BERRY_BUSH"));
+	} else if (Bukkit.getVersion().contains("1.13")) {
+	    top.add(Material.valueOf("DANDELION_YELLOW"));
+	}
+	return top;
     }
 }

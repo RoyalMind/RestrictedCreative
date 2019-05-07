@@ -2,6 +2,7 @@ package me.prunt.restrictedcreative.listeners;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -80,12 +81,21 @@ public class BlockChangeListener implements Listener {
 	if (getMain().getUtils().isExcluded(m) && m != Material.AIR)
 	    return;
 
+	// Crops trampled by mobs
+	Block bl = b.getRelative(BlockFace.UP);
+	if (DataHandler.isTracked(bl) && m == Material.FARMLAND) {
+	    DataHandler.breakBlock(bl, null);
+	    b.setType(Material.DIRT);
+	    e.setCancelled(true);
+	    return;
+	}
+
 	// No need to control non-tracked blocks and entities
 	if (!DataHandler.isTracked(b) && !DataHandler.isTracked(en))
 	    return;
 
 	// Lily pad broken by boat
-	if (b.getType() == Material.LILY_PAD) {
+	if (m == Material.LILY_PAD) {
 	    DataHandler.breakBlock(b, null);
 	    return;
 	}
@@ -100,7 +110,7 @@ public class BlockChangeListener implements Listener {
 		((FallingBlock) en).setDropItem(false);
 
 		if (Main.DEBUG)
-		    System.out.println("blockToFallingblock: " + b.getType());
+		    System.out.println("blockToFallingblock: " + m);
 	    }
 
 	    // FALLING_BLOCK is transforming into regular block

@@ -206,6 +206,14 @@ public class PlayerInteractListener implements Listener {
 		    b.getType().toString()));
 	}
 
+	// Creative placed cake shouldn't be edible
+	if (DataHandler.isTracked(b) && b.getType() == Material.CAKE) {
+	    getMain().getUtils().sendMessage(p, true, "disabled.interact");
+
+	    e.setCancelled(true);
+	    return;
+	}
+
 	if (e.getItem() == null)
 	    return;
 

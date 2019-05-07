@@ -3,6 +3,7 @@ package me.prunt.restrictedcreative.listeners;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -52,98 +53,127 @@ public class BlockUpdateListener implements Listener {
 	    return;
 
 	BlockData bd = b.getBlockData();
+	Block bl = b.getRelative(BlockFace.DOWN);
+	Material ma = bl.getType();
 
 	if (Main.DEBUG && Main.EXTRADEBUG)
-	    System.out.println("onBlockUpdate: " + m);
+	    System.out.println("onBlockUpdate: " + m + " (" + ma + ")");
 
 	/* 1.-2. Rail */
 	if (bd instanceof Rail) {
-	    Block bl = b.getRelative(BlockFace.DOWN);
-
 	    // If the block below the rail is solid
 	    // and if rail is on slope, there's a block to support on
-	    if (isSolid(bl) && isSlopeOk(b))
-		return;
-
-	    if (Main.DEBUG)
-		System.out.println("Rail: " + bl);
-
-	    e.setCancelled(true);
-	    DataHandler.breakBlock(b, null);
+	    if (isSolid(bl) && isSlopeOk(b)) {
+		e.setCancelled(true);
+		DataHandler.breakBlock(b, null);
+	    }
 	    return;
 	}
 
 	/* 1.-2. Chorus */
 	if (m == Material.CHORUS_PLANT) {
-	    if (!willChorusDrop(b))
-		return;
+	    if (!isChorusOk(b)) {
+		e.setCancelled(true);
+		DataHandler.breakBlock(b, null);
 
-	    if (Main.DEBUG)
-		System.out.println("willChorusDrop: true");
-
-	    e.setCancelled(true);
-	    DataHandler.breakBlock(b, null, true);
+		if (Main.DEBUG)
+		    System.out.println("isChorusOk: false");
+	    }
 	    return;
 	}
 
 	/* 3. Top blocks */
 	if (MaterialHandler.needsBlockBelow(b)) {
-	    Block bl = b.getRelative(BlockFace.DOWN);
-	    Material ma = bl.getType();
-
 	    if (Main.DEBUG)
-		System.out.println("needsBlockBelow: " + m + " " + ma);
+		System.out.println("needsBlockBelow");
 
 	    // Needs to be checked BEFORE isSolid()
-	    if (m == Material.LILY_PAD && ma != Material.WATER) {
-		e.setCancelled(true);
-		DataHandler.breakBlock(b, null);
+	    if (Bukkit.getVersion().contains("1.14") && m == Material.valueOf("BAMBOO")) {
+		if (!isBambooOk(b)) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
 		return;
 	    }
 
 	    // Needs to be checked BEFORE isSolid()
-	    if ((m == Material.KELP || m == Material.KELP_PLANT) && isKelpOk(b))
+	    switch (m) {
+	    case LILY_PAD:
+		if (ma != Material.WATER) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
 		return;
+	    case KELP:
+	    case KELP_PLANT:
+		if (!isKelpOk(b)) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
+		return;
+	    case CACTUS:
+		if (!isCactusOk(b)) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
+		return;
+	    case SUGAR_CANE:
+		if (!isSugarCaneOk(b)) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
+		return;
+	    default:
+		break;
+	    }
 
 	    // Needs to be checked BEFORE isSolid()
-	    if (m == Material.CACTUS && isCactusOk(b))
+	    if (MaterialHandler.isDoublePlant(b)) {
+		if (!isDoublePlantOk(b)) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
 		return;
+	    }
 
 	    // Needs to be checked BEFORE isSolid()
-	    if (m == Material.SUGAR_CANE && isSugarCaneOk(b))
+	    if (MaterialHandler.isCarpet(b)) {
+		if (isBelowEmpty(b)) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
 		return;
+	    }
 
 	    // Needs to be checked BEFORE isSolid()
-	    if (MaterialHandler.isDoublePlant(b) && isDoublePlantOk(b))
+	    if (MaterialHandler.isCrop(b)) {
+		if (!isLightingOk(b) || !isSolid(bl)) {
+		    e.setCancelled(true);
+		    DataHandler.breakBlock(b, null);
+		}
 		return;
+	    }
 
-	    // Needs to be checked BEFORE isSolid()
-	    if (MaterialHandler.isCarpet(b) && !isBelowEmpty(b))
-		return;
-
-	    if (isSolid(bl) && (!MaterialHandler.isCrop(b) || isLightingOk(b)))
-		return;
-
-	    e.setCancelled(true);
-	    DataHandler.breakBlock(b, null);
+	    if (!isSolid(bl)) {
+		e.setCancelled(true);
+		DataHandler.breakBlock(b, null);
+	    }
 	    return;
 	}
 
 	/* 4. Attachable */
 	BlockFace bf = MaterialHandler.getNeededFace(b);
 	if (bf != null) {
-	    Block bl = b.getRelative(bf);
+	    bl = b.getRelative(bf);
 
 	    if (Main.DEBUG)
 		System.out.println("getNeededFace: " + m + " " + b.getFace(bl));
 
 	    // If the block (to which the first block is attached to) is solid
-	    if (isSolid(bl))
-		return;
-
-	    e.setCancelled(true);
-	    DataHandler.breakBlock(b, null);
-	    return;
+	    if (!isSolid(bl)) {
+		e.setCancelled(true);
+		DataHandler.breakBlock(b, null);
+	    }
 	}
     }
 
@@ -164,16 +194,22 @@ public class BlockUpdateListener implements Listener {
 	}
     }
 
-    private boolean willChorusDrop(Block b) {
-	List<Block> horisontals = getValidHorisontalChoruses(b);
+    private boolean isChorusOk(Block b) {
+	List<Block> horisontalChoruses = horisontalChoruses(b);
+	boolean validHorisontalChorusExists = validHorisontalChorusExists(horisontalChoruses);
 
-	if (!isBelowChorusOk(b) && horisontals.isEmpty())
-	    return true;
+	// Chorus plant will break unless the block below is chorus plant or end stone
+	// or any horizontally adjacent block is a chorus plant above chorus plant or
+	// end stone
+	if (!isBelowChorusOk(b) && !validHorisontalChorusExists)
+	    return false;
 
-	boolean isVerticalEmpty = b.getRelative(BlockFace.UP).getType() == Material.AIR
+	boolean isVerticalOk = b.getRelative(BlockFace.UP).getType() == Material.AIR
 		|| b.getRelative(BlockFace.DOWN).getType() == Material.AIR;
 
-	return !horisontals.isEmpty() && !isVerticalEmpty;
+	// Chorus plant with at least one other chorus plant horizontally adjacent will
+	// break unless at least one of the vertically adjacent blocks is air
+	return horisontalChoruses.isEmpty() || isVerticalOk;
     }
 
     private boolean isBelowChorusOk(Block b) {
@@ -186,22 +222,26 @@ public class BlockUpdateListener implements Listener {
 	return m.isSolid() && m != Material.PISTON && m != Material.STICKY_PISTON;
     }
 
-    private List<Block> getValidHorisontalChoruses(Block b) {
-	List<Block> list = new ArrayList<>();
+    private List<Block> horisontalChoruses(Block b) {
+	List<Block> choruses = new ArrayList<>();
 
 	for (BlockFace bf : horisontal) {
 	    Block bl = b.getRelative(bf);
 
-	    if (bl.getType() != Material.CHORUS_PLANT)
-		continue;
-
-	    if (!isBelowChorusOk(bl))
-		continue;
-
-	    list.add(bl);
+	    if (bl.getType() == Material.CHORUS_PLANT)
+		choruses.add(bl);
 	}
 
-	return list;
+	return choruses;
+    }
+
+    private boolean validHorisontalChorusExists(List<Block> blocks) {
+	for (Block b : blocks) {
+	    if (isBelowChorusOk(b))
+		return true;
+	}
+
+	return false;
     }
 
     private boolean isLightingOk(Block b) {
@@ -221,6 +261,10 @@ public class BlockUpdateListener implements Listener {
 
     private boolean isAroundCactusOk(Block b) {
 	Material m = b.getType();
+
+	if (Main.DEBUG)
+	    System.out.println("isAroundCactusOk: " + m);
+
 	return m == Material.AIR || m == Material.WATER;
     }
 
@@ -245,6 +289,20 @@ public class BlockUpdateListener implements Listener {
 		|| north == Material.FROSTED_ICE || south == Material.FROSTED_ICE;
 
 	return soil && (water || frosted_ice);
+    }
+
+    private boolean isBambooOk(Block b) {
+	Block bl = b.getRelative(BlockFace.DOWN);
+	Material ma = bl.getType();
+
+	if (ma == Material.valueOf("BAMBOO"))
+	    return true;
+
+	boolean isSoilOk = ma == Material.GRASS || ma == Material.DIRT || ma == Material.SAND || ma == Material.PODZOL
+		|| ma == Material.COARSE_DIRT || ma == Material.RED_SAND || ma == Material.GRAVEL
+		|| ma == Material.MYCELIUM;
+
+	return isSoilOk;
     }
 
     private boolean isKelpOk(Block b) {

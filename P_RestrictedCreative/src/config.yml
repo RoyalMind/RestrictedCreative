@@ -180,7 +180,6 @@ disable:
     - 'MAGMA_CUBE_SPAWN_EGG'
     - 'MOOSHROOM_SPAWN_EGG'
     - 'MULE_SPAWN_EGG'
-    - 'OCELOT_SPAWN_EGG'
     - 'PARROT_SPAWN_EGG'
     - 'PHANTOM_SPAWN_EGG'
     - 'PIG_SPAWN_EGG'
@@ -215,9 +214,33 @@ disable:
     - 'JUNGLE_SAPLING'
     - 'OAK_SAPLING'
     - 'SPRUCE_SAPLING'
+    # 1.13
+    #- 'OCELOT_SPAWN_EGG'
+    # 1.14
+    - 'CAT_SPAWN_EGG'
+    - 'FOX_SPAWN_EGG'
+    - 'PANDA_SPAWN_EGG'
+    - 'PILLAGER_SPAWN_EGG'
+    - 'RAVAGER_SPAWN_EGG'
+    - 'TRADER_LLAMA_SPAWN_EGG'
+    - 'WANDERING_TRADER_SPAWN_EGG'
     on-ground:
     - 'JUKEBOX'
     - 'FLOWER_POT'
-    - 'SIGN'
-    - 'WALL_SIGN'
+    # 1.13
+    #- 'SIGN'
+    #- 'WALL_SIGN'
+    # 1.14
+    - 'ACACIA_SIGN'
+    - 'BIRCH_SIGN'
+    - 'DARK_OAK_SIGN'
+    - 'JUNGLE_SIGN'
+    - 'OAK_SIGN'
+    - 'SPRUCE_SIGN'
+    - 'ACACIA_WALL_SIGN'
+    - 'BIRCH_WALL_SIGN'
+    - 'DARK_OAK_WALL_SIGN'
+    - 'JUNGLE_WALL_SIGN'
+    - 'OAK_WALL_SIGN'
+    - 'SPRUCE_WALL_SIGN'
     
