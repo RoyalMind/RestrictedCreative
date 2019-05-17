@@ -351,7 +351,7 @@ public class DataHandler {
 	getInfoWithCommand().add(p);
     }
 
-    public static void loadFromDatabase(Main main) {
+    public static void loadFromDatabaseNew(Main main) {
 	Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), new Runnable() {
 	    @Override
 	    public void run() {
@@ -388,6 +388,57 @@ public class DataHandler {
 
 		Utils.sendMessage(Bukkit.getConsoleSender(),
 			main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
+	    }
+	});
+    }
+
+    public static void loadFromDatabaseOld(Main main) {
+	Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), new Runnable() {
+	    @Override
+	    public void run() {
+		long start = System.currentTimeMillis();
+
+		main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.load");
+
+		// Gets all blocks from database
+		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getBlocksTable());
+
+		// Back to sync processing
+		Bukkit.getScheduler().runTask(Main.getInstance(), new Runnable() {
+		    @Override
+		    public void run() {
+			int count = 0;
+
+			try {
+			    while (rs.next()) {
+				String str = rs.getString("block");
+				Block b = Utils.getBlock(str);
+
+				if (b == null)
+				    continue;
+
+				if (b.isEmpty()) {
+				    removeFromDatabase.add(Utils.getBlockString(b));
+				} else {
+				    count++;
+				    b.setMetadata("GMC", Main.getFMV());
+				}
+			    }
+			} catch (SQLException e) {
+			    e.printStackTrace();
+			}
+
+			setTotalCount(count);
+
+			Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")
+				.replaceAll("%blocks%", getTotalCount()));
+
+			String took = String.valueOf(System.currentTimeMillis() - start);
+
+			Utils.sendMessage(Bukkit.getConsoleSender(),
+				main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
+		    }
+		});
 	    }
 	});
     }

@@ -158,7 +158,12 @@ public class Main extends JavaPlugin {
 		    + " OR type = 1 AND lastused < " + creative);
 	}
 
-	DataHandler.loadFromDatabase(this);
+	if (getSettings().isEnabled("general.loading.use-old-system")) {
+	    DataHandler.loadFromDatabaseOld(this);
+	} else {
+	    DataHandler.loadFromDatabaseNew(this);
+	}
+
 	DataHandler.startDataSync(this);
     }
 

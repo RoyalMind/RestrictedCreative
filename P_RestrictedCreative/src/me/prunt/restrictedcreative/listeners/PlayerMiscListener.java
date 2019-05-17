@@ -205,7 +205,7 @@ public class PlayerMiscListener implements Listener {
 	    return;
 
 	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("general.wait-until-loaded"))
+	if (!getMain().getSettings().isEnabled("general.loading.delay-login"))
 	    return;
 
 	e.disallow(Result.KICK_OTHER, getMain().getUtils().getMessage(false, "database.load"));

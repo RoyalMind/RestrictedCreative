@@ -55,7 +55,9 @@ general:
       purge:
         survival: 90
         creative: 30
-  wait-until-loaded: true
+  loading:
+    delay-login: true
+    use-old-system: false
   
 creative:
   armor:
