@@ -16,6 +16,8 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -194,6 +196,19 @@ public class PlayerMiscListener implements Listener {
 	// Removes all drops
 	e.getDrops().clear();
 	e.setDroppedExp(0);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerLogin(PlayerLoginEvent e) {
+	// We don't care if blocks have already been loaded
+	if (Integer.valueOf(DataHandler.getTotalCount()) >= 0)
+	    return;
+
+	// No need to control disabled features
+	if (!getMain().getSettings().isEnabled("general.wait-until-loaded"))
+	    return;
+
+	e.disallow(Result.KICK_OTHER, getMain().getUtils().getMessage(false, "database.load"));
     }
 
     @EventHandler(ignoreCancelled = true)

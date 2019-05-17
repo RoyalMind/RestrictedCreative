@@ -61,9 +61,9 @@ public class BlockUpdateListener implements Listener {
 
 	/* 1.-2. Rail */
 	if (bd instanceof Rail) {
-	    // If the block below the rail is solid
-	    // and if rail is on slope, there's a block to support on
-	    if (isSolid(bl) && isSlopeOk(b)) {
+	    // If the block below the rail isn't solid or
+	    // if rail is on slope and there isn't a block to support it
+	    if (!isSolid(bl) || !isSlopeOk(b)) {
 		e.setCancelled(true);
 		DataHandler.breakBlock(b, null);
 	    }
@@ -180,6 +180,9 @@ public class BlockUpdateListener implements Listener {
     private boolean isSlopeOk(Block b) {
 	Rail rail = (Rail) b.getBlockData();
 
+	if (Main.DEBUG)
+	    System.out.println("isSlopeOk: " + rail.getShape());
+
 	switch (rail.getShape()) {
 	case ASCENDING_EAST:
 	    return b.getRelative(BlockFace.EAST).getType().isSolid();
@@ -254,9 +257,11 @@ public class BlockUpdateListener implements Listener {
 		&& isAroundCactusOk(b.getRelative(BlockFace.SOUTH));
 
 	Material m = b.getRelative(BlockFace.DOWN).getType();
-	boolean belowOk = m == Material.SAND || m == Material.CACTUS;
+	boolean belowOk = m == Material.SAND || m == Material.RED_SAND || m == Material.CACTUS;
 
-	return nothingAround && belowOk;
+	boolean aboveOk = b.getRelative(BlockFace.UP).getType() != Material.WATER;
+
+	return nothingAround && belowOk && aboveOk;
     }
 
     private boolean isAroundCactusOk(Block b) {
@@ -275,7 +280,7 @@ public class BlockUpdateListener implements Listener {
 	if (ma == Material.SUGAR_CANE)
 	    return true;
 
-	boolean soil = ma == Material.GRASS || ma == Material.DIRT || ma == Material.SAND || ma == Material.PODZOL
+	boolean soil = ma == Material.GRASS_BLOCK || ma == Material.DIRT || ma == Material.SAND || ma == Material.PODZOL
 		|| ma == Material.COARSE_DIRT || ma == Material.RED_SAND;
 
 	Material east = bl.getRelative(BlockFace.EAST).getType();

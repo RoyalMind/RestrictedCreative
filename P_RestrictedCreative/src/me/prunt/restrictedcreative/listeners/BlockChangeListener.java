@@ -37,6 +37,9 @@ public class BlockChangeListener implements Listener {
     public void onBlockChange(BlockFromToEvent e) {
 	Block b = e.getToBlock();
 
+	if (Main.DEBUG)
+	    System.out.println("onBlockChange: " + b.getType());
+
 	// No need to control blocks in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
 	    return;
@@ -52,9 +55,6 @@ public class BlockChangeListener implements Listener {
 	// No need to control non-tracked blocks
 	if (!DataHandler.isTracked(b))
 	    return;
-
-	if (Main.DEBUG)
-	    System.out.println("onBlockChange: " + b.getType());
 
 	// Removes, because otherwise a liquid would destroy it and drop the block
 	e.setCancelled(true);

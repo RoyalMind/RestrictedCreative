@@ -145,18 +145,19 @@ public class MaterialHandler {
 
 	// getOppositeFace() because getFacing() returns where the item is "looking",
 	// opposite of where it is attached
+	// NB: this doesn't seem to be always true
 	if (bd instanceof Cocoa)
-	    return d.getFacing().getOppositeFace();
+	    return d.getFacing(); // TESTED 1.13.2
 	if (bd instanceof Ladder)
-	    return d.getFacing().getOppositeFace();
+	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	if (bd instanceof CoralWallFan)
-	    return d.getFacing().getOppositeFace();
-	if (bd instanceof RedstoneWallTorch)
-	    return d.getFacing().getOppositeFace();
+	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
+	if (bd instanceof RedstoneWallTorch) // currently covered by RedstoneTorch MaterialData above
+	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	if (bd instanceof TripwireHook)
-	    return d.getFacing().getOppositeFace();
+	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	if (bd instanceof WallSign)
-	    return d.getFacing().getOppositeFace();
+	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	if (bd instanceof Switch) {
 	    switch (((Switch) bd).getFace()) {
 	    case CEILING:
@@ -164,7 +165,7 @@ public class MaterialHandler {
 	    case FLOOR:
 		return BlockFace.DOWN;
 	    case WALL:
-		return d.getFacing().getOppositeFace();
+		return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	    }
 	}
 	if (Bukkit.getVersion().contains("1.14") && bd instanceof Bell) {
@@ -175,14 +176,14 @@ public class MaterialHandler {
 		return BlockFace.DOWN;
 	    case SINGLE_WALL:
 	    case DOUBLE_WALL:
-		return d.getFacing();
+		return d.getFacing(); // TESTED 1.14
 	    }
 	}
 
 	Material m = b.getType();
 
 	if (Tag.BANNERS.isTagged(m))
-	    return d.getFacing().getOppositeFace();
+	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 
 	return null;
     }

@@ -55,6 +55,7 @@ general:
       purge:
         survival: 90
         creative: 30
+  wait-until-loaded: true
   
 creative:
   armor:

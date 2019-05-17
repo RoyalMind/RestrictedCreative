@@ -47,7 +47,7 @@ public class DataHandler {
     private static List<Player> removeWithCommand = new ArrayList<>();
     private static List<Player> infoWithCommand = new ArrayList<>();
 
-    private static int totalCount = 0;
+    private static int totalCount = -1;
 
     public static boolean isTracked(Block b) {
 	if (b == null)
@@ -72,7 +72,7 @@ public class DataHandler {
 	removeFromDatabase.remove(Utils.getBlockString(b));
 
 	if (Main.DEBUG)
-	    System.out.println("setAsTracked");
+	    System.out.println("setAsTracked: " + b.getType());
     }
 
     public static void removeTracking(Block b) {
@@ -82,6 +82,9 @@ public class DataHandler {
 	b.removeMetadata("GMC", Main.getInstance());
 	addToDatabase.remove(Utils.getBlockString(b));
 	removeFromDatabase.add(Utils.getBlockString(b));
+
+	if (Main.DEBUG)
+	    System.out.println("removeTracking: " + b.getType());
     }
 
     public static void breakBlock(Block b, Player p) {
@@ -398,7 +401,7 @@ public class DataHandler {
 		final List<String> fAdd = new ArrayList<>(addToDatabase);
 		final List<String> fDel = new ArrayList<>(removeFromDatabase);
 
-		Bukkit.getScheduler().runTask(main, new SyncData(main, fAdd, fDel, false));
+		Bukkit.getScheduler().runTaskAsynchronously(main, new SyncData(main, fAdd, fDel, false));
 	    }
 	}, interval, interval);
     }
