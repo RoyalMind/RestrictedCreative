@@ -37,9 +37,6 @@ public class BlockChangeListener implements Listener {
     public void onBlockChange(BlockFromToEvent e) {
 	Block b = e.getToBlock();
 
-	if (Main.DEBUG)
-	    System.out.println("onBlockChange: " + b.getType());
-
 	// No need to control blocks in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
 	    return;
@@ -56,6 +53,9 @@ public class BlockChangeListener implements Listener {
 	if (!DataHandler.isTracked(b))
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onBlockChange: " + b.getType());
+
 	// Removes, because otherwise a liquid would destroy it and drop the block
 	e.setCancelled(true);
 	DataHandler.breakBlock(b, null);
@@ -70,9 +70,6 @@ public class BlockChangeListener implements Listener {
 	Material m = b.getType();
 	Entity en = e.getEntity();
 
-	if (Main.DEBUG)
-	    System.out.println("onEntityChangeBlock: " + e.getTo());
-
 	// No need to control blocks in disabled worlds
 	if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
 	    return;
@@ -81,9 +78,15 @@ public class BlockChangeListener implements Listener {
 	if (getMain().getUtils().isExcluded(m) && m != Material.AIR)
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onEntityChangeBlock: " + e.getTo());
+
 	// Crops trampled by mobs
 	Block bl = b.getRelative(BlockFace.UP);
 	if (DataHandler.isTracked(bl) && m == Material.FARMLAND) {
+	    if (Main.DEBUG)
+		System.out.println("Crops trampled by mobs: " + bl.getType());
+
 	    DataHandler.breakBlock(bl, null);
 	    b.setType(Material.DIRT);
 	    e.setCancelled(true);
@@ -97,6 +100,10 @@ public class BlockChangeListener implements Listener {
 	// Lily pad broken by boat
 	if (m == Material.LILY_PAD) {
 	    DataHandler.breakBlock(b, null);
+
+	    if (Main.DEBUG)
+		System.out.println("Lily pad broken by boat");
+
 	    return;
 	}
 

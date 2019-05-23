@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -50,6 +51,11 @@ public class Utils {
 	return b.getWorld().getName() + ";" + b.getX() + ";" + b.getY() + ";" + b.getZ();
     }
 
+    // Return chunk position as a string
+    public static String getChunkString(Chunk c) {
+	return c.getWorld().getName() + ";" + c.getX() + ";" + c.getZ();
+    }
+
     // Return location coordinates as a string
     public static String getLocString(Location loc) {
 	return loc.getWorld().getName() + ";" + loc.getBlockX() + ";" + loc.getBlockZ();
@@ -70,6 +76,17 @@ public class Utils {
 
 	// Return block from given coordinates
 	return Bukkit.getServer().getWorld(world).getBlockAt(x, y, z);
+    }
+
+    public static String getBlockChunk(String block) {
+	String[] sl = block.split(";");
+
+	// Get chunk data from given block string
+	String world = sl[0];
+	int chunkX = Integer.valueOf(sl[1]) >> 4; // ">> 4" == "/ 16", but faster
+	int chunkZ = Integer.valueOf(sl[3]) >> 4; // ">> 4" == "/ 16", but faster
+
+	return world + ";" + chunkX + ";" + chunkZ;
     }
 
     // Print error to console

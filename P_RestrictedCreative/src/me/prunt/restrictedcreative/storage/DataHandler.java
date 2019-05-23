@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -39,6 +41,8 @@ public class DataHandler {
     private static HashMap<Player, List<String>> vaultPerms = new HashMap<>();
     private static HashMap<Player, List<String>> vaultGroups = new HashMap<>();
     private static HashMap<Player, PermissionAttachment> permissions = new HashMap<>();
+
+    private static HashMap<String, List<String>> blocksInChunk = new HashMap<>();
 
     private static boolean usingOldAliases = false;
     private static boolean usingSQLite = false;
@@ -71,8 +75,9 @@ public class DataHandler {
 	addToDatabase.add(Utils.getBlockString(b));
 	removeFromDatabase.remove(Utils.getBlockString(b));
 
-	if (Main.DEBUG)
-	    System.out.println("setAsTracked: " + b.getType());
+	if (Main.EXTRADEBUG)
+	    System.out.println("setAsTracked: " + b.getType() + " " + Utils.getChunkString(b.getChunk()) + " vs "
+		    + Utils.getBlockString(b));
     }
 
     public static void removeTracking(Block b) {
@@ -80,11 +85,16 @@ public class DataHandler {
 	    return;
 
 	b.removeMetadata("GMC", Main.getInstance());
-	addToDatabase.remove(Utils.getBlockString(b));
-	removeFromDatabase.add(Utils.getBlockString(b));
 
-	if (Main.DEBUG)
+	removeTracking(Utils.getBlockString(b));
+
+	if (Main.EXTRADEBUG)
 	    System.out.println("removeTracking: " + b.getType());
+    }
+
+    public static void removeTracking(String b) {
+	addToDatabase.remove(b);
+	removeFromDatabase.add(b);
     }
 
     public static void breakBlock(Block b, Player p) {
@@ -351,7 +361,55 @@ public class DataHandler {
 	getInfoWithCommand().add(p);
     }
 
-    public static void loadFromDatabaseNew(Main main) {
+    public static boolean isTrackedChunk(Chunk c) {
+	return !getBlocksInChunk(c).isEmpty();
+    }
+
+    public static List<String> getBlocksInChunk(Chunk c) {
+	return getBlocksInChunk(Utils.getChunkString(c));
+    }
+
+    public static List<String> getBlocksInChunk(String c) {
+	return blocksInChunk.containsKey(c) ? blocksInChunk.get(c) : new ArrayList<String>();
+    }
+
+    public static void addBlockToChunk(String c, String block) {
+	List<String> prevBlocks = getBlocksInChunk(c);
+
+	if (!prevBlocks.isEmpty()) {
+	    blocksInChunk.get(c).add(block);
+	} else {
+	    blocksInChunk.put(c, new ArrayList<>(Arrays.asList(block)));
+	}
+    }
+
+    public static void removeBlocksInChunk(String c) {
+	if (blocksInChunk.containsKey(c))
+	    blocksInChunk.remove(c);
+    }
+
+    public static void loadBlocks(Chunk c) {
+	long start = System.currentTimeMillis();
+
+	// No need to handle untracked chunks
+	if (!isTrackedChunk(c))
+	    return;
+
+	for (String block : getBlocksInChunk(c)) {
+	    Block b = Utils.getBlock(block);
+
+	    if (b == null || b.isEmpty()) {
+		removeTracking(block);
+	    } else {
+		b.setMetadata("GMC", Main.getFMV());
+	    }
+	}
+
+	if (Main.DEBUG)
+	    System.out.println("loadFromDatabase: " + c + " took " + (System.currentTimeMillis() - start) + "ms");
+    }
+
+    public static void loadFromDatabaseOld(Main main) {
 	Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), new Runnable() {
 	    @Override
 	    public void run() {
@@ -392,41 +450,7 @@ public class DataHandler {
 	});
     }
 
-    public static void loadFromDatabaseOld(Main main) {
-	loadAsync(main, new DBCallback() {
-	    @Override
-	    public void onQueryDone(ResultSet rs, long start) {
-		int count = 0;
-		try {
-		    while (rs.next()) {
-			String block = rs.getString("block");
-			Block b = Utils.getBlock(block);
-
-			if (b == null || b.isEmpty()) {
-			    removeFromDatabase.add(block);
-			} else {
-			    count++;
-			    b.setMetadata("GMC", Main.getFMV());
-			}
-		    }
-		} catch (SQLException e) {
-		    e.printStackTrace();
-		}
-
-		setTotalCount(count);
-
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-			main.getUtils().getMessage(true, "database.loaded").replaceAll("%blocks%", getTotalCount()));
-
-		String took = String.valueOf(System.currentTimeMillis() - start);
-
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-			main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
-	    }
-	});
-    }
-
-    private static void loadAsync(Main main, DBCallback callback) {
+    public static void loadFromDatabaseNew(Main main) {
 	// Start async processing
 	Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
 	    @Override
@@ -438,13 +462,52 @@ public class DataHandler {
 		// Gets all blocks from database
 		ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getBlocksTable());
 
-		// Back to sync processing
-		Bukkit.getScheduler().runTask(main, new Runnable() {
-		    @Override
-		    public void run() {
-			callback.onQueryDone(rs, start);
+		int count = 0;
+		try {
+		    while (rs.next()) {
+			String block = rs.getString("block");
+			String chunk = Utils.getBlockChunk(block);
+
+			String world = block.split(";")[0];
+			if (main.getUtils().isDisabledWorld(world) || Bukkit.getWorld(world) == null)
+			    continue;
+
+			addBlockToChunk(chunk, block);
+			count++;
 		    }
-		});
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		}
+
+		if (Main.DEBUG)
+		    System.out.println("loadFromDatabase: " + blocksInChunk.size() + " chunks");
+
+		int radius = 8;
+		for (World world : Bukkit.getWorlds()) {
+		    // Ignore disabled worlds
+		    if (main.getUtils().isDisabledWorld(world.getName()))
+			continue;
+
+		    Chunk center = world.getSpawnLocation().getChunk();
+
+		    for (int x = center.getX() - radius; x < center.getX() + radius; x++) {
+			for (int z = center.getZ() - radius; z < center.getZ() + radius; z++) {
+			    Chunk c = world.getChunkAt(x, z);
+			    loadBlocks(c);
+			}
+		    }
+		}
+
+		setTotalCount(count);
+
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+			main.getUtils().getMessage(true, "database.loaded").replaceAll("%blocks%", getTotalCount())
+				.replaceAll("%chunks%", String.valueOf(blocksInChunk.size())));
+
+		String took = String.valueOf(System.currentTimeMillis() - start);
+
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+			main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
 	    }
 	});
     }

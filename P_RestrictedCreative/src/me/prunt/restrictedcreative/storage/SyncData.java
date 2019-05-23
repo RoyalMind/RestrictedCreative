@@ -1,5 +1,7 @@
 package me.prunt.restrictedcreative.storage;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -36,43 +38,59 @@ public class SyncData implements Runnable {
 
 	main.getDB().setAutoCommit(false);
 
-	if (addedCount > 0) {
-	    for (String str : toAdd) {
-		main.getDB().executeUpdate("INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable()
-			+ " (block) VALUES ('" + str + "')");
-	    }
-	    Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.added")
-		    .replaceAll("%blocks%", String.valueOf(addedCount)));
+	if (addedCount > 0)
+	    syncData(toAdd, "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable() + " (block) VALUES (?)",
+		    "database.added");
+
+	if (removedCount > 0)
+	    syncData(toRemove, "DELETE FROM " + main.getDB().getBlocksTable() + " WHERE block = ?", "database.removed");
+
+	main.getDB().setAutoCommit(true);
+
+	if (onDisable) {
+	    DataHandler.addToDatabase.clear();
+	    DataHandler.removeFromDatabase.clear();
+
+	    String took = String.valueOf(System.currentTimeMillis() - start);
+
+	    Utils.sendMessage(Bukkit.getConsoleSender(),
+		    main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
+	} else {
+	    Bukkit.getScheduler().runTask(main, new Runnable() {
+		@Override
+		public void run() {
+		    DataHandler.addToDatabase.removeAll(toAdd);
+		    DataHandler.removeFromDatabase.removeAll(toRemove);
+
+		    String took = String.valueOf(System.currentTimeMillis() - start);
+
+		    Utils.sendMessage(Bukkit.getConsoleSender(),
+			    main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
+		}
+	    });
 	}
-	if (removedCount > 0) {
-	    for (String str : toRemove) {
-		main.getDB()
-			.executeUpdate("DELETE FROM " + main.getDB().getBlocksTable() + " WHERE block = '" + str + "'");
+    }
+
+    private void syncData(List<String> blocks, String statement, String message) {
+	PreparedStatement ps = main.getDB().getStatement(statement);
+	int count = 0;
+
+	try {
+	    for (String block : blocks) {
+		ps.setString(1, block);
+		ps.executeUpdate();
+		count++;
+
+		if (count % 10000 == 0)
+		    main.getDB().commit();
 	    }
-	    Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.removed")
-		    .replaceAll("%blocks%", String.valueOf(removedCount)));
+	} catch (SQLException e) {
+	    e.printStackTrace();
 	}
 
 	main.getDB().commit();
-	main.getDB().setAutoCommit(true);
 
-	Runnable runnable = new Runnable() {
-	    @Override
-	    public void run() {
-		DataHandler.addToDatabase.removeAll(toAdd);
-		DataHandler.removeFromDatabase.removeAll(toRemove);
-
-		String took = String.valueOf(System.currentTimeMillis() - start);
-
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-			main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
-	    }
-	};
-
-	if (onDisable) {
-	    runnable.run();
-	} else {
-	    Bukkit.getScheduler().runTask(main, runnable);
-	}
+	Utils.sendMessage(Bukkit.getConsoleSender(),
+		main.getUtils().getMessage(true, message).replaceAll("%blocks%", String.valueOf(count)));
     }
 }

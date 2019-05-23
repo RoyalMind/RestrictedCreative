@@ -13,7 +13,7 @@ disabled:
   creature: '&cYou can''t do that, because a part of the creature was placed in creative mode.'
 database:
   load: '&ePlease wait! Loading data from database...'
-  loaded: '&eLoaded %blocks% blocks from database!'
+  loaded: '&eLoaded %blocks% blocks in %chunks% chunks from database!'
   save: '&eSaving data to database...'
   added: '&eAdded %blocks% new blocks to database.'
   removed: '&eDeleted %blocks% old blocks from database.'

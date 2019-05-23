@@ -26,6 +26,7 @@ import me.prunt.restrictedcreative.listeners.BlockExplodeListener;
 import me.prunt.restrictedcreative.listeners.BlockPistonListener;
 import me.prunt.restrictedcreative.listeners.BlockPlaceListener;
 import me.prunt.restrictedcreative.listeners.BlockUpdateListener;
+import me.prunt.restrictedcreative.listeners.ChunkListener;
 import me.prunt.restrictedcreative.listeners.EntityCreateListener;
 import me.prunt.restrictedcreative.listeners.EntityDamageListener;
 import me.prunt.restrictedcreative.listeners.PlayerInteractListener;
@@ -103,6 +104,8 @@ public class Main extends JavaPlugin {
 	getServer().getPluginManager().registerEvents(new BlockChangeListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockExplodeListener(this), this);
 	getServer().getPluginManager().registerEvents(new BlockPistonListener(this), this);
+
+	getServer().getPluginManager().registerEvents(new ChunkListener(), this);
 
 	getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
 	getServer().getPluginManager().registerEvents(new EntityCreateListener(this), this);
