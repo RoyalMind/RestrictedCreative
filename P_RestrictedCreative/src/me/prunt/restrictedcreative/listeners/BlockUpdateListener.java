@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -52,15 +51,14 @@ public class BlockUpdateListener implements Listener {
 	if (getMain().getUtils().isExcluded(m))
 	    return;
 
-	BlockData bd = b.getBlockData();
 	Block bl = b.getRelative(BlockFace.DOWN);
 	Material ma = bl.getType();
 
 	if (Main.DEBUG && Main.EXTRADEBUG)
 	    System.out.println("onBlockUpdate: " + m + " (" + ma + ")");
 
-	/* 1.-2. Rail */
-	if (bd instanceof Rail) {
+	/* 1.-3. Rail */
+	if (MaterialHandler.isRail(b)) {
 	    // If the block below the rail isn't solid or
 	    // if rail is on slope and there isn't a block to support it
 	    if (!isSolid(bl) || !isSlopeOk(b)) {
@@ -70,7 +68,7 @@ public class BlockUpdateListener implements Listener {
 	    return;
 	}
 
-	/* 1.-2. Chorus */
+	/* 1.-3. Chorus */
 	if (m == Material.CHORUS_PLANT) {
 	    if (!isChorusOk(b)) {
 		e.setCancelled(true);
@@ -82,7 +80,19 @@ public class BlockUpdateListener implements Listener {
 	    return;
 	}
 
-	/* 3. Top blocks */
+	/* 1.-3. Scaffolding */
+	if (Bukkit.getVersion().contains("1.14") && m == Material.valueOf("SCAFFOLDING")) {
+	    if (!isScaffoldingOk(b)) {
+		e.setCancelled(true);
+		DataHandler.breakBlock(b, null);
+
+		if (Main.DEBUG)
+		    System.out.println("isScaffoldingOk: false");
+	    }
+	    return;
+	}
+
+	/* 4. Top blocks */
 	if (MaterialHandler.needsBlockBelow(b)) {
 	    if (Main.DEBUG)
 		System.out.println("needsBlockBelow");
@@ -161,7 +171,7 @@ public class BlockUpdateListener implements Listener {
 	    return;
 	}
 
-	/* 4. Attachable */
+	/* 5. Attachable */
 	BlockFace bf = MaterialHandler.getNeededFace(b);
 	if (bf != null) {
 	    bl = b.getRelative(bf);
@@ -175,6 +185,32 @@ public class BlockUpdateListener implements Listener {
 		DataHandler.breakBlock(b, null);
 	    }
 	}
+    }
+
+    private boolean isScaffoldingOk(Block scaffolding) {
+	Block down = scaffolding.getRelative(BlockFace.DOWN);
+	if (down.getType().isSolid() || down.getType() == Material.valueOf("SCAFFOLDING")) {
+	    if (Main.DEBUG)
+		System.out.println("isScaffoldingOk: true (down ok)");
+
+	    return true;
+	}
+
+	/*
+	 * TODO doesn't work int radius = 6; for (int x = scaffolding.getX() - radius; x
+	 * < scaffolding.getX() + radius; x++) { for (int z = scaffolding.getZ() -
+	 * radius; z < scaffolding.getZ() + radius; z++) { Block bl =
+	 * scaffolding.getRelative(x, 0, z); if (bl.getType() !=
+	 * Material.valueOf("SCAFFOLDING")) continue;
+	 * 
+	 * Block bottom = bl.getRelative(BlockFace.DOWN); if (bottom.getType().isSolid()
+	 * || bottom.getType() == Material.valueOf("SCAFFOLDING")) { if (Main.DEBUG)
+	 * System.out.println("isScaffoldingOk: true (" + x + ", " + z + ")");
+	 * 
+	 * return true; } } }
+	 */
+
+	return false;
     }
 
     private boolean isSlopeOk(Block b) {

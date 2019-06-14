@@ -146,6 +146,8 @@ disable:
   - 'BEDROCK'
   - 'END_PORTAL_FRAME'
   - 'TNT'
+  # 1.14
+  - 'SCAFFOLDING'
   breaking:
   - 'BEDROCK'
   - 'END_PORTAL_FRAME'

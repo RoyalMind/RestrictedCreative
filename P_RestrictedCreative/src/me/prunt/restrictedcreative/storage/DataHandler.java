@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -476,6 +477,7 @@ public class DataHandler {
 			count++;
 		    }
 		} catch (SQLException e) {
+		    Bukkit.getLogger().log(Level.WARNING, "Data loading was interrupted!");
 		    e.printStackTrace();
 		}
 

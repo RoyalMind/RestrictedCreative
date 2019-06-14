@@ -3,7 +3,6 @@ package me.prunt.restrictedcreative.utils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,6 +19,7 @@ import org.bukkit.block.data.type.Comparator;
 import org.bukkit.block.data.type.CoralWallFan;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Ladder;
+import org.bukkit.block.data.type.Lantern;
 import org.bukkit.block.data.type.RedstoneWallTorch;
 import org.bukkit.block.data.type.RedstoneWire;
 import org.bukkit.block.data.type.Repeater;
@@ -74,7 +74,7 @@ public class MaterialHandler {
 	Material m = b.getType();
 
 	if (Main.DEBUG && Main.EXTRADEBUG)
-	    Bukkit.getLogger().log(Level.FINE, "needsBlockBelow: " + m);
+	    System.out.println("needsBlockBelow: " + m);
 
 	if (getTop().contains(m))
 	    return true;
@@ -128,7 +128,7 @@ public class MaterialHandler {
 	MaterialData md = b.getState().getData();
 
 	if (Main.DEBUG && Main.EXTRADEBUG)
-	    Bukkit.getLogger().log(Level.FINE, "getNeededFace: " + b.getType());
+	    System.out.println("getNeededFace: " + b.getType());
 
 	// Some of the MaterialData instances aren't directional
 	if (md instanceof Button)
@@ -137,6 +137,14 @@ public class MaterialHandler {
 	    return ((Torch) md).getAttachedFace();
 	if (md instanceof RedstoneTorch)
 	    return ((RedstoneTorch) md).getAttachedFace();
+
+	if (Bukkit.getVersion().contains("1.14")) {
+	    if (bd instanceof Lantern) {
+		if (Main.DEBUG)
+		    System.out.println("getNeededFace: Lantern");
+		return ((Lantern) bd).isHanging() ? BlockFace.UP : BlockFace.DOWN;
+	    }
+	}
 
 	if (!(bd instanceof Directional))
 	    return null;
@@ -153,7 +161,7 @@ public class MaterialHandler {
 	if (bd instanceof CoralWallFan)
 	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	if (bd instanceof RedstoneWallTorch) // currently covered by RedstoneTorch MaterialData above
-	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
+	    return d.getFacing().getOppositeFace();
 	if (bd instanceof TripwireHook)
 	    return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	if (bd instanceof WallSign)
@@ -168,15 +176,17 @@ public class MaterialHandler {
 		return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 	    }
 	}
-	if (Bukkit.getVersion().contains("1.14") && bd instanceof Bell) {
-	    switch (((Bell) bd).getAttachment()) {
-	    case CEILING:
-		return BlockFace.UP;
-	    case FLOOR:
-		return BlockFace.DOWN;
-	    case SINGLE_WALL:
-	    case DOUBLE_WALL:
-		return d.getFacing(); // TESTED 1.14
+	if (Bukkit.getVersion().contains("1.14")) {
+	    if (bd instanceof Bell) {
+		switch (((Bell) bd).getAttachment()) {
+		case CEILING:
+		    return BlockFace.UP;
+		case FLOOR:
+		    return BlockFace.DOWN;
+		case SINGLE_WALL:
+		case DOUBLE_WALL:
+		    return d.getFacing(); // TESTED 1.14
+		}
 	    }
 	}
 
