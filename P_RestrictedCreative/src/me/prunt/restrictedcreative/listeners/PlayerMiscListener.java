@@ -46,6 +46,9 @@ public class PlayerMiscListener implements Listener {
 	if (e.getNewGameMode() == p.getGameMode())
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("onPlayerGameModeChange: " + p.getGameMode() + " -> " + e.getNewGameMode());
+
 	// Player wants to switch into creative mode
 	if (e.getNewGameMode() == GameMode.CREATIVE) {
 	    // Player height check
@@ -213,7 +216,41 @@ public class PlayerMiscListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent e) {
-	getMain().getUtils().loadInventory(e.getPlayer());
+	Player p = e.getPlayer();
+
+	getMain().getUtils().loadInventory(p);
+
+	// When force-gamemode is enabled, PlayerGamemodeChangeEvent isn't fired onjoin
+	if (!DataHandler.isForceGamemodeEnabled())
+	    return;
+
+	if (Main.DEBUG) {
+	    System.out.println("onPlayerJoin: forced " + main.getServer().getDefaultGameMode());
+	    System.out.println("... c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
+		    + (DataHandler.getSurvivalInv(p) != null));
+	}
+
+	// If player was switched to creative by default and it was previously survival
+	if (p.getGameMode() == GameMode.CREATIVE && DataHandler.getCreativeInv(p) != null) {
+	    if (Main.DEBUG)
+		System.out.println("onPlayerJoin: setCreative true");
+
+	    // Switch inventories, permissions etc
+	    getMain().getUtils().setCreative(p, true);
+	    DataHandler.setPreviousGameMode(p, GameMode.SURVIVAL);
+	    return;
+	}
+
+	// If player was switched to ~survival by default and it was previously creative
+	if (p.getGameMode() != GameMode.CREATIVE && DataHandler.getSurvivalInv(p) != null) {
+	    if (Main.DEBUG)
+		System.out.println("onPlayerJoin: setCreative false");
+
+	    // Switch inventories, permissions etc
+	    getMain().getUtils().setCreative(p, false);
+	    DataHandler.setPreviousGameMode(p, GameMode.CREATIVE);
+	    return;
+	}
     }
 
     @EventHandler(ignoreCancelled = true)

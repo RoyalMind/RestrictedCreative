@@ -58,15 +58,15 @@ public class PlayerInteractListener implements Listener {
 	    return;
 
 	ItemStack is = e.getItem();
+	Material ma = is == null ? Material.AIR : is.getType();
 
 	// Region check
-	if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")
-		|| getMain().getSettings().isEnabled("limit.regions.whitelist.enabled")) {
-	    if (is != null && !getMain().getUtils().canBuildHere(p, e.getClickedBlock(), is)) {
-		e.setCancelled(true);
-		getMain().getUtils().sendMessage(p, true, "disabled.region");
-		return;
-	    }
+	if ((getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")
+		|| getMain().getSettings().isEnabled("limit.regions.whitelist.enabled"))
+		&& !getMain().getUtils().canBuildHere(p, e.getClickedBlock(), ma)) {
+	    e.setCancelled(true);
+	    getMain().getUtils().sendMessage(p, true, "disabled.region");
+	    return;
 	}
 
 	// Confiscate

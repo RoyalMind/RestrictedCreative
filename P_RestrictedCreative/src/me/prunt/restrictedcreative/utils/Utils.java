@@ -1,5 +1,8 @@
 package me.prunt.restrictedcreative.utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -7,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -99,6 +103,25 @@ public class Utils {
 	    sender.sendMessage(msg);
     }
 
+    public static boolean isForceGamemodeEnabled() {
+	try {
+	    FileInputStream in = new FileInputStream(new File(".").getAbsolutePath() + "/server.properties");
+	    Properties prop = new Properties();
+
+	    prop.load(in);
+	    boolean result = Boolean.parseBoolean(prop.getProperty("force-gamemode"));
+	    in.close();
+
+	    if (Main.DEBUG)
+		System.out.println("isForceGamemodeEnabled: '" + prop.getProperty("force-gamemode") + "' vs " + result);
+
+	    return result;
+	} catch (IOException e) {
+	    e.printStackTrace();
+	    return false;
+	}
+    }
+
     /* --- Non-static methods --- */
     private Main main;
 
@@ -185,7 +208,11 @@ public class Utils {
 	return msg;
     }
 
-    public boolean canBuildHere(Player p, Block b, ItemStack is) {
+    public boolean canBuildHere(Player p, Block b, Material m) {
+	// No need to check bypassed players
+	if (p.hasPermission("rc.bypass.limit.regions"))
+	    return true;
+
 	// Gets the player or block location
 	Location loc = p.getLocation();
 	if (b != null)
@@ -237,7 +264,7 @@ public class Utils {
 
 		// Member check
 		if (getMain().getSettings().isEnabled("limit.regions.owner-based.allow-members")) {
-		    if (claim.allowBuild(p, is.getType()) == null)
+		    if (claim.allowBuild(p, m) == null)
 			return true;
 		}
 	    }
@@ -414,6 +441,12 @@ public class Utils {
 
     private void separateInventory(Player p, boolean toCreative) {
 	PlayerInfo pi = getPlayerInfo(p);
+
+	if (Main.DEBUG) {
+	    System.out.println("separateInventory: " + toCreative + " " + pi.gm);
+	    System.out.println("... c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
+		    + (DataHandler.getSurvivalInv(p) != null));
+	}
 
 	// Stores Player with PlayerInfo into HashMap
 	if (toCreative) {
@@ -600,6 +633,9 @@ public class Utils {
 	    DataHandler.removeSurvivalInv(p);
 	    DataHandler.removeCreativeInv(p);
 
+	    if (Main.DEBUG)
+		System.out.println("saveInventory: inv saving disabled");
+
 	    return;
 	}
 
@@ -610,17 +646,29 @@ public class Utils {
 	if (DataHandler.getSurvivalInv(p) == null && DataHandler.getCreativeInv(p) == null)
 	    return;
 
+	if (Main.DEBUG)
+	    System.out.println("saveInventory: s?" + (DataHandler.getSurvivalInv(p) != null) + " c?"
+		    + (DataHandler.getCreativeInv(p) != null));
+
 	PlayerInfo pi;
 	int type;
-	if (p.getGameMode() == GameMode.CREATIVE) {
+	if (p.getGameMode() == GameMode.CREATIVE) { // creative inv remains with player, survival must be saved
 	    pi = DataHandler.getSurvivalInv(p);
 	    type = 0;
-	} else {
+
+	    if (Main.DEBUG)
+		System.out.println("saveInventory: survival " + (pi != null));
+	} else { // survival inv remains with player, creative must be saved
 	    pi = DataHandler.getCreativeInv(p);
 	    type = 1;
+
+	    if (Main.DEBUG)
+		System.out.println("saveInventory: creative " + (pi != null));
 	}
 
 	if (pi != null) {
+	    // Only one inventory per player is saved to the database - the one that the
+	    // player doesn't carry at the moment
 	    if (DataHandler.isUsingSQLite()) {
 		// Inserts a new row if it doesn't exist already and updates it with new values
 		getMain().getDB()
@@ -630,11 +678,11 @@ public class Utils {
 				+ pi.getArmor() + "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', "
 				+ p.getTotalExperience() + ", " + Instant.now().getEpochSecond() + ")");
 		getMain().getDB()
-			.executeUpdate("UPDATE " + getMain().getDB().getInvsTable() + " SET storage = '"
-				+ pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra()
-				+ "', effects = '" + pi.getEffects() + "', xp = " + p.getTotalExperience()
-				+ ", lastused = " + Instant.now().getEpochSecond() + " WHERE player = '"
-				+ p.getUniqueId().toString() + "' AND type = " + type);
+			.executeUpdate("UPDATE " + getMain().getDB().getInvsTable() + " SET type = " + type
+				+ ", storage = '" + pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '"
+				+ pi.getExtra() + "', effects = '" + pi.getEffects() + "', xp = "
+				+ p.getTotalExperience() + ", lastused = " + Instant.now().getEpochSecond()
+				+ " WHERE player = '" + p.getUniqueId().toString() + "'");
 	    } else {
 		// Inserts a new row or updates the old one if it already exists
 		getMain().getDB().executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
@@ -668,12 +716,22 @@ public class Utils {
 
 		if (rs.getInt("type") == 0) {
 		    DataHandler.saveSurvivalInv(p, pi);
+
+		    if (Main.DEBUG)
+			System.out.println("loadInventory: is run " + pi.gm);
 		} else {
 		    DataHandler.saveCreativeInv(p, pi);
+
+		    if (Main.DEBUG)
+			System.out.println("loadInventory: never run " + pi.gm);
 		}
 	    }
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
+
+	if (Main.DEBUG)
+	    System.out.println("loadInventory: c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
+		    + (DataHandler.getSurvivalInv(p) != null));
     }
 }

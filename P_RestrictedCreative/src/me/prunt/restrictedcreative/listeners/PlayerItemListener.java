@@ -84,8 +84,7 @@ public class PlayerItemListener implements Listener {
 	Material m = e.getItemDrop().getItemStack().getType();
 
 	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.limit.item.drop")
-		|| p.hasPermission("rc.bypass.limit.item.drop." + m))
+	if (p.hasPermission("rc.bypass.limit.item.drop") || p.hasPermission("rc.bypass.limit.item.drop." + m))
 	    return;
 
 	if (Main.DEBUG)
@@ -121,8 +120,7 @@ public class PlayerItemListener implements Listener {
 	Material m = e.getItem().getItemStack().getType();
 
 	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.limit.item.pickup")
-		|| p.hasPermission("rc.bypass.limit.item.pickup." + m))
+	if (p.hasPermission("rc.bypass.limit.item.pickup") || p.hasPermission("rc.bypass.limit.item.pickup." + m))
 	    return;
 
 	if (Main.DEBUG && Main.EXTRADEBUG)

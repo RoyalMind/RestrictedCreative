@@ -142,6 +142,7 @@ public class Main extends JavaPlugin {
 	setDB(new Database(this));
 
 	DataHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
+	DataHandler.setForceGamemodeEnabled(Utils.isForceGamemodeEnabled());
 
 	// Tracked blocks
 	getDB().executeUpdate(

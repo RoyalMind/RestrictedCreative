@@ -47,6 +47,7 @@ public class DataHandler {
 
     private static boolean usingOldAliases = false;
     private static boolean usingSQLite = false;
+    private static boolean isForceGamemodeEnabled = false;
 
     private static List<Player> addWithCommand = new ArrayList<>();
     private static List<Player> removeWithCommand = new ArrayList<>();
@@ -309,6 +310,14 @@ public class DataHandler {
 
     public static void setUsingSQLite(boolean usingSQLite) {
 	DataHandler.usingSQLite = usingSQLite;
+    }
+
+    public static boolean isForceGamemodeEnabled() {
+	return isForceGamemodeEnabled;
+    }
+
+    public static void setForceGamemodeEnabled(boolean isForceGamemodeEnabled) {
+	DataHandler.isForceGamemodeEnabled = isForceGamemodeEnabled;
     }
 
     public static List<Player> getAddWithCommand() {

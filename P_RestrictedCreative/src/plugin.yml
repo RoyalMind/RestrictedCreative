@@ -1,5 +1,5 @@
 name: RestrictedCreative
-version: 2.2
+version: 2.2.1
 description: Extremely lightweight, but fully-featured and customizable Creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
@@ -57,8 +57,7 @@ permissions:
       rc.bypass.tracking.entities: true # per EntityType enum
       rc.bypass.tracking.worldedit: true
       rc.bypass.tracking.inventory: true
-      rc.bypass.limit.regions.owner-based: true
-      rc.bypass.limit.regions.whitelist: true
+      rc.bypass.limit.regions: true
       rc.bypass.limit.moving: true
       rc.bypass.limit.interact.inventories: true # per InventoryType enum
       rc.bypass.limit.interact.entities: true # per EntityType enum
@@ -170,11 +169,8 @@ permissions:
     description: Allows to have same potion effects for both creative and survival.
     default: false
     
-  rc.bypass.limit.regions.owner-based:
-    description: Allows to enter creative mode and place blocks/items outside player's own regions in creative mode.
-    default: false
-  rc.bypass.limit.regions.whitelist:
-    description: Allows to enter creative mode and place blocks/items outside whitelisted regions in creative mode.
+  rc.bypass.limit.regions:
+    description: Allows to enter creative mode and place blocks/items outside allowed regions in creative mode.
     default: false
   rc.bypass.limit.moving:
     description: Allows to move below and above disabled Y levels in creative mode.

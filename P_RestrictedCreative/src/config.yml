@@ -248,4 +248,5 @@ disable:
     - 'JUNGLE_WALL_SIGN'
     - 'OAK_WALL_SIGN'
     - 'SPRUCE_WALL_SIGN'
+    - 'CAMPFIRE'
     
