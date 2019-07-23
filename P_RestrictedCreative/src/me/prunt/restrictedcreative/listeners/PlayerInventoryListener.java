@@ -61,10 +61,12 @@ public class PlayerInventoryListener implements Listener {
 	}
 
 	/* Middle-click check */
-	if (getMain().getSettings().isEnabled("confiscate.middle-click")
+	if (getMain().getSettings().isEnabled("confiscate.middle-click.enabled")
 		&& !p.hasPermission("rc.bypass.confiscate.middle-click")) {
-	    // If it's a block (not an item)
-	    if (is != null && is.getType().isBlock()) {
+	    Material m = is.getType();
+
+	    // If it's a block (not an item) and it's not excluded
+	    if (is != null && m.isBlock() && getMain().getUtils().isExcludedFromConfiscating(m)) {
 		if (Main.DEBUG)
 		    System.out.println("middleClick: " + is.getType());
 

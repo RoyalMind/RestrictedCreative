@@ -42,7 +42,7 @@ public class BlockChangeListener implements Listener {
 	    return;
 
 	// No need to control excluded blocks
-	if (getMain().getUtils().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcludedFromTracking(b.getType()))
 	    return;
 
 	// Waterloggable blocks won't be affected by liquids
@@ -75,7 +75,7 @@ public class BlockChangeListener implements Listener {
 	    return;
 
 	// No need to control excluded blocks (except AIR)
-	if (getMain().getUtils().isExcluded(m) && m != Material.AIR)
+	if (getMain().getUtils().isExcludedFromTracking(m) && m != Material.AIR)
 	    return;
 
 	if (Main.DEBUG)

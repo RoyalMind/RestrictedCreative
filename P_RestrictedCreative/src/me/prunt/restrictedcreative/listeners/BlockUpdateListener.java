@@ -48,7 +48,7 @@ public class BlockUpdateListener implements Listener {
 	Material m = b.getType();
 
 	// No need to control excluded blocks
-	if (getMain().getUtils().isExcluded(m))
+	if (getMain().getUtils().isExcludedFromTracking(m))
 	    return;
 
 	Block bl = b.getRelative(BlockFace.DOWN);

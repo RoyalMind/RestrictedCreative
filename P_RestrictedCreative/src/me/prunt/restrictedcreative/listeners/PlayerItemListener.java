@@ -46,7 +46,7 @@ public class PlayerItemListener implements Listener {
 	Material m = b.getType();
 
 	// No need to control excluded blocks
-	if (getMain().getUtils().isExcluded(m))
+	if (getMain().getUtils().isExcludedFromTracking(m))
 	    return;
 
 	// No need to control bypassed players

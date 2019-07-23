@@ -55,7 +55,7 @@ public class BlockBreakListener implements Listener {
 	    return;
 
 	// No need to control excluded blocks
-	if (getMain().getUtils().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcludedFromTracking(b.getType()))
 	    return;
 
 	/* Disabled blocks for creative players */

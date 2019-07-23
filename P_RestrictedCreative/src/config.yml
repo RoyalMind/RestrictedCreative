@@ -119,7 +119,10 @@ limit:
   
 confiscate:
   invalid-items: true # NBT check requires ProtocolLib
-  middle-click: true
+  middle-click:
+    enabled: true
+    exclude:
+    - 'PLAYER_HEAD'
   items:
     enabled: true
     material:

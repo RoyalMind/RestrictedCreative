@@ -1,5 +1,8 @@
 package me.prunt.restrictedcreative;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,8 +152,43 @@ public class Main extends JavaPlugin {
 		"CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255), UNIQUE (block))");
 
 	// Tracked inventories
-	getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
-		+ " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player, type))");
+	if (DataHandler.isUsingSQLite()) {
+	    ResultSet rs = getDB().executeQuery(
+		    "SELECT name FROM sqlite_master WHERE type='table' AND name='" + getDB().getInvsTable() + "'");
+
+	    boolean tableExists = false;
+	    try {
+		tableExists = rs.next();
+		rs.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+
+	    String tableName = getDB().getInvsTable();
+	    if (tableExists)
+		tableName += "_tmp";
+
+	    getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + tableName
+		    + " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player))");
+
+	    if (tableExists) {
+		// Retain only the latest inventory from each player
+		try {
+		    Statement stm = getDB().getConnection().createStatement();
+		    stm.addBatch("INSERT INTO " + tableName
+			    + " SELECT player, type, storage, armor, extra, effects, xp, MAX(lastused) as lastused FROM "
+			    + getDB().getInvsTable() + " GROUP BY player");
+		    stm.addBatch("DROP TABLE " + getDB().getInvsTable());
+		    stm.addBatch("ALTER TABLE " + tableName + " RENAME TO " + getDB().getInvsTable());
+		    stm.executeBatch();
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		}
+	    }
+	} else {
+	    getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getInvsTable()
+		    + " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player))");
+	}
 
 	if (getSettings().isEnabled("general.saving.inventories.enabled")) {
 	    long survival = Instant.now().getEpochSecond()

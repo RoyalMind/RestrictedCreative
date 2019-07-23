@@ -393,6 +393,10 @@ public class DataHandler {
 	}
     }
 
+    public static void removeBlocksInChunk(Chunk c) {
+	removeBlocksInChunk(Utils.getChunkString(c));
+    }
+
     public static void removeBlocksInChunk(String c) {
 	if (blocksInChunk.containsKey(c))
 	    blocksInChunk.remove(c);
@@ -414,6 +418,8 @@ public class DataHandler {
 		b.setMetadata("GMC", Main.getFMV());
 	    }
 	}
+
+	removeBlocksInChunk(c);
 
 	if (Main.DEBUG)
 	    System.out.println("loadFromDatabase: " + c + " took " + (System.currentTimeMillis() - start) + "ms");

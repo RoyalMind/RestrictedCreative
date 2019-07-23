@@ -153,8 +153,17 @@ public class Utils {
      * @param m Material type
      * @return Whether the given type should be excluded from tracking
      */
-    public boolean isExcluded(Material m) {
+    public boolean isExcludedFromTracking(Material m) {
 	return getMain().getSettings().getMaterialList("tracking.blocks.exclude").contains(m) || !isTrackingEnabled()
+		|| m == Material.AIR;
+    }
+
+    /**
+     * @param m Material type
+     * @return Whether the given type should be excluded from tracking
+     */
+    public boolean isExcludedFromConfiscating(Material m) {
+	return getMain().getSettings().getMaterialList("confiscate.middle-click.exclude").contains(m)
 		|| m == Material.AIR;
     }
 

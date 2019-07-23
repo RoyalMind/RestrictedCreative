@@ -53,7 +53,7 @@ public class BlockPlaceListener implements Listener {
 	    return;
 
 	// No need to track excluded blocks
-	if (getMain().getUtils().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcludedFromTracking(b.getType()))
 	    return;
 
 	// No need to track bypassed players
@@ -96,7 +96,7 @@ public class BlockPlaceListener implements Listener {
 	    return;
 
 	// No need to track excluded blocks
-	if (getMain().getUtils().isExcluded(b.getType()))
+	if (getMain().getUtils().isExcludedFromTracking(b.getType()))
 	    return;
 
 	// No need to track bypassed players

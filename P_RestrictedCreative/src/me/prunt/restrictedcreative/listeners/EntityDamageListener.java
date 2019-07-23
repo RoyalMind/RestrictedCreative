@@ -35,7 +35,7 @@ public class EntityDamageListener implements Listener {
      * Called when an entity is damaged by an entity
      */
     // HIGHEST required for WorldGuard and similar plugins
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onEntityDamage(EntityDamageByEntityEvent e) {
 	Entity en = e.getEntity();
 

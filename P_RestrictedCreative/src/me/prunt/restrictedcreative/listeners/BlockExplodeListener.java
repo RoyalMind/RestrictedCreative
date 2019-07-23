@@ -33,7 +33,7 @@ public class BlockExplodeListener implements Listener {
 
 	// Loops through all broken blocks
 	for (Block b : e.blockList()) {
-	    if (getMain().getUtils().isExcluded(b.getType()))
+	    if (getMain().getUtils().isExcludedFromTracking(b.getType()))
 		continue;
 
 	    if (!DataHandler.isTracked(b))
@@ -58,7 +58,7 @@ public class BlockExplodeListener implements Listener {
 
 	// Loops through all broken blocks
 	for (Block b : e.blockList()) {
-	    if (getMain().getUtils().isExcluded(b.getType()))
+	    if (getMain().getUtils().isExcludedFromTracking(b.getType()))
 		continue;
 
 	    if (!DataHandler.isTracked(b))
