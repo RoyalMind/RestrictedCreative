@@ -2,6 +2,7 @@ package me.prunt.restrictedcreative.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,8 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import com.google.common.base.Charsets;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.utils.Utils;
@@ -90,8 +93,15 @@ public class ConfigProvider {
 	}
 
 	FileConfiguration config = new YamlConfiguration();
+
 	try {
 	    config.load(file);
+
+	    // Update config with new paths and values
+	    config.options().copyDefaults(true);
+	    config.setDefaults(YamlConfiguration
+		    .loadConfiguration(new InputStreamReader(getMain().getResource(name), Charsets.UTF_8)));
+	    config.save(file);
 	} catch (IOException | InvalidConfigurationException e) {
 	    e.printStackTrace();
 	}
@@ -101,8 +111,14 @@ public class ConfigProvider {
 
     private void loadConfig() {
 	if (isDefault()) {
-	    getMain().saveDefaultConfig();
+	    // Update config with new paths and values
+	    getMain().getConfig().options().copyDefaults(true);
+	    getMain().getConfig().setDefaults(YamlConfiguration
+		    .loadConfiguration(new InputStreamReader(getMain().getResource(name), Charsets.UTF_8)));
+	    getMain().saveConfig();
+
 	    getMain().reloadConfig();
+
 	    setConfig(getMain().getConfig());
 	} else {
 	    setConfig(loadCustomConfig(getName()));

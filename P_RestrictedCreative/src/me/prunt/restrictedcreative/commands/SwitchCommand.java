@@ -33,7 +33,8 @@ public class SwitchCommand implements CommandExecutor {
 	    Player p = (Player) sender;
 
 	    // Commands shouldn't work in disabled worlds
-	    if (getMain().getUtils().isDisabledWorld(p.getWorld().getName())) {
+	    if (getMain().getUtils().isDisabledWorld(p.getWorld().getName())
+		    && !p.hasPermission("rc.bypass.general.disabled-worlds")) {
 		getMain().getUtils().sendMessage(p, true, "disabled.region");
 		return true;
 	    }
@@ -58,7 +59,8 @@ public class SwitchCommand implements CommandExecutor {
 		}
 
 		// Commands shouldn't work in disabled worlds
-		if (getMain().getUtils().isDisabledWorld(p1.getWorld().getName())) {
+		if (getMain().getUtils().isDisabledWorld(p1.getWorld().getName())
+			&& !p1.hasPermission("rc.bypass.general.disabled-worlds")) {
 		    getMain().getUtils().sendMessage(sender, true, "disabled.region");
 		    return true;
 		}

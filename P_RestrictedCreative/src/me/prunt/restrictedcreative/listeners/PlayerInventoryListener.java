@@ -66,7 +66,7 @@ public class PlayerInventoryListener implements Listener {
 	    Material m = is.getType();
 
 	    // If it's a block (not an item) and it's not excluded
-	    if (is != null && m.isBlock() && getMain().getUtils().isExcludedFromConfiscating(m)) {
+	    if (is != null && m.isBlock() && !getMain().getUtils().isExcludedFromConfiscating(m)) {
 		if (Main.DEBUG)
 		    System.out.println("middleClick: " + is.getType());
 
