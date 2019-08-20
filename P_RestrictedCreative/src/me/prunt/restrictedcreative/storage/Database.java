@@ -15,6 +15,7 @@ public class Database {
 
     private String host, name, user, pass, type, table_blocks, table_invs;
     private int port;
+    private boolean ssl;
     private Connection connection;
 
     public Database(Main main) {
@@ -26,6 +27,7 @@ public class Database {
 	this.user = main.getSettings().getString("database.username");
 	this.pass = main.getSettings().getString("database.password");
 	this.port = main.getSettings().getInt("database.port");
+	this.ssl = main.getSettings().isEnabled("database.ssl");
 	this.table_blocks = main.getSettings().getString("database.table.blocks");
 	this.table_invs = main.getSettings().getString("database.table.inventories");
 
@@ -121,9 +123,8 @@ public class Database {
 		    return;
 		}
 		Class.forName("com.mysql.jdbc.Driver");
-		connection = DriverManager.getConnection(
-			"jdbc:mysql://" + this.host + ":" + this.port + "/" + this.name + "?autoReconnect=true",
-			this.user, this.pass);
+		connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.name
+			+ "?autoReconnect=true&useSSL=" + this.ssl + ": true", this.user, this.pass);
 	    }
 	} catch (SQLException e) {
 	    log("Could not connect to database, check config:");

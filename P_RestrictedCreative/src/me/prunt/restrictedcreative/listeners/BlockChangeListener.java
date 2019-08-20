@@ -3,6 +3,7 @@ package me.prunt.restrictedcreative.listeners;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -10,6 +11,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.SpongeAbsorbEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 
 import me.prunt.restrictedcreative.Main;
@@ -127,6 +129,34 @@ public class BlockChangeListener implements Listener {
 		if (Main.DEBUG)
 		    System.out.println("fallingblockToBlock: " + e.getTo());
 	    }
+	}
+    }
+
+    /*
+     * Called when a sponge absorbs water from the world. The world will be in its
+     * previous state, and getBlocks() will represent the changes to be made to the
+     * world, if the event is not cancelled. As this is a physics based event it may
+     * be called multiple times for "the same" changes.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onSpongeAbsorb(SpongeAbsorbEvent e) {
+	// No need to control blocks in disabled worlds
+	if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
+	    return;
+
+	for (BlockState bs : e.getBlocks()) {
+	    Block b = bs.getBlock();
+
+	    if (!DataHandler.isTracked(b))
+		continue;
+
+	    Material m = b.getType();
+
+	    if (m != Material.KELP && m != Material.KELP_PLANT)
+		continue;
+
+	    DataHandler.breakBlock(bs.getBlock(), null, false);
+
 	}
     }
 }

@@ -81,7 +81,7 @@ public class SyncData implements Runnable {
 		ps.executeUpdate();
 		count++;
 
-		if (count % 10000 == 0)
+		if (count % 5000 == 0)
 		    main.getDB().commit();
 	    }
 	} catch (SQLException e) {

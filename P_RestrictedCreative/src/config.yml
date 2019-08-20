@@ -8,6 +8,7 @@ database:
   host: localhost
   port: 3306
   database: rc_database
+  ssl: true
   table:
     blocks: rc_blocks
     inventories: rc_invs
