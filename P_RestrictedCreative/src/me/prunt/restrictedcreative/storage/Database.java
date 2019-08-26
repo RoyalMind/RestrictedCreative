@@ -124,7 +124,7 @@ public class Database {
 		}
 		Class.forName("com.mysql.jdbc.Driver");
 		connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.name
-			+ "?autoReconnect=true&useSSL=" + this.ssl + ": true", this.user, this.pass);
+			+ "?autoReconnect=true&useSSL=" + this.ssl, this.user, this.pass);
 	    }
 	} catch (SQLException e) {
 	    log("Could not connect to database, check config:");
