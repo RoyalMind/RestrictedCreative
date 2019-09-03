@@ -31,7 +31,6 @@ import org.bukkit.block.data.type.Switch;
 import org.bukkit.block.data.type.TripwireHook;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Button;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.RedstoneTorch;
 import org.bukkit.material.Torch;
@@ -72,9 +71,6 @@ public class MaterialHandler {
     public static boolean needsBlockBelow(Block b) {
 	BlockData bd = b.getBlockData();
 	Material m = b.getType();
-
-	if (Main.DEBUG && Main.EXTRADEBUG)
-	    System.out.println("needsBlockBelow: " + m);
 
 	if (getTop().contains(m))
 	    return true;
@@ -127,12 +123,7 @@ public class MaterialHandler {
 	BlockData bd = b.getBlockData();
 	MaterialData md = b.getState().getData();
 
-	if (Main.DEBUG && Main.EXTRADEBUG)
-	    System.out.println("getNeededFace: " + b.getType());
-
 	// Some of the MaterialData instances aren't directional
-	if (md instanceof Button)
-	    return ((Button) md).getAttachedFace();
 	if (md instanceof Torch)
 	    return ((Torch) md).getAttachedFace();
 	if (md instanceof RedstoneTorch)

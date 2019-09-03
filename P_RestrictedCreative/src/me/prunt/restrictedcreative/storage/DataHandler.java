@@ -91,7 +91,7 @@ public class DataHandler {
 	removeTracking(Utils.getBlockString(b));
 
 	if (Main.EXTRADEBUG)
-	    System.out.println("removeTracking: " + b.getType());
+	    System.out.println("removeTracking: " + b);
     }
 
     public static void removeTracking(String b) {
@@ -496,8 +496,10 @@ public class DataHandler {
 		    e.printStackTrace();
 		}
 
+		int chunksLoaded = blocksInChunk.size();
+
 		if (Main.DEBUG)
-		    System.out.println("loadFromDatabase: " + blocksInChunk.size() + " chunks");
+		    System.out.println("loadFromDatabase: " + chunksLoaded + " chunks");
 
 		int radius = 8;
 		for (World world : Bukkit.getWorlds()) {
@@ -517,9 +519,8 @@ public class DataHandler {
 
 		setTotalCount(count);
 
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-			main.getUtils().getMessage(true, "database.loaded").replaceAll("%blocks%", getTotalCount())
-				.replaceAll("%chunks%", String.valueOf(blocksInChunk.size())));
+		Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")
+			.replaceAll("%blocks%", getTotalCount()).replaceAll("%chunks%", String.valueOf(chunksLoaded)));
 
 		String took = String.valueOf(System.currentTimeMillis() - start);
 

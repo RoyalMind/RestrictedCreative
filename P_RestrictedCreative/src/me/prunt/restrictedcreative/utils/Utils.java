@@ -735,7 +735,8 @@ public class Utils {
 			System.out.println("loadInventory: never run " + pi.gm);
 		}
 	    }
-	} catch (SQLException e) {
+	} catch (SQLException | NullPointerException e) {
+	    Bukkit.getLogger().severe("Database error:");
 	    e.printStackTrace();
 	}
 

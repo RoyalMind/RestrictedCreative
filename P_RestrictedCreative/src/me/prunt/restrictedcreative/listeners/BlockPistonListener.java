@@ -8,9 +8,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.block.data.Bisected.Half;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Bed;
 import org.bukkit.block.data.type.Bed.Part;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -62,15 +64,31 @@ public class BlockPistonListener implements Listener {
 		return;
 
 	    if (!DataHandler.isTracked(b))
-		break;
+		continue;
 
 	    if (Main.DEBUG)
 		System.out.println("onBlockPull: " + b.getType() + " " + b.getPistonMoveReaction());
 
+	    BlockData bd = b.getBlockData();
+
+	    /* Bed */
+	    if (bd instanceof Bed) {
+		Bed bed = (Bed) bd;
+		Block block = bed.getPart() == Part.FOOT ? b.getRelative(bed.getFacing())
+			: b.getRelative(bed.getFacing().getOppositeFace());
+
+		if (Main.DEBUG)
+		    System.out.println("bedPull: " + b.getType() + " " + block.getType());
+
+		DataHandler.breakBlock(b, null, false);
+		DataHandler.breakBlock(block, null, false);
+		continue;
+	    }
+
 	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
 		DataHandler.breakBlock(b, null);
 
-	    // If it's on top of another moving block and need a block below
+	    // If it's on top of another moving block and needs a block below
 	    if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
 		DataHandler.breakBlock(b, null);
 
@@ -118,7 +136,7 @@ public class BlockPistonListener implements Listener {
 		return;
 
 	    if (!DataHandler.isTracked(b))
-		break;
+		continue;
 
 	    if (Main.DEBUG)
 		System.out.println("onBlockPush: " + b.getType() + " " + b.getPistonMoveReaction());
@@ -136,7 +154,21 @@ public class BlockPistonListener implements Listener {
 
 		DataHandler.breakBlock(b, null, false);
 		DataHandler.breakBlock(block, null, false);
-		break;
+		continue;
+	    }
+
+	    /* Door */
+	    if (bd instanceof Door) {
+		Door door = (Door) bd;
+		Block block = door.getHalf() == Half.BOTTOM ? b.getRelative(BlockFace.UP)
+			: b.getRelative(BlockFace.DOWN);
+
+		if (Main.DEBUG)
+		    System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
+
+		DataHandler.breakBlock(b, null, false);
+		DataHandler.breakBlock(block, null, false);
+		continue;
 	    }
 
 	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
@@ -168,7 +200,7 @@ public class BlockPistonListener implements Listener {
     private List<BlockFace> getSurroundingBlockFaces(BlockFace direction) {
 	// Gets the non-pushed/-pulled faces
 	BlockFace bf1 = null, bf2 = null, bf3 = null, bf4 = null, bf5 = direction.getOppositeFace();
-	
+
 	switch (direction.name()) {
 	case ("UP"):
 	case ("DOWN"):
@@ -208,8 +240,27 @@ public class BlockPistonListener implements Listener {
 	    if (bl.getFace(b) == BlockFace.DOWN && MaterialHandler.needsBlockBelow(bl)) {
 		// Rails don't cooperate with slime blocks
 		if (MaterialHandler.isRail(bl) && b.getType() == Material.SLIME_BLOCK) {
+		    if (Main.DEBUG)
+			System.out.println("removeSurroundingBlock: slime + " + bl.getType());
+
 		    e.setCancelled(true);
 		    return;
+		}
+
+		BlockData bd = b.getBlockData();
+
+		/* Door */
+		if (bd instanceof Door) {
+		    Door door = (Door) bd;
+		    Block block = door.getHalf() == Half.BOTTOM ? b.getRelative(BlockFace.UP)
+			    : b.getRelative(BlockFace.DOWN);
+
+		    if (Main.DEBUG)
+			System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
+
+		    DataHandler.breakBlock(b, null, false);
+		    DataHandler.breakBlock(block, null, false);
+		    continue;
 		}
 
 		if (Main.DEBUG)

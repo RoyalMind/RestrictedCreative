@@ -7,7 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
+import org.bukkit.block.data.type.Piston;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -95,11 +97,15 @@ public class BlockUpdateListener implements Listener {
 	/* 4. Top blocks */
 	if (MaterialHandler.needsBlockBelow(b)) {
 	    if (Main.DEBUG)
-		System.out.println("needsBlockBelow");
+		System.out.println("needsBlockBelow: " + m);
 
 	    // Needs to be checked BEFORE isSolid()
-	    if (Bukkit.getVersion().contains("1.14") && m == Material.valueOf("BAMBOO")) {
+	    if (Bukkit.getVersion().contains("1.14")
+		    && (m == Material.valueOf("BAMBOO") || m == Material.valueOf("BAMBOO_SAPLING"))) {
 		if (!isBambooOk(b)) {
+		    if (Main.DEBUG)
+			System.out.println("isBambooOk: false");
+
 		    e.setCancelled(true);
 		    DataHandler.breakBlock(b, null);
 		}
@@ -174,10 +180,10 @@ public class BlockUpdateListener implements Listener {
 	/* 5. Attachable */
 	BlockFace bf = MaterialHandler.getNeededFace(b);
 	if (bf != null) {
-	    bl = b.getRelative(bf);
-
 	    if (Main.DEBUG)
-		System.out.println("getNeededFace: " + m + " " + b.getFace(bl));
+		System.out.println("getNeededFace: " + bf);
+
+	    bl = b.getRelative(bf);
 
 	    // If the block (to which the first block is attached to) is solid
 	    if (!isSolid(bl)) {
@@ -258,7 +264,9 @@ public class BlockUpdateListener implements Listener {
 
     private boolean isSolid(Block b) {
 	Material m = b.getType();
-	return m.isSolid() && m != Material.PISTON && m != Material.STICKY_PISTON;
+	BlockData bd = b.getBlockData();
+
+	return m.isSolid() && (!(bd instanceof Piston) || !((Piston) bd).isExtended());
     }
 
     private List<Block> horisontalChoruses(Block b) {
@@ -336,12 +344,12 @@ public class BlockUpdateListener implements Listener {
 	Block bl = b.getRelative(BlockFace.DOWN);
 	Material ma = bl.getType();
 
-	if (ma == Material.valueOf("BAMBOO"))
+	if (ma == Material.valueOf("BAMBOO") || ma == Material.valueOf("BAMBOO_SAPLING"))
 	    return true;
 
-	boolean isSoilOk = ma == Material.GRASS || ma == Material.DIRT || ma == Material.SAND || ma == Material.PODZOL
-		|| ma == Material.COARSE_DIRT || ma == Material.RED_SAND || ma == Material.GRAVEL
-		|| ma == Material.MYCELIUM;
+	boolean isSoilOk = ma == Material.GRASS_BLOCK || ma == Material.DIRT || ma == Material.SAND
+		|| ma == Material.PODZOL || ma == Material.COARSE_DIRT || ma == Material.RED_SAND
+		|| ma == Material.GRAVEL || ma == Material.MYCELIUM;
 
 	return isSoilOk;
     }
