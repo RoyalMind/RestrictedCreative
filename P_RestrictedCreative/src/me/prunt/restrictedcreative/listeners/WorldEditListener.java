@@ -18,51 +18,51 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
 
 public class WorldEditListener {
-    private Main main;
+	private Main main;
 
-    public WorldEditListener(Main main) {
-	this.main = main;
+	public WorldEditListener(Main main) {
+		this.main = main;
 
-	if (Main.DEBUG)
-	    System.out.println("Loaded WorldEditListener");
-    }
+		if (Main.DEBUG)
+			System.out.println("Loaded WorldEditListener");
+	}
 
-    @Subscribe
-    public void wrapForLogging(EditSessionEvent e) {
-	if (Main.DEBUG)
-	    System.out.println("wrapForLogging");
+	@Subscribe
+	public void wrapForLogging(EditSessionEvent e) {
+		if (Main.DEBUG)
+			System.out.println("wrapForLogging");
 
-	Actor a = e.getActor();
+		Actor a = e.getActor();
 
-	if (a == null || !a.isPlayer() || e.getWorld() == null)
-	    return;
+		if (a == null || !a.isPlayer() || e.getWorld() == null)
+			return;
 
-	Player p = Bukkit.getServer().getPlayer(a.getUniqueId());
-	String world = e.getWorld().getName();
-	World w = main.getServer().getWorld(world);
+		Player p = Bukkit.getServer().getPlayer(a.getUniqueId());
+		String world = e.getWorld().getName();
+		World w = main.getServer().getWorld(world);
 
-	if (main.getUtils().isDisabledWorld(world))
-	    return;
+		if (main.getUtils().isDisabledWorld(world))
+			return;
 
-	e.setExtent(new AbstractDelegateExtent(e.getExtent()) {
-	    @SuppressWarnings("rawtypes")
-	    @Override
-	    public boolean setBlock(BlockVector3 position, BlockStateHolder newBlock) throws WorldEditException {
-		Block b = w.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
+		e.setExtent(new AbstractDelegateExtent(e.getExtent()) {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			@Override
+			public boolean setBlock(BlockVector3 position, BlockStateHolder newBlock) throws WorldEditException {
+				Block b = w.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
 
-		// If a tracked block is removed
-		if (newBlock.getBlockType().getMaterial().isAir()) {
-		    DataHandler.removeTracking(b);
-		}
-		// The block is changed/placed
-		else if (!p.hasPermission("rc.bypass.tracking.worldedit")
-			&& (main.getSettings().isEnabled("tracking.wordedit.extended")
-				|| p.getGameMode() == GameMode.CREATIVE)) {
-		    DataHandler.setAsTracked(b);
-		}
+				// If a tracked block is removed
+				if (newBlock.getBlockType().getMaterial().isAir()) {
+					DataHandler.removeTracking(b);
+				}
+				// The block is changed/placed
+				else if (!p.hasPermission("rc.bypass.tracking.worldedit")
+						&& (main.getSettings().isEnabled("tracking.wordedit.extended")
+								|| p.getGameMode() == GameMode.CREATIVE)) {
+					DataHandler.setAsTracked(b);
+				}
 
-		return getExtent().setBlock(position, newBlock);
-	    }
-	});
-    }
+				return getExtent().setBlock(position, newBlock);
+			}
+		});
+	}
 }

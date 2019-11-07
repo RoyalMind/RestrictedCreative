@@ -25,256 +25,256 @@ import me.prunt.restrictedcreative.storage.DataHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
 
 public class BlockPistonListener implements Listener {
-    private Main main;
+	private Main main;
 
-    public BlockPistonListener(Main main) {
-	this.main = main;
-    }
+	public BlockPistonListener(Main main) {
+		this.main = main;
+	}
 
-    private Main getMain() {
-	return this.main;
-    }
+	private Main getMain() {
+		return this.main;
+	}
 
-    /*
-     * Called when a piston retracts
-     */
-    // HIGHEST required for WorldGuard and similar plugins
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onBlockPull(BlockPistonRetractEvent e) {
-	// No need to control blocks in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
-	    return;
+	/*
+	 * Called when a piston retracts
+	 */
+	// HIGHEST required for WorldGuard and similar plugins
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onBlockPull(BlockPistonRetractEvent e) {
+		// No need to control blocks in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
+			return;
 
-	// Non-sticky piston doesn't pull anything
-	if (!e.isSticky())
-	    return;
+		// Non-sticky piston doesn't pull anything
+		if (!e.isSticky())
+			return;
 
-	List<Block> newBlocks = new ArrayList<>();
-	List<Block> oldBlocks = new ArrayList<>();
-	List<BlockFace> blockfaces = getSurroundingBlockFaces(e.getDirection());
-
-	if (Main.DEBUG)
-	    System.out.println("onBlockPullBlocks: " + e.getBlocks().size());
-
-	// Loop through pulled blocks
-	for (Block b : e.getBlocks()) {
-	    checkSurroundingBlocks(e, b, blockfaces);
-
-	    if (e.isCancelled())
-		return;
-
-	    if (!DataHandler.isTracked(b))
-		continue;
-
-	    if (Main.DEBUG)
-		System.out.println("onBlockPull: " + b.getType() + " " + b.getPistonMoveReaction());
-
-	    BlockData bd = b.getBlockData();
-
-	    /* Bed */
-	    if (bd instanceof Bed) {
-		Bed bed = (Bed) bd;
-		Block block = bed.getPart() == Part.FOOT ? b.getRelative(bed.getFacing())
-			: b.getRelative(bed.getFacing().getOppositeFace());
+		List<Block> newBlocks = new ArrayList<>();
+		List<Block> oldBlocks = new ArrayList<>();
+		List<BlockFace> blockfaces = getSurroundingBlockFaces(e.getDirection());
 
 		if (Main.DEBUG)
-		    System.out.println("bedPull: " + b.getType() + " " + block.getType());
+			System.out.println("onBlockPullBlocks: " + e.getBlocks().size());
 
-		DataHandler.breakBlock(b, null, false);
-		DataHandler.breakBlock(block, null, false);
-		continue;
-	    }
+		// Loop through pulled blocks
+		for (Block b : e.getBlocks()) {
+			checkSurroundingBlocks(e, b, blockfaces);
 
-	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
-		DataHandler.breakBlock(b, null);
+			if (e.isCancelled())
+				return;
 
-	    // If it's on top of another moving block and needs a block below
-	    if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
-		DataHandler.breakBlock(b, null);
+			if (!DataHandler.isTracked(b))
+				continue;
 
-	    // If it's attached to another moving block
-	    if (MaterialHandler.getNeededFace(b) != null
-		    && e.getBlocks().contains(b.getRelative(MaterialHandler.getNeededFace(b))))
-		DataHandler.breakBlock(b, null);
+			if (Main.DEBUG)
+				System.out.println("onBlockPull: " + b.getType() + " " + b.getPistonMoveReaction());
 
-	    oldBlocks.add(b);
-	    newBlocks.add(b.getRelative(e.getDirection()));
-	}
+			BlockData bd = b.getBlockData();
 
-	// Remove old blocks first
-	for (Block b : oldBlocks) {
-	    DataHandler.removeTracking(b);
-	}
-	// Add new blocks afterwards
-	for (Block b : newBlocks) {
-	    DataHandler.setAsTracked(b);
-	}
-    }
+			/* Bed */
+			if (bd instanceof Bed) {
+				Bed bed = (Bed) bd;
+				Block block = bed.getPart() == Part.FOOT ? b.getRelative(bed.getFacing())
+						: b.getRelative(bed.getFacing().getOppositeFace());
 
-    /*
-     * Called when a piston extends
-     */
-    // HIGHEST required for WorldGuard and similar plugins
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onBlockPush(BlockPistonExtendEvent e) {
-	// No need to control blocks in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
-	    return;
+				if (Main.DEBUG)
+					System.out.println("bedPull: " + b.getType() + " " + block.getType());
 
-	List<Block> newBlocks = new ArrayList<>();
-	List<Block> oldBlocks = new ArrayList<>();
-	List<BlockFace> blockfaces = getSurroundingBlockFaces(e.getDirection());
+				DataHandler.breakBlock(b, null, false);
+				DataHandler.breakBlock(block, null, false);
+				continue;
+			}
 
-	if (Main.DEBUG)
-	    System.out.println("onBlockPushBlocks: " + e.getBlocks().size());
+			if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
+				DataHandler.breakBlock(b, null);
 
-	// Loop through pushed blocks
-	for (Block b : e.getBlocks()) {
-	    checkSurroundingBlocks(e, b, blockfaces);
+			// If it's on top of another moving block and needs a block below
+			if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
+				DataHandler.breakBlock(b, null);
 
-	    if (e.isCancelled())
-		return;
+			// If it's attached to another moving block
+			if (MaterialHandler.getNeededFace(b) != null
+					&& e.getBlocks().contains(b.getRelative(MaterialHandler.getNeededFace(b))))
+				DataHandler.breakBlock(b, null);
 
-	    if (!DataHandler.isTracked(b))
-		continue;
-
-	    if (Main.DEBUG)
-		System.out.println("onBlockPush: " + b.getType() + " " + b.getPistonMoveReaction());
-
-	    BlockData bd = b.getBlockData();
-
-	    /* Bed */
-	    if (bd instanceof Bed) {
-		Bed bed = (Bed) bd;
-		Block block = bed.getPart() == Part.FOOT ? b.getRelative(bed.getFacing())
-			: b.getRelative(bed.getFacing().getOppositeFace());
-
-		if (Main.DEBUG)
-		    System.out.println("bedPush: " + b.getType() + " " + block.getType());
-
-		DataHandler.breakBlock(b, null, false);
-		DataHandler.breakBlock(block, null, false);
-		continue;
-	    }
-
-	    /* Door */
-	    if (bd instanceof Door) {
-		Door door = (Door) bd;
-		Block block = door.getHalf() == Half.BOTTOM ? b.getRelative(BlockFace.UP)
-			: b.getRelative(BlockFace.DOWN);
-
-		if (Main.DEBUG)
-		    System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
-
-		DataHandler.breakBlock(b, null, false);
-		DataHandler.breakBlock(block, null, false);
-		continue;
-	    }
-
-	    if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
-		DataHandler.breakBlock(b, null);
-
-	    // If it's on top of another moving block and need a block below
-	    if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
-		DataHandler.breakBlock(b, null);
-
-	    // If it's attached to another moving block
-	    if (MaterialHandler.getNeededFace(b) != null
-		    && e.getBlocks().contains(b.getRelative(MaterialHandler.getNeededFace(b))))
-		DataHandler.breakBlock(b, null);
-
-	    oldBlocks.add(b);
-	    newBlocks.add(b.getRelative(e.getDirection()));
-	}
-
-	// Remove old blocks first
-	for (Block b : oldBlocks) {
-	    DataHandler.removeTracking(b);
-	}
-	// Add new blocks afterwards
-	for (Block b : newBlocks) {
-	    DataHandler.setAsTracked(b);
-	}
-    }
-
-    private List<BlockFace> getSurroundingBlockFaces(BlockFace direction) {
-	// Gets the non-pushed/-pulled faces
-	BlockFace bf1 = null, bf2 = null, bf3 = null, bf4 = null, bf5 = direction.getOppositeFace();
-
-	switch (direction.name()) {
-	case ("UP"):
-	case ("DOWN"):
-	    bf1 = BlockFace.WEST;
-	    bf2 = BlockFace.EAST;
-	    bf3 = BlockFace.NORTH;
-	    bf4 = BlockFace.SOUTH;
-	    break;
-	case ("NORTH"):
-	case ("SOUTH"):
-	    bf1 = BlockFace.WEST;
-	    bf2 = BlockFace.EAST;
-	    bf3 = BlockFace.UP;
-	    bf4 = BlockFace.DOWN;
-	    break;
-	case ("EAST"):
-	case ("WEST"):
-	    bf1 = BlockFace.NORTH;
-	    bf2 = BlockFace.SOUTH;
-	    bf3 = BlockFace.UP;
-	    bf4 = BlockFace.DOWN;
-	    break;
-	}
-
-	return Arrays.asList(bf1, bf2, bf3, bf4, bf5);
-    }
-
-    private void checkSurroundingBlocks(BlockPistonEvent e, Block b, List<BlockFace> sides) {
-	for (BlockFace bf : sides) {
-	    Block bl = b.getRelative(bf);
-
-	    // Checks if the surrounding block is placed in creative
-	    if (!DataHandler.isTracked(bl))
-		continue;
-
-	    // If it's attached to the moving block
-	    if (bl.getFace(b) == BlockFace.DOWN && MaterialHandler.needsBlockBelow(bl)) {
-		// Rails don't cooperate with slime blocks
-		if (MaterialHandler.isRail(bl) && b.getType() == Material.SLIME_BLOCK) {
-		    if (Main.DEBUG)
-			System.out.println("removeSurroundingBlock: slime + " + bl.getType());
-
-		    e.setCancelled(true);
-		    return;
+			oldBlocks.add(b);
+			newBlocks.add(b.getRelative(e.getDirection()));
 		}
 
-		BlockData bd = b.getBlockData();
+		// Remove old blocks first
+		for (Block b : oldBlocks) {
+			DataHandler.removeTracking(b);
+		}
+		// Add new blocks afterwards
+		for (Block b : newBlocks) {
+			DataHandler.setAsTracked(b);
+		}
+	}
 
-		/* Door */
-		if (bd instanceof Door) {
-		    Door door = (Door) bd;
-		    Block block = door.getHalf() == Half.BOTTOM ? b.getRelative(BlockFace.UP)
-			    : b.getRelative(BlockFace.DOWN);
+	/*
+	 * Called when a piston extends
+	 */
+	// HIGHEST required for WorldGuard and similar plugins
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onBlockPush(BlockPistonExtendEvent e) {
+		// No need to control blocks in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
+			return;
 
-		    if (Main.DEBUG)
-			System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
+		List<Block> newBlocks = new ArrayList<>();
+		List<Block> oldBlocks = new ArrayList<>();
+		List<BlockFace> blockfaces = getSurroundingBlockFaces(e.getDirection());
 
-		    DataHandler.breakBlock(b, null, false);
-		    DataHandler.breakBlock(block, null, false);
-		    continue;
+		if (Main.DEBUG)
+			System.out.println("onBlockPushBlocks: " + e.getBlocks().size());
+
+		// Loop through pushed blocks
+		for (Block b : e.getBlocks()) {
+			checkSurroundingBlocks(e, b, blockfaces);
+
+			if (e.isCancelled())
+				return;
+
+			if (!DataHandler.isTracked(b))
+				continue;
+
+			if (Main.DEBUG)
+				System.out.println("onBlockPush: " + b.getType() + " " + b.getPistonMoveReaction());
+
+			BlockData bd = b.getBlockData();
+
+			/* Bed */
+			if (bd instanceof Bed) {
+				Bed bed = (Bed) bd;
+				Block block = bed.getPart() == Part.FOOT ? b.getRelative(bed.getFacing())
+						: b.getRelative(bed.getFacing().getOppositeFace());
+
+				if (Main.DEBUG)
+					System.out.println("bedPush: " + b.getType() + " " + block.getType());
+
+				DataHandler.breakBlock(b, null, false);
+				DataHandler.breakBlock(block, null, false);
+				continue;
+			}
+
+			/* Door */
+			if (bd instanceof Door) {
+				Door door = (Door) bd;
+				Block block = door.getHalf() == Half.BOTTOM ? b.getRelative(BlockFace.UP)
+						: b.getRelative(BlockFace.DOWN);
+
+				if (Main.DEBUG)
+					System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
+
+				DataHandler.breakBlock(b, null, false);
+				DataHandler.breakBlock(block, null, false);
+				continue;
+			}
+
+			if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
+				DataHandler.breakBlock(b, null);
+
+			// If it's on top of another moving block and need a block below
+			if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
+				DataHandler.breakBlock(b, null);
+
+			// If it's attached to another moving block
+			if (MaterialHandler.getNeededFace(b) != null
+					&& e.getBlocks().contains(b.getRelative(MaterialHandler.getNeededFace(b))))
+				DataHandler.breakBlock(b, null);
+
+			oldBlocks.add(b);
+			newBlocks.add(b.getRelative(e.getDirection()));
 		}
 
-		if (Main.DEBUG)
-		    System.out.println("removeSurroundingBlock: " + bl.getType());
-
-		DataHandler.breakBlock(bl, null);
-	    }
-
-	    if (bl.getFace(b) == MaterialHandler.getNeededFace(bl)) {
-		if (Main.DEBUG)
-		    System.out.println("removeSurroundingBlock: " + bl.getType());
-
-		DataHandler.breakBlock(bl, null);
-	    }
+		// Remove old blocks first
+		for (Block b : oldBlocks) {
+			DataHandler.removeTracking(b);
+		}
+		// Add new blocks afterwards
+		for (Block b : newBlocks) {
+			DataHandler.setAsTracked(b);
+		}
 	}
-    }
+
+	private List<BlockFace> getSurroundingBlockFaces(BlockFace direction) {
+		// Gets the non-pushed/-pulled faces
+		BlockFace bf1 = null, bf2 = null, bf3 = null, bf4 = null, bf5 = direction.getOppositeFace();
+
+		switch (direction.name()) {
+		case ("UP"):
+		case ("DOWN"):
+			bf1 = BlockFace.WEST;
+			bf2 = BlockFace.EAST;
+			bf3 = BlockFace.NORTH;
+			bf4 = BlockFace.SOUTH;
+			break;
+		case ("NORTH"):
+		case ("SOUTH"):
+			bf1 = BlockFace.WEST;
+			bf2 = BlockFace.EAST;
+			bf3 = BlockFace.UP;
+			bf4 = BlockFace.DOWN;
+			break;
+		case ("EAST"):
+		case ("WEST"):
+			bf1 = BlockFace.NORTH;
+			bf2 = BlockFace.SOUTH;
+			bf3 = BlockFace.UP;
+			bf4 = BlockFace.DOWN;
+			break;
+		}
+
+		return Arrays.asList(bf1, bf2, bf3, bf4, bf5);
+	}
+
+	private void checkSurroundingBlocks(BlockPistonEvent e, Block b, List<BlockFace> sides) {
+		for (BlockFace bf : sides) {
+			Block bl = b.getRelative(bf);
+
+			// Checks if the surrounding block is placed in creative
+			if (!DataHandler.isTracked(bl))
+				continue;
+
+			// If it's attached to the moving block
+			if (bl.getFace(b) == BlockFace.DOWN && MaterialHandler.needsBlockBelow(bl)) {
+				// Rails don't cooperate with slime blocks
+				if (MaterialHandler.isRail(bl) && b.getType() == Material.SLIME_BLOCK) {
+					if (Main.DEBUG)
+						System.out.println("removeSurroundingBlock: slime + " + bl.getType());
+
+					e.setCancelled(true);
+					return;
+				}
+
+				BlockData bd = b.getBlockData();
+
+				/* Door */
+				if (bd instanceof Door) {
+					Door door = (Door) bd;
+					Block block = door.getHalf() == Half.BOTTOM ? b.getRelative(BlockFace.UP)
+							: b.getRelative(BlockFace.DOWN);
+
+					if (Main.DEBUG)
+						System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
+
+					DataHandler.breakBlock(b, null, false);
+					DataHandler.breakBlock(block, null, false);
+					continue;
+				}
+
+				if (Main.DEBUG)
+					System.out.println("removeSurroundingBlock: " + bl.getType());
+
+				DataHandler.breakBlock(bl, null);
+			}
+
+			if (bl.getFace(b) == MaterialHandler.getNeededFace(bl)) {
+				if (Main.DEBUG)
+					System.out.println("removeSurroundingBlock: " + bl.getType());
+
+				DataHandler.breakBlock(bl, null);
+			}
+		}
+	}
 }

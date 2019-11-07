@@ -1,8 +1,17 @@
 package me.prunt.restrictedcreative.listeners;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Bisected.Half;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.TrapDoor;
+import org.bukkit.block.data.type.Door.Hinge;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -26,423 +35,530 @@ import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class PlayerInteractListener implements Listener {
-    private Main main;
+	private Main main;
 
-    public PlayerInteractListener(Main main) {
-	this.main = main;
-    }
+	private static final List<BlockFace> ALL_SIDES = Arrays.asList(BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH,
+			BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST);
 
-    private Main getMain() {
-	return this.main;
-    }
-
-    /*
-     * Represents an event that is called when a player interacts with an object or
-     * air, potentially fired once for each hand. The hand can be determined using
-     * getHand().
-     *
-     * This event will fire as cancelled if the vanilla behavior is to do nothing
-     * (e.g interacting with air)
-     */
-    // LOWEST required for signshops and similar plugins
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void onPlayerInteractLowest(PlayerInteractEvent e) {
-	Player p = e.getPlayer();
-
-	// No need to track entities in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	// No need to track non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
-
-	ItemStack is = e.getItem();
-	Material ma = is == null ? Material.AIR : is.getType();
-
-	// Region check
-	if ((getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")
-		|| getMain().getSettings().isEnabled("limit.regions.whitelist.enabled"))
-		&& !getMain().getUtils().canBuildHere(p, e.getClickedBlock(), ma)) {
-	    e.setCancelled(true);
-	    getMain().getUtils().sendMessage(p, true, "disabled.region");
-	    return;
+	public PlayerInteractListener(Main main) {
+		this.main = main;
 	}
 
-	// Confiscate
-	if (getMain().getUtils().shouldConfiscate(p, is)) {
-	    p.getInventory().remove(is);
-	    e.setCancelled(true);
-
-	    if (Main.DEBUG)
-		System.out.println("shouldConfiscate: " + is.getType());
-
-	    return;
+	private Main getMain() {
+		return this.main;
 	}
 
-	// We only need to control right click interactions on blocks
-	if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
-	    return;
+	/*
+	 * Represents an event that is called when a player interacts with an object or
+	 * air, potentially fired once for each hand. The hand can be determined using
+	 * getHand().
+	 *
+	 * This event will fire as cancelled if the vanilla behavior is to do nothing
+	 * (e.g interacting with air)
+	 */
+	// LOWEST required for signshops and similar plugins
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+	public void onPlayerInteractLowest(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
 
-	Block b = e.getClickedBlock();
+		// No need to track entities in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-	// If block doesn't exist
-	if (b == null || b.getType() == Material.AIR)
-	    return;
+		// No need to track non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
 
-	Material m = b.getType();
+		ItemStack is = e.getItem();
+		Material ma = is == null ? Material.AIR : is.getType();
 
-	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.disable.interacting.on-ground")
-		|| p.hasPermission("rc.bypass.disable.interacting.on-ground." + m))
-	    return;
+		// Region check
+		if ((getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")
+				|| getMain().getSettings().isEnabled("limit.regions.whitelist.enabled"))
+				&& !getMain().getUtils().canBuildHere(p, e.getClickedBlock(), ma)) {
+			e.setCancelled(true);
+			getMain().getUtils().sendMessage(p, true, "disabled.region");
+			return;
+		}
 
-	// No need to control non-blocked items
-	if (!getMain().getSettings().getMaterialList("disable.interacting.on-ground").contains(m))
-	    return;
+		// Confiscate
+		if (getMain().getUtils().shouldConfiscate(p, is)) {
+			p.getInventory().remove(is);
+			e.setCancelled(true);
 
-	e.setCancelled(true);
+			if (Main.DEBUG)
+				System.out.println("shouldConfiscate: " + is.getType());
 
-	// Prevent double message
-	if (e.getHand() != EquipmentSlot.OFF_HAND)
-	    getMain().getUtils().sendMessage(p, true, "disabled.general");
-    }
+			return;
+		}
 
-    /*
-     * Represents an event that is called when a player interacts with an object or
-     * air, potentially fired once for each hand. The hand can be determined using
-     * getHand().
-     *
-     * This event will fire as cancelled if the vanilla behavior is to do nothing
-     * (e.g interacting with air)
-     */
-    // "ignoreCancelled = true" skipped EYE_OF_ENDER for the latter reason
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent e) {
-	Player p = e.getPlayer();
+		// We only need to control right click interactions on blocks
+		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
+			return;
 
-	// No need to track entities in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
+		Block b = e.getClickedBlock();
 
-	// No need to track non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
+		// If block doesn't exist
+		if (b == null || b.getType() == Material.AIR)
+			return;
 
-	ItemStack is = e.getItem();
+		Material m = b.getType();
 
-	if (is == null || is.getType() == Material.AIR)
-	    return;
+		// No need to control bypassed players
+		if (p.hasPermission("rc.bypass.disable.interacting.on-ground")
+				|| p.hasPermission("rc.bypass.disable.interacting.on-ground." + m))
+			return;
 
-	Material m = is.getType();
+		// No need to control non-blocked items
+		if (!getMain().getSettings().getMaterialList("disable.interacting.on-ground").contains(m))
+			return;
 
-	// No need to track bypassed players
-	if (p.hasPermission("rc.bypass.disable.interacting.in-hand")
-		|| p.hasPermission("rc.bypass.disable.interacting.in-hand." + m))
-	    return;
+		e.setCancelled(true);
 
-	// No need to control non-blocked items
-	if (!getMain().getSettings().getMaterialList("disable.interacting.in-hand").contains(m))
-	    return;
-
-	e.setCancelled(true);
-
-	// Prevent double message
-	if (e.getHand() != EquipmentSlot.OFF_HAND)
-	    getMain().getUtils().sendMessage(p, true, "disabled.general");
-    }
-
-    /*
-     * Represents an event that is called when a player interacts with an object or
-     * air, potentially fired once for each hand. The hand can be determined using
-     * getHand().
-     *
-     * This event will fire as cancelled if the vanilla behavior is to do nothing
-     * (e.g interacting with air)
-     */
-    // HIGHEST required for WorldGuard and similar plugins
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onPlayerInteractHighest(PlayerInteractEvent e) {
-	Player p = e.getPlayer();
-
-	// No need to track entities in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	// We only need to control right click interactions on blocks
-	if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
-	    return;
-
-	Block b = e.getClickedBlock();
-
-	if (b == null || b.getType() == Material.AIR)
-	    return;
-
-	/* Command /block */
-	if (DataHandler.isInfoWithCommand(p)) {
-	    if (DataHandler.isTracked(b)) {
-		Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
-			b.getType().toString()));
-	    } else {
-		Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false").replaceAll("%material%",
-			b.getType().toString()));
-	    }
-
-	    DataHandler.removeInfoWithCommand(p);
-	    e.setCancelled(true);
-	} else if (DataHandler.isAddWithCommand(p)) {
-	    DataHandler.setAsTracked(b);
-	    DataHandler.removeAddWithCommand(p);
-	    e.setCancelled(true);
-
-	    Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%",
-		    b.getType().toString()));
-	} else if (DataHandler.isRemoveWithCommand(p)) {
-	    DataHandler.removeTracking(b);
-	    DataHandler.removeRemoveWithCommand(p);
-	    e.setCancelled(true);
-
-	    Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
-		    b.getType().toString()));
+		// Prevent double message
+		if (e.getHand() != EquipmentSlot.OFF_HAND)
+			getMain().getUtils().sendMessage(p, true, "disabled.general");
 	}
 
-	// Creative placed cake shouldn't be edible
-	if (DataHandler.isTracked(b) && b.getType() == Material.CAKE) {
-	    getMain().getUtils().sendMessage(p, true, "disabled.interact");
+	/*
+	 * Represents an event that is called when a player interacts with an object or
+	 * air, potentially fired once for each hand. The hand can be determined using
+	 * getHand().
+	 *
+	 * This event will fire as cancelled if the vanilla behavior is to do nothing
+	 * (e.g interacting with air)
+	 */
+	// "ignoreCancelled = true" skipped EYE_OF_ENDER for the latter reason
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
 
-	    e.setCancelled(true);
-	    return;
+		// No need to track entities in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
+
+		// No need to track non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
+
+		ItemStack is = e.getItem();
+
+		if (is == null || is.getType() == Material.AIR)
+			return;
+
+		Material m = is.getType();
+
+		// No need to track bypassed players
+		if (p.hasPermission("rc.bypass.disable.interacting.in-hand")
+				|| p.hasPermission("rc.bypass.disable.interacting.in-hand." + m))
+			return;
+
+		// No need to control non-blocked items
+		if (!getMain().getSettings().getMaterialList("disable.interacting.in-hand").contains(m))
+			return;
+
+		e.setCancelled(true);
+
+		// Prevent double message
+		if (e.getHand() != EquipmentSlot.OFF_HAND)
+			getMain().getUtils().sendMessage(p, true, "disabled.general");
 	}
 
-	if (e.getItem() == null)
-	    return;
+	/*
+	 * Represents an event that is called when a player interacts with an object or
+	 * air, potentially fired once for each hand. The hand can be determined using
+	 * getHand().
+	 *
+	 * This event will fire as cancelled if the vanilla behavior is to do nothing
+	 * (e.g interacting with air)
+	 */
+	// HIGHEST required for WorldGuard and similar plugins
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onPlayerInteractHighest(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
 
-	Material m = e.getItem().getType();
+		// No need to track entities in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-	// Pumpkins can be carved with shears and they drop seeds
-	if (DataHandler.isTracked(b) && m == Material.SHEARS && b.getType() == Material.PUMPKIN) {
-	    getMain().getUtils().sendMessage(p, true, "disabled.interact");
+		// We only need to control right click interactions on blocks
+		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
+			return;
 
-	    e.setCancelled(true);
-	    return;
+		Block b = e.getClickedBlock();
+
+		if (b == null || b.getType() == Material.AIR)
+			return;
+
+		/* Command /block */
+		if (DataHandler.isInfoWithCommand(p)) {
+			if (DataHandler.isTracked(b)) {
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
+						b.getType().toString()));
+			} else {
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false").replaceAll("%material%",
+						b.getType().toString()));
+			}
+
+			DataHandler.removeInfoWithCommand(p);
+			e.setCancelled(true);
+		} else if (DataHandler.isAddWithCommand(p)) {
+			DataHandler.setAsTracked(b);
+			DataHandler.removeAddWithCommand(p);
+			e.setCancelled(true);
+
+			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%",
+					b.getType().toString()));
+		} else if (DataHandler.isRemoveWithCommand(p)) {
+			DataHandler.removeTracking(b);
+			DataHandler.removeRemoveWithCommand(p);
+			e.setCancelled(true);
+
+			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
+					b.getType().toString()));
+		}
+
+		// Creative placed cake shouldn't be edible
+		if (DataHandler.isTracked(b) && b.getType() == Material.CAKE) {
+			getMain().getUtils().sendMessage(p, true, "disabled.interact");
+
+			e.setCancelled(true);
+			return;
+		}
+
+		BlockData bd = b.getBlockData();
+
+		// Door and trapdoor attachment check
+		if (bd instanceof Door || bd instanceof TrapDoor) {
+			checkForAttachments(p, b);
+		}
+
+		if (e.getItem() == null)
+			return;
+
+		Material m = e.getItem().getType();
+
+		// Pumpkins can be carved with shears and they drop seeds
+		if (DataHandler.isTracked(b) && m == Material.SHEARS && b.getType() == Material.PUMPKIN) {
+			getMain().getUtils().sendMessage(p, true, "disabled.interact");
+
+			e.setCancelled(true);
+			return;
+		}
+
+		// No need to track non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
+
+		// No need to track bypassed players
+		if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
+			return;
+
+		// No need to track non-entity materials
+		if (!MaterialHandler.isPlaceableEntity(m))
+			return;
+
+		DataHandler.addToTrackedLocs(b.getLocation());
 	}
 
-	// No need to track non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
+	/*
+	 * Represents an event that is called when a player right clicks an entity.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
+		Player p = e.getPlayer();
 
-	// No need to track bypassed players
-	if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
-	    return;
+		// No need to track entities in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-	// No need to track non-entity materials
-	if (!MaterialHandler.isPlaceableEntity(m))
-	    return;
+		Entity en = e.getRightClicked();
+		EntityType et = en.getType();
 
-	DataHandler.addToTrackedLocs(b.getLocation());
-    }
+		/* Command /block */
+		if (DataHandler.isInfoWithCommand(p)) {
+			if (DataHandler.isTracked(en)) {
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
+						et.toString()));
+			} else {
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false").replaceAll("%material%",
+						et.toString()));
+			}
 
-    /*
-     * Represents an event that is called when a player right clicks an entity.
-     */
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
-	Player p = e.getPlayer();
+			DataHandler.removeInfoWithCommand(p);
+			e.setCancelled(true);
+		} else if (DataHandler.isAddWithCommand(p)) {
+			DataHandler.setAsTracked(en);
+			DataHandler.removeAddWithCommand(p);
+			e.setCancelled(true);
 
-	// No need to track entities in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
+			Utils.sendMessage(p,
+					getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%", et.toString()));
+		} else if (DataHandler.isRemoveWithCommand(p)) {
+			DataHandler.removeTracking(en);
+			DataHandler.removeRemoveWithCommand(p);
+			e.setCancelled(true);
 
-	Entity en = e.getRightClicked();
-	EntityType et = en.getType();
+			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
+					et.toString()));
+		}
 
-	/* Command /block */
-	if (DataHandler.isInfoWithCommand(p)) {
-	    if (DataHandler.isTracked(en)) {
-		Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
-			et.toString()));
-	    } else {
-		Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false").replaceAll("%material%",
-			et.toString()));
-	    }
+		// No need to track non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
 
-	    DataHandler.removeInfoWithCommand(p);
-	    e.setCancelled(true);
-	} else if (DataHandler.isAddWithCommand(p)) {
-	    DataHandler.setAsTracked(en);
-	    DataHandler.removeAddWithCommand(p);
-	    e.setCancelled(true);
+		// If creative player wants to put something in an empty item frame
+		if (en instanceof ItemFrame && !p.hasPermission("rc.bypass.tracking.blocks")
+				&& !p.hasPermission("rc.bypass.tracking.blocks." + et)) {
+			ItemStack is = e.getHand() == EquipmentSlot.HAND ? p.getInventory().getItemInMainHand()
+					: p.getInventory().getItemInOffHand();
+			ItemFrame frame = (ItemFrame) en;
+			ItemStack fis = frame.getItem();
 
-	    Utils.sendMessage(p,
-		    getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%", et.toString()));
-	} else if (DataHandler.isRemoveWithCommand(p)) {
-	    DataHandler.removeTracking(en);
-	    DataHandler.removeRemoveWithCommand(p);
-	    e.setCancelled(true);
+			if ((is != null && is.getType() != Material.AIR) && (fis == null || fis.getType() == Material.AIR)) {
+				DataHandler.setAsTrackedItem(frame);
+				return;
+			}
+		}
 
-	    Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
-		    et.toString()));
+		// No need to control disabled features
+		if (!getMain().getSettings().isEnabled("limit.interact.entities"))
+			return;
+
+		// No need to track bypassed players
+		if (p.hasPermission("rc.bypass.limit.interact.entities")
+				|| p.hasPermission("rc.bypass.limit.interact.entities." + et))
+			return;
+
+		e.setCancelled(true);
+
+		// Prevent double message
+		if (e.getHand() != EquipmentSlot.OFF_HAND)
+			getMain().getUtils().sendMessage(p, true, "disabled.general");
 	}
 
-	// No need to track non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
+	/*
+	 * Called when a player interacts with an armor stand and will either swap,
+	 * retrieve or place an item.
+	 */
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onPlayerArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
+		Player p = e.getPlayer();
+		ArmorStand a = e.getRightClicked();
+		EquipmentSlot slot = e.getSlot();
 
-	// If creative player wants to put something in an empty item frame
-	if (en instanceof ItemFrame && !p.hasPermission("rc.bypass.tracking.blocks")
-		&& !p.hasPermission("rc.bypass.tracking.blocks." + et)) {
-	    ItemStack is = e.getHand() == EquipmentSlot.HAND ? p.getInventory().getItemInMainHand()
-		    : p.getInventory().getItemInOffHand();
-	    ItemFrame frame = (ItemFrame) en;
-	    ItemStack fis = frame.getItem();
+		// No need to track entities in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-	    if ((is != null && is.getType() != Material.AIR) && (fis == null || fis.getType() == Material.AIR)) {
-		DataHandler.setAsTrackedItem(frame);
-		return;
-	    }
+		// No need to track bypassed players
+		if (p.hasPermission("rc.bypass.limit.interact.entities")
+				|| p.hasPermission("rc.bypass.limit.interact.entities." + a.getType()))
+			return;
+
+		// No need to control disabled features
+		if (p.getGameMode() == GameMode.CREATIVE && getMain().getSettings().isEnabled("limit.interact.entities")) {
+			getMain().getUtils().sendMessage(p, true, "disabled.general");
+
+			if (Main.DEBUG)
+				System.out.println("cancelEvent: " + slot);
+
+			e.setCancelled(true);
+			return;
+		}
+
+		if (e.getArmorStandItem() == null)
+			return;
+
+		// Survival player is taking creative item from armor stand
+		if (p.getGameMode() != GameMode.CREATIVE && e.getArmorStandItem().getType() != Material.AIR
+				&& DataHandler.isTrackedSlot(a, slot)) {
+			e.setCancelled(true);
+
+			EntityEquipment inv = a.getEquipment();
+			ItemStack air = new ItemStack(Material.AIR);
+
+			switch (slot) {
+			case CHEST:
+				a.setChestplate(air);
+				break;
+			case FEET:
+				a.setBoots(air);
+				break;
+			case HEAD:
+				a.setHelmet(air);
+				break;
+			case LEGS:
+				a.setLeggings(air);
+				break;
+			case HAND:
+				inv.setItemInMainHand(air);
+				break;
+			case OFF_HAND:
+				inv.setItemInOffHand(air);
+				break;
+			default:
+				break;
+			}
+
+			if (Main.DEBUG)
+				System.out.println("removeSlotTracking: " + slot);
+
+			DataHandler.removeSlotTracking(a, slot);
+
+			// Prevent double message
+			if (e.getHand() != EquipmentSlot.OFF_HAND)
+				getMain().getUtils().sendMessage(p, true, "disabled.interact");
+
+			return;
+		}
+
+		// Only creative players going forward
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
+
+		if (Main.DEBUG)
+			System.out.println("onPlayerArmorStandManipulate: " + slot);
+
+		// Creative player is taking a creative item from armor stand
+		if (e.getArmorStandItem().getType() != Material.AIR && DataHandler.isTrackedSlot(a, slot))
+			DataHandler.removeSlotTracking(a, slot);
+
+		// Creative player is putting an item on the armor stand
+		if (e.getPlayerItem().getType() != Material.AIR)
+			DataHandler.setAsTrackedSlot(a, slot);
 	}
 
-	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("limit.interact.entities"))
-	    return;
+	/*
+	 * Called when one Entity breeds with another Entity.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onEntityBreed(EntityBreedEvent e) {
+		// Only players going forward
+		if (!(e.getBreeder() instanceof Player))
+			return;
 
-	// No need to track bypassed players
-	if (p.hasPermission("rc.bypass.limit.interact.entities")
-		|| p.hasPermission("rc.bypass.limit.interact.entities." + et))
-	    return;
+		Player p = (Player) e.getBreeder();
 
-	e.setCancelled(true);
+		// No need to track entities in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-	// Prevent double message
-	if (e.getHand() != EquipmentSlot.OFF_HAND)
-	    getMain().getUtils().sendMessage(p, true, "disabled.general");
-    }
+		// No need to track non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
 
-    /*
-     * Called when a player interacts with an armor stand and will either swap,
-     * retrieve or place an item.
-     */
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onPlayerArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
-	Player p = e.getPlayer();
-	ArmorStand a = e.getRightClicked();
-	EquipmentSlot slot = e.getSlot();
+		// No need to control disabled features
+		if (!getMain().getSettings().isEnabled("limit.interact.breeding"))
+			return;
 
-	// No need to track entities in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
+		EntityType et = e.getEntityType();
 
-	// No need to track bypassed players
-	if (p.hasPermission("rc.bypass.limit.interact.entities")
-		|| p.hasPermission("rc.bypass.limit.interact.entities." + a.getType()))
-	    return;
+		// No need to track bypassed players
+		if (p.hasPermission("rc.bypass.limit.interact.breeding")
+				|| p.hasPermission("rc.bypass.limit.interact.breeding." + et))
+			return;
 
-	// No need to control disabled features
-	if (p.getGameMode() == GameMode.CREATIVE && getMain().getSettings().isEnabled("limit.interact.entities")) {
-	    getMain().getUtils().sendMessage(p, true, "disabled.general");
+		if (Main.DEBUG)
+			System.out.println("onEntityBreed: " + et);
 
-	    if (Main.DEBUG)
-		System.out.println("cancelEvent: " + slot);
-
-	    e.setCancelled(true);
-	    return;
+		e.setCancelled(true);
 	}
 
-	if (e.getArmorStandItem() == null)
-	    return;
+	private void checkForAttachments(Player p, Block b) {
+		checkSurroundingBlocks(p, b, ALL_SIDES);
+		BlockData bd = b.getBlockData();
 
-	// Survival player is taking creative item from armor stand
-	if (p.getGameMode() != GameMode.CREATIVE && e.getArmorStandItem().getType() != Material.AIR
-		&& DataHandler.isTrackedSlot(a, slot)) {
-	    e.setCancelled(true);
+		// Check other half of the door as well
+		if (bd instanceof Door) {
+			Door door = (Door) bd;
 
-	    EntityEquipment inv = a.getEquipment();
-	    ItemStack air = new ItemStack(Material.AIR);
-
-	    switch (slot) {
-	    case CHEST:
-		a.setChestplate(air);
-		break;
-	    case FEET:
-		a.setBoots(air);
-		break;
-	    case HEAD:
-		a.setHelmet(air);
-		break;
-	    case LEGS:
-		a.setLeggings(air);
-		break;
-	    case HAND:
-		inv.setItemInMainHand(air);
-		break;
-	    case OFF_HAND:
-		inv.setItemInOffHand(air);
-		break;
-	    default:
-		break;
-	    }
-
-	    if (Main.DEBUG)
-		System.out.println("removeSlotTracking: " + slot);
-
-	    DataHandler.removeSlotTracking(a, slot);
-
-	    // Prevent double message
-	    if (e.getHand() != EquipmentSlot.OFF_HAND)
-		getMain().getUtils().sendMessage(p, true, "disabled.interact");
-
-	    return;
+			Block bl = door.getHalf() == Half.TOP ? b.getRelative(BlockFace.DOWN) : b.getRelative(BlockFace.UP);
+			checkSurroundingBlocks(p, bl, ALL_SIDES);
+		}
 	}
 
-	// Only creative players going forward
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
+	private void checkSurroundingBlocks(Player p, Block door, List<BlockFace> sides) {
+		for (BlockFace bf : sides) {
+			Block attachable = door.getRelative(bf);
 
-	if (Main.DEBUG)
-	    System.out.println("onPlayerArmorStandManipulate: " + slot);
+			// Checks if the surrounding block is placed in creative
+			if (!DataHandler.isTracked(attachable))
+				continue;
 
-	// Creative player is taking a creative item from armor stand
-	if (e.getArmorStandItem().getType() != Material.AIR && DataHandler.isTrackedSlot(a, slot))
-	    DataHandler.removeSlotTracking(a, slot);
+			BlockFace dir = MaterialHandler.getNeededFace(attachable);
 
-	// Creative player is putting an item on the armor stand
-	if (e.getPlayerItem().getType() != Material.AIR)
-	    DataHandler.setAsTrackedSlot(a, slot);
-    }
+			// If it's attached to the original block
+			if (attachable.getFace(door) == dir && isNeededDirectionOk(attachable, dir))
+				DataHandler.breakBlock(attachable, p);
+		}
+	}
 
-    /*
-     * Called when one Entity breeds with another Entity.
-     */
-    @EventHandler(ignoreCancelled = true)
-    public void onEntityBreed(EntityBreedEvent e) {
-	// Only players going forward
-	if (!(e.getBreeder() instanceof Player))
-	    return;
+	private boolean isNeededDirectionOk(Block bl, BlockFace dir) {
+		BlockData bd = bl.getBlockData();
 
-	Player p = (Player) e.getBreeder();
+		if (bd instanceof Door) {
+			if (Main.DEBUG)
+				System.out.println("getDoorFace: " + getDoorFace((Door) bd) + " vs " + dir);
 
-	// No need to track entities in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
+			// If they're not facing each other, they're in illegal position
+			if (getDoorFace((Door) bd) != dir.getOppositeFace())
+				return false;
 
-	// No need to track non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
+			return true;
+		}
 
-	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("limit.interact.breeding"))
-	    return;
+		if (bd instanceof TrapDoor) {
+			TrapDoor door = (TrapDoor) bd;
+			BlockFace face = door.getFacing();
+			boolean open = door.isOpen();
 
-	EntityType et = e.getEntityType();
+			if (Main.DEBUG)
+				System.out.println("trapdoor: " + face + " vs " + dir + " " + open);
 
-	// No need to track bypassed players
-	if (p.hasPermission("rc.bypass.limit.interact.breeding")
-		|| p.hasPermission("rc.bypass.limit.interact.breeding." + et))
-	    return;
+			// Trapdoors always face down when they're closed
+			if (!open && dir != BlockFace.UP)
+				return false;
 
-	if (Main.DEBUG)
-	    System.out.println("onEntityBreed: " + et);
+			// If trapdoors are open, they have the same face as the blocks attached to them
+			if (open && dir != face)
+				return false;
 
-	e.setCancelled(true);
-    }
+			return true;
+		}
+
+		return true;
+	}
+
+	private BlockFace getDoorFace(Door door) {
+		Hinge hinge = door.getHinge();
+		BlockFace face = door.getFacing();
+
+		if (Main.DEBUG)
+			System.out.println("getDoorFace: " + hinge + " " + face + " " + door.isOpen());
+
+		// If a door is closed, it's actually facing the opposite of placement face
+		if (!door.isOpen())
+			return face.getOppositeFace();
+
+		return getHingeFace(face, hinge).getOppositeFace();
+	}
+
+	private BlockFace getHingeFace(BlockFace face, Hinge hinge) {
+		if (Main.DEBUG)
+			System.out.println("getHingeFace: " + face + " " + hinge);
+
+		switch (face) {
+		case NORTH:
+			return hinge == Hinge.LEFT ? BlockFace.EAST : BlockFace.WEST;
+		case EAST:
+			return hinge == Hinge.LEFT ? BlockFace.SOUTH : BlockFace.NORTH;
+		case SOUTH:
+			return hinge == Hinge.LEFT ? BlockFace.WEST : BlockFace.EAST;
+		case WEST:
+			return hinge == Hinge.LEFT ? BlockFace.NORTH : BlockFace.SOUTH;
+		default:
+			return null;
+		}
+	}
 }

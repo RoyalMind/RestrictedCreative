@@ -25,261 +25,261 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.DataHandler;
 
 public class PlayerMiscListener implements Listener {
-    private Main main;
+	private Main main;
 
-    public PlayerMiscListener(Main main) {
-	this.main = main;
-    }
-
-    private Main getMain() {
-	return this.main;
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onPlayerGameModeChange(PlayerGameModeChangeEvent e) {
-	Player p = e.getPlayer();
-
-	// No need to control gamemode changes in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	if (e.getNewGameMode() == p.getGameMode())
-	    return;
-
-	if (Main.DEBUG)
-	    System.out.println("onPlayerGameModeChange: " + p.getGameMode() + " -> " + e.getNewGameMode());
-
-	// Player wants to switch into creative mode
-	if (e.getNewGameMode() == GameMode.CREATIVE) {
-	    // Player height check
-	    if (!getMain().getUtils().isHeightOk(p)) {
-		getMain().getUtils().sendMessage(p, true, "disabled.region");
-		e.setCancelled(true);
-		return;
-	    }
-
-	    // Prevents opening a container, switching to creative mode, and dumping items
-	    if (illegalContainerOpened(p)) {
-		getMain().getUtils().sendMessage(p, true, "disabled.general");
-		e.setCancelled(true);
-		return;
-	    }
-
-	    // Switch inventories, permissions etc
-	    getMain().getUtils().setCreative(p, true);
+	public PlayerMiscListener(Main main) {
+		this.main = main;
 	}
 
-	// Player want's to switch out of creative
-	else if (p.getGameMode() == GameMode.CREATIVE) {
-	    // Switch inventories, permissions etc
-	    getMain().getUtils().setCreative(p, false);
-	} else {
-	    return;
+	private Main getMain() {
+		return this.main;
 	}
 
-	DataHandler.setPreviousGameMode(p, p.getGameMode());
-    }
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onPlayerGameModeChange(PlayerGameModeChangeEvent e) {
+		Player p = e.getPlayer();
 
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-	Player p = e.getPlayer();
-	String command = e.getMessage();
-
-	/* Old way of handling aliases */
-	if (DataHandler.isUsingOldAliases()) {
-	    // Loop through command list
-	    for (String cmd : getMain().getSettings().getConfig().getConfigurationSection("commands").getKeys(false)) {
-		// Loop through alias list
-		for (String alias : getMain().getSettings().getStringList("commands." + cmd + ".aliases")) {
-		    // If the message matches or starts with the alias
-		    // (+ space to not catch other commands)
-		    if (command.startsWith("/" + alias + " ") || command.equalsIgnoreCase("/" + alias)) {
-			List<String> argList = new ArrayList<>(
-				Arrays.asList(command.substring(alias.length() + 1).split(" ")));
-			// Remove empty strings caused by double spaces and such
-			argList.removeAll(Arrays.asList("", null));
-			String[] arguments = argList.toArray(new String[0]);
-
-			main.getCommand(cmd).execute(p, alias, arguments);
-			e.setCancelled(true);
+		// No need to control gamemode changes in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 			return;
-		    }
+
+		if (e.getNewGameMode() == p.getGameMode())
+			return;
+
+		if (Main.DEBUG)
+			System.out.println("onPlayerGameModeChange: " + p.getGameMode() + " -> " + e.getNewGameMode());
+
+		// Player wants to switch into creative mode
+		if (e.getNewGameMode() == GameMode.CREATIVE) {
+			// Player height check
+			if (!getMain().getUtils().isHeightOk(p)) {
+				getMain().getUtils().sendMessage(p, true, "disabled.region");
+				e.setCancelled(true);
+				return;
+			}
+
+			// Prevents opening a container, switching to creative mode, and dumping items
+			if (illegalContainerOpened(p)) {
+				getMain().getUtils().sendMessage(p, true, "disabled.general");
+				e.setCancelled(true);
+				return;
+			}
+
+			// Switch inventories, permissions etc
+			getMain().getUtils().setCreative(p, true);
 		}
-	    }
+
+		// Player want's to switch out of creative
+		else if (p.getGameMode() == GameMode.CREATIVE) {
+			// Switch inventories, permissions etc
+			getMain().getUtils().setCreative(p, false);
+		} else {
+			return;
+		}
+
+		DataHandler.setPreviousGameMode(p, p.getGameMode());
 	}
 
-	// No need to control drops in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
+		Player p = e.getPlayer();
+		String command = e.getMessage();
 
-	// No need to control non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
+		/* Old way of handling aliases */
+		if (DataHandler.isUsingOldAliases()) {
+			// Loop through command list
+			for (String cmd : getMain().getSettings().getConfig().getConfigurationSection("commands").getKeys(false)) {
+				// Loop through alias list
+				for (String alias : getMain().getSettings().getStringList("commands." + cmd + ".aliases")) {
+					// If the message matches or starts with the alias
+					// (+ space to not catch other commands)
+					if (command.startsWith("/" + alias + " ") || command.equalsIgnoreCase("/" + alias)) {
+						List<String> argList = new ArrayList<>(
+								Arrays.asList(command.substring(alias.length() + 1).split(" ")));
+						// Remove empty strings caused by double spaces and such
+						argList.removeAll(Arrays.asList("", null));
+						String[] arguments = argList.toArray(new String[0]);
 
-	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.limit.commands")
-		|| p.hasPermission("rc.bypass.limit.commands." + command.split(" ")[0]))
-	    return;
+						main.getCommand(cmd).execute(p, alias, arguments);
+						e.setCancelled(true);
+						return;
+					}
+				}
+			}
+		}
 
-	// Loops through all disabled commands
-	for (String regex : getMain().getSettings().getStringList("limit.commands")) {
-	    // .substring(1) removes "/" from the command
-	    if (command.substring(1).toLowerCase().matches(regex)) {
-		e.setCancelled(true);
-		getMain().getUtils().sendMessage(p, true, "disabled.general");
-		return;
-	    }
-	}
-    }
+		// No need to control drops in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-    /*
-     * Called when a player switches to another world.
-     */
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
-	Player p = e.getPlayer();
+		// No need to control non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
 
-	// No need to control world changing when both worlds are enabled or disabled
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()) == getMain().getUtils()
-		.isDisabledWorld(e.getFrom().getName()))
-	    return;
+		// No need to control bypassed players
+		if (p.hasPermission("rc.bypass.limit.commands")
+				|| p.hasPermission("rc.bypass.limit.commands." + command.split(" ")[0]))
+			return;
 
-	// No need to control non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
-
-	// Removes creative mode
-	p.setGameMode(DataHandler.getPreviousGameMode(p));
-
-	// Switch inventories, permissions etc
-	getMain().getUtils().setCreative(p, false);
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent e) {
-	if (!getMain().getSettings().isEnabled("limit.moving.enabled"))
-	    return;
-
-	Player p = e.getPlayer();
-
-	// No need to control moving in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	// No need to control non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
-
-	if (getMain().getUtils().isHeightOk(p))
-	    return;
-
-	p.setGameMode(DataHandler.getPreviousGameMode(p));
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerDeath(PlayerDeathEvent e) {
-	Player p = e.getEntity();
-
-	// No need to control moving in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	// No need to control non-creative players
-	if (p.getGameMode() != GameMode.CREATIVE)
-	    return;
-
-	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("limit.item.drop"))
-	    return;
-
-	// No need to control bypassed players
-	if (p.hasPermission("rc.bypass.limit.item.drop"))
-	    return;
-
-	// Removes all drops
-	e.getDrops().clear();
-	e.setDroppedExp(0);
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerLogin(PlayerLoginEvent e) {
-	// We don't care if blocks have already been loaded
-	if (Integer.valueOf(DataHandler.getTotalCount()) >= 0)
-	    return;
-
-	// No need to control disabled features
-	if (!getMain().getSettings().isEnabled("general.loading.delay-login"))
-	    return;
-
-	e.disallow(Result.KICK_OTHER, getMain().getUtils().getMessage(false, "database.load"));
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent e) {
-	Player p = e.getPlayer();
-
-	getMain().getUtils().loadInventory(p);
-
-	// When force-gamemode is enabled, PlayerGamemodeChangeEvent isn't fired onjoin
-	if (!DataHandler.isForceGamemodeEnabled())
-	    return;
-
-	if (Main.DEBUG) {
-	    System.out.println("onPlayerJoin: forced " + main.getServer().getDefaultGameMode());
-	    System.out.println("... c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
-		    + (DataHandler.getSurvivalInv(p) != null));
+		// Loops through all disabled commands
+		for (String regex : getMain().getSettings().getStringList("limit.commands")) {
+			// .substring(1) removes "/" from the command
+			if (command.substring(1).toLowerCase().matches(regex)) {
+				e.setCancelled(true);
+				getMain().getUtils().sendMessage(p, true, "disabled.general");
+				return;
+			}
+		}
 	}
 
-	// If player was switched to creative by default and it was previously survival
-	if (p.getGameMode() == GameMode.CREATIVE && DataHandler.getCreativeInv(p) != null) {
-	    if (Main.DEBUG)
-		System.out.println("onPlayerJoin: setCreative true");
+	/*
+	 * Called when a player switches to another world.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
+		Player p = e.getPlayer();
 
-	    // Switch inventories, permissions etc
-	    getMain().getUtils().setCreative(p, true);
-	    DataHandler.setPreviousGameMode(p, GameMode.SURVIVAL);
-	    return;
+		// No need to control world changing when both worlds are enabled or disabled
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()) == getMain().getUtils()
+				.isDisabledWorld(e.getFrom().getName()))
+			return;
+
+		// No need to control non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
+
+		// Removes creative mode
+		p.setGameMode(DataHandler.getPreviousGameMode(p));
+
+		// Switch inventories, permissions etc
+		getMain().getUtils().setCreative(p, false);
 	}
 
-	// If player was switched to ~survival by default and it was previously creative
-	if (p.getGameMode() != GameMode.CREATIVE && DataHandler.getSurvivalInv(p) != null) {
-	    if (Main.DEBUG)
-		System.out.println("onPlayerJoin: setCreative false");
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerMove(PlayerMoveEvent e) {
+		if (!getMain().getSettings().isEnabled("limit.moving.enabled"))
+			return;
 
-	    // Switch inventories, permissions etc
-	    getMain().getUtils().setCreative(p, false);
-	    DataHandler.setPreviousGameMode(p, GameMode.CREATIVE);
-	    return;
+		Player p = e.getPlayer();
+
+		// No need to control moving in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
+
+		// No need to control non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
+
+		if (getMain().getUtils().isHeightOk(p))
+			return;
+
+		p.setGameMode(DataHandler.getPreviousGameMode(p));
 	}
-    }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerQuit(PlayerQuitEvent e) {
-	Player p = e.getPlayer();
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerDeath(PlayerDeathEvent e) {
+		Player p = e.getEntity();
 
-	DataHandler.removeInfoWithCommand(p);
-	DataHandler.removeAddWithCommand(p);
-	DataHandler.removeRemoveWithCommand(p);
+		// No need to control moving in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-	getMain().getUtils().saveInventory(p);
-    }
+		// No need to control non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
 
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerKick(PlayerKickEvent e) {
-	Player p = e.getPlayer();
+		// No need to control disabled features
+		if (!getMain().getSettings().isEnabled("limit.item.drop"))
+			return;
 
-	DataHandler.removeInfoWithCommand(p);
-	DataHandler.removeAddWithCommand(p);
-	DataHandler.removeRemoveWithCommand(p);
+		// No need to control bypassed players
+		if (p.hasPermission("rc.bypass.limit.item.drop"))
+			return;
 
-	getMain().getUtils().saveInventory(p);
-    }
+		// Removes all drops
+		e.getDrops().clear();
+		e.setDroppedExp(0);
+	}
 
-    private boolean illegalContainerOpened(Player p) {
-	InventoryType it = p.getOpenInventory().getType();
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerLogin(PlayerLoginEvent e) {
+		// We don't care if blocks have already been loaded
+		if (Integer.valueOf(DataHandler.getTotalCount()) >= 0)
+			return;
 
-	return it != InventoryType.PLAYER && it != InventoryType.CRAFTING && it != InventoryType.CREATIVE
-		&& !p.hasPermission("rc.bypass.tracking.inventory")
-		&& getMain().getSettings().isEnabled("limit.item.drop");
-    }
+		// No need to control disabled features
+		if (!getMain().getSettings().isEnabled("general.loading.delay-login"))
+			return;
+
+		e.disallow(Result.KICK_OTHER, getMain().getUtils().getMessage(false, "database.load"));
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerJoin(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+
+		getMain().getUtils().loadInventory(p);
+
+		// When force-gamemode is enabled, PlayerGamemodeChangeEvent isn't fired onjoin
+		if (!DataHandler.isForceGamemodeEnabled())
+			return;
+
+		if (Main.DEBUG) {
+			System.out.println("onPlayerJoin: forced " + main.getServer().getDefaultGameMode());
+			System.out.println("... c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
+					+ (DataHandler.getSurvivalInv(p) != null));
+		}
+
+		// If player was switched to creative by default and it was previously survival
+		if (p.getGameMode() == GameMode.CREATIVE && DataHandler.getCreativeInv(p) != null) {
+			if (Main.DEBUG)
+				System.out.println("onPlayerJoin: setCreative true");
+
+			// Switch inventories, permissions etc
+			getMain().getUtils().setCreative(p, true);
+			DataHandler.setPreviousGameMode(p, GameMode.SURVIVAL);
+			return;
+		}
+
+		// If player was switched to ~survival by default and it was previously creative
+		if (p.getGameMode() != GameMode.CREATIVE && DataHandler.getSurvivalInv(p) != null) {
+			if (Main.DEBUG)
+				System.out.println("onPlayerJoin: setCreative false");
+
+			// Switch inventories, permissions etc
+			getMain().getUtils().setCreative(p, false);
+			DataHandler.setPreviousGameMode(p, GameMode.CREATIVE);
+			return;
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerQuit(PlayerQuitEvent e) {
+		Player p = e.getPlayer();
+
+		DataHandler.removeInfoWithCommand(p);
+		DataHandler.removeAddWithCommand(p);
+		DataHandler.removeRemoveWithCommand(p);
+
+		getMain().getUtils().saveInventory(p);
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerKick(PlayerKickEvent e) {
+		Player p = e.getPlayer();
+
+		DataHandler.removeInfoWithCommand(p);
+		DataHandler.removeAddWithCommand(p);
+		DataHandler.removeRemoveWithCommand(p);
+
+		getMain().getUtils().saveInventory(p);
+	}
+
+	private boolean illegalContainerOpened(Player p) {
+		InventoryType it = p.getOpenInventory().getType();
+
+		return it != InventoryType.PLAYER && it != InventoryType.CRAFTING && it != InventoryType.CREATIVE
+				&& !p.hasPermission("rc.bypass.tracking.inventory")
+				&& getMain().getSettings().isEnabled("limit.item.drop");
+	}
 }
