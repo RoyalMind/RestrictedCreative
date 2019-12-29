@@ -80,7 +80,7 @@ public class PlayerMiscListener implements Listener {
 		DataHandler.setPreviousGameMode(p, p.getGameMode());
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
 		Player p = e.getPlayer();
 		String command = e.getMessage();
