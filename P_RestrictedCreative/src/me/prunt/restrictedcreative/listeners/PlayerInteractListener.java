@@ -380,16 +380,16 @@ public class PlayerInteractListener implements Listener {
 
 			switch (slot) {
 			case CHEST:
-				a.setChestplate(air);
+				inv.setChestplate(air);
 				break;
 			case FEET:
-				a.setBoots(air);
+				inv.setBoots(air);
 				break;
 			case HEAD:
-				a.setHelmet(air);
+				inv.setHelmet(air);
 				break;
 			case LEGS:
-				a.setLeggings(air);
+				inv.setLeggings(air);
 				break;
 			case HAND:
 				inv.setItemInMainHand(air);

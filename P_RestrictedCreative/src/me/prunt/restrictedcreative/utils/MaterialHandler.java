@@ -31,13 +31,9 @@ import org.bukkit.block.data.type.Switch;
 import org.bukkit.block.data.type.TripwireHook;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.RedstoneTorch;
-import org.bukkit.material.Torch;
 
 import me.prunt.restrictedcreative.Main;
 
-@SuppressWarnings("deprecation")
 public class MaterialHandler {
 	// Items that will break if block below is air
 	private static HashSet<Material> top = new HashSet<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
@@ -121,21 +117,18 @@ public class MaterialHandler {
 
 	public static BlockFace getNeededFace(Block b) {
 		BlockData bd = b.getBlockData();
-		MaterialData md = b.getState().getData();
 
-		// Some of the MaterialData instances aren't directional
-		if (md instanceof Torch)
-			return ((Torch) md).getAttachedFace();
-		if (md instanceof RedstoneTorch)
-			return ((RedstoneTorch) md).getAttachedFace();
+		if (!Bukkit.getVersion().contains("1.13") && bd instanceof Lantern) {
+			if (Main.DEBUG)
+				System.out.println("getNeededFace: Lantern");
 
-		if (Bukkit.getVersion().contains("1.14")) {
-			if (bd instanceof Lantern) {
-				if (Main.DEBUG)
-					System.out.println("getNeededFace: Lantern");
-				return ((Lantern) bd).isHanging() ? BlockFace.UP : BlockFace.DOWN;
-			}
+			return ((Lantern) bd).isHanging() ? BlockFace.UP : BlockFace.DOWN;
 		}
+
+		if (b.getType() == Material.TORCH)
+			return BlockFace.DOWN;
+		if (b.getType() == Material.REDSTONE_TORCH)
+			return BlockFace.DOWN;
 
 		if (!(bd instanceof Directional))
 			return null;
@@ -145,14 +138,16 @@ public class MaterialHandler {
 		// getOppositeFace() because getFacing() returns where the item is "looking",
 		// opposite of where it is attached
 		// NB: this doesn't seem to be always true
+		if (b.getType() == Material.WALL_TORCH)
+			return ((Directional) bd).getFacing().getOppositeFace(); // TESTED 1.15.2
+		if (bd instanceof RedstoneWallTorch)
+			return d.getFacing().getOppositeFace();
 		if (bd instanceof Cocoa)
 			return d.getFacing(); // TESTED 1.13.2
 		if (bd instanceof Ladder)
 			return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 		if (bd instanceof CoralWallFan)
 			return d.getFacing().getOppositeFace(); // TESTED 1.13.2
-		if (bd instanceof RedstoneWallTorch) // currently covered by RedstoneTorch MaterialData above
-			return d.getFacing().getOppositeFace();
 		if (bd instanceof TripwireHook)
 			return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 		if (bd instanceof WallSign)
@@ -167,17 +162,15 @@ public class MaterialHandler {
 				return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 			}
 		}
-		if (Bukkit.getVersion().contains("1.14")) {
-			if (bd instanceof Bell) {
-				switch (((Bell) bd).getAttachment()) {
-				case CEILING:
-					return BlockFace.UP;
-				case FLOOR:
-					return BlockFace.DOWN;
-				case SINGLE_WALL:
-				case DOUBLE_WALL:
-					return d.getFacing(); // TESTED 1.14
-				}
+		if (!Bukkit.getVersion().contains("1.13") && bd instanceof Bell) {
+			switch (((Bell) bd).getAttachment()) {
+			case CEILING:
+				return BlockFace.UP;
+			case FLOOR:
+				return BlockFace.DOWN;
+			case SINGLE_WALL:
+			case DOUBLE_WALL:
+				return d.getFacing(); // TESTED 1.14
 			}
 		}
 
@@ -214,14 +207,14 @@ public class MaterialHandler {
 	}
 
 	private static HashSet<Material> getTop() {
-		if (Bukkit.getVersion().contains("1.14")) {
+		if (!Bukkit.getVersion().contains("1.13")) {
 			top.add(Material.valueOf("BAMBOO"));
 			top.add(Material.valueOf("BAMBOO_SAPLING"));
 			top.add(Material.valueOf("CORNFLOWER"));
 			top.add(Material.valueOf("LILY_OF_THE_VALLEY"));
 			top.add(Material.valueOf("WITHER_ROSE"));
 			top.add(Material.valueOf("SWEET_BERRY_BUSH"));
-		} else if (Bukkit.getVersion().contains("1.13")) {
+		} else {
 			top.add(Material.valueOf("DANDELION_YELLOW"));
 		}
 		return top;

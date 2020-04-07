@@ -12,119 +12,119 @@ import me.prunt.restrictedcreative.storage.DataHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class MainCommand implements CommandExecutor {
-    private Main main;
+	private Main main;
 
-    public MainCommand(Main plugin) {
-	this.main = plugin;
-    }
+	public MainCommand(Main plugin) {
+		this.main = plugin;
+	}
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-	if (args.length == 0)
-	    return false;
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (args.length == 0)
+			return false;
 
-	switch (args[0]) {
-	case "reload":
-	    if (sender.hasPermission("rc.commands.reload")) {
-		reload(sender);
+		switch (args[0]) {
+		case "reload":
+			if (sender.hasPermission("rc.commands.reload")) {
+				reload(sender);
+				return true;
+			}
+			break;
+		case "block":
+			if (sender.hasPermission("rc.commands.block")) {
+				block(sender, args);
+				return true;
+			}
+			break;
+		case "i-am-sure-i-want-to-delete-all-plugin-data-from-database":
+			if (sender.hasPermission("rc.commands.delete")) {
+				delete(sender);
+				return true;
+			}
+			break;
+		default:
+			return false;
+		}
+
+		main.getUtils().sendMessage(sender, false, "no-permission");
 		return true;
-	    }
-	    break;
-	case "block":
-	    if (sender.hasPermission("rc.commands.block")) {
-		block(sender, args);
-		return true;
-	    }
-	    break;
-	case "i-am-sure-i-want-to-delete-all-plugin-data-from-database":
-	    if (sender.hasPermission("rc.commands.delete")) {
-		delete(sender);
-		return true;
-	    }
-	    break;
-	default:
-	    return false;
 	}
 
-	main.getUtils().sendMessage(sender, false, "no-permission");
-	return true;
-    }
-
-    private void reload(CommandSender sender) {
-	main.loadConfig();
-	main.registerListeners();
-	main.getUtils().sendMessage(sender, true, "reloaded");
-    }
-
-    private void delete(CommandSender sender) {
-	main.getDB().executeUpdate("DELETE FROM " + main.getDB().getBlocksTable());
-
-	// Loops through worlds
-	for (World w : main.getServer().getWorlds()) {
-	    // Leaves out the disabled ones
-	    if (main.getUtils().isDisabledWorld(w.getName()))
-		continue;
-
-	    // Loops through entities
-	    for (Entity e : w.getEntities()) {
-		if (DataHandler.isTracked(e))
-		    DataHandler.removeTracking(e);
-	    }
+	private void reload(CommandSender sender) {
+		main.reloadConfigs();
+		main.registerListeners();
+		main.getUtils().sendMessage(sender, true, "reloaded");
 	}
 
-	main.getUtils().sendMessage(sender, true, "database.deleted");
-    }
+	private void delete(CommandSender sender) {
+		main.getDB().executeUpdate("DELETE FROM " + main.getDB().getBlocksTable());
 
-    private void block(CommandSender sender, String[] args) {
-	if (args.length < 2) {
-	    main.getUtils().sendMessage(sender, false, "usage.block");
-	    return;
+		// Loops through worlds
+		for (World w : main.getServer().getWorlds()) {
+			// Leaves out the disabled ones
+			if (main.getUtils().isDisabledWorld(w.getName()))
+				continue;
+
+			// Loops through entities
+			for (Entity e : w.getEntities()) {
+				if (DataHandler.isTracked(e))
+					DataHandler.removeTracking(e);
+			}
+		}
+
+		main.getUtils().sendMessage(sender, true, "database.deleted");
 	}
 
-	if (args[1].equalsIgnoreCase("stats")) {
-	    String msg = main.getUtils().getMessage(true, "block.stats").replaceAll("%total%",
-		    DataHandler.getTotalCount());
-	    Utils.sendMessage(sender, msg);
-	    return;
-	}
+	private void block(CommandSender sender, String[] args) {
+		if (args.length < 2) {
+			main.getUtils().sendMessage(sender, false, "usage.block");
+			return;
+		}
 
-	if (!(sender instanceof Player)) {
-	    main.getUtils().sendMessage(sender, true, "no-console");
-	    return;
-	}
+		if (args[1].equalsIgnoreCase("stats")) {
+			String msg = main.getUtils().getMessage(true, "block.stats").replaceAll("%total%",
+					DataHandler.getTotalCount());
+			Utils.sendMessage(sender, msg);
+			return;
+		}
 
-	Player p = (Player) sender;
+		if (!(sender instanceof Player)) {
+			main.getUtils().sendMessage(sender, true, "no-console");
+			return;
+		}
 
-	switch (args[1]) {
-	case "add":
-	    if (DataHandler.getAddWithCommand().contains(p)) {
-		DataHandler.getAddWithCommand().remove(p);
-		main.getUtils().sendMessage(sender, true, "block.cancel");
-	    } else {
-		DataHandler.getAddWithCommand().add(p);
-		main.getUtils().sendMessage(sender, true, "block.add.add");
-	    }
-	    break;
-	case "remove":
-	    if (DataHandler.getRemoveWithCommand().contains(p)) {
-		DataHandler.getRemoveWithCommand().remove(p);
-		main.getUtils().sendMessage(sender, true, "block.cancel");
-	    } else {
-		DataHandler.getRemoveWithCommand().add(p);
-		main.getUtils().sendMessage(sender, true, "block.remove.remove");
-	    }
-	    break;
-	case "info":
-	    if (DataHandler.getInfoWithCommand().contains(p)) {
-		DataHandler.getInfoWithCommand().remove(p);
-		main.getUtils().sendMessage(sender, true, "block.cancel");
-	    } else {
-		DataHandler.getInfoWithCommand().add(p);
-		main.getUtils().sendMessage(sender, true, "block.info.info");
-	    }
-	    break;
-	default:
-	    main.getUtils().sendMessage(sender, false, "usage.block");
+		Player p = (Player) sender;
+
+		switch (args[1]) {
+		case "add":
+			if (DataHandler.getAddWithCommand().contains(p)) {
+				DataHandler.getAddWithCommand().remove(p);
+				main.getUtils().sendMessage(sender, true, "block.cancel");
+			} else {
+				DataHandler.getAddWithCommand().add(p);
+				main.getUtils().sendMessage(sender, true, "block.add.add");
+			}
+			break;
+		case "remove":
+			if (DataHandler.getRemoveWithCommand().contains(p)) {
+				DataHandler.getRemoveWithCommand().remove(p);
+				main.getUtils().sendMessage(sender, true, "block.cancel");
+			} else {
+				DataHandler.getRemoveWithCommand().add(p);
+				main.getUtils().sendMessage(sender, true, "block.remove.remove");
+			}
+			break;
+		case "info":
+			if (DataHandler.getInfoWithCommand().contains(p)) {
+				DataHandler.getInfoWithCommand().remove(p);
+				main.getUtils().sendMessage(sender, true, "block.cancel");
+			} else {
+				DataHandler.getInfoWithCommand().add(p);
+				main.getUtils().sendMessage(sender, true, "block.info.info");
+			}
+			break;
+		default:
+			main.getUtils().sendMessage(sender, false, "usage.block");
+		}
 	}
-    }
 }

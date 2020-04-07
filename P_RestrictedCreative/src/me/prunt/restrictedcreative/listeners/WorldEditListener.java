@@ -56,7 +56,7 @@ public class WorldEditListener {
 				}
 				// The block is changed/placed
 				else if (!p.hasPermission("rc.bypass.tracking.worldedit")
-						&& (main.getSettings().isEnabled("tracking.wordedit.extended")
+						&& (main.getSettings().isEnabled("tracking.worldedit.extended")
 								|| p.getGameMode() == GameMode.CREATIVE)) {
 					DataHandler.setAsTracked(b);
 				}

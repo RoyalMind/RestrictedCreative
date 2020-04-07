@@ -93,8 +93,8 @@ public class BlockPistonListener implements Listener {
 				DataHandler.breakBlock(b, null);
 
 			// If it's attached to another moving block
-			if (MaterialHandler.getNeededFace(b) != null
-					&& e.getBlocks().contains(b.getRelative(MaterialHandler.getNeededFace(b))))
+			BlockFace neededFace = MaterialHandler.getNeededFace(b);
+			if (neededFace != null && e.getBlocks().contains(b.getRelative(neededFace)))
 				DataHandler.breakBlock(b, null);
 
 			oldBlocks.add(b);
@@ -179,8 +179,8 @@ public class BlockPistonListener implements Listener {
 				DataHandler.breakBlock(b, null);
 
 			// If it's attached to another moving block
-			if (MaterialHandler.getNeededFace(b) != null
-					&& e.getBlocks().contains(b.getRelative(MaterialHandler.getNeededFace(b))))
+			BlockFace neededFace = MaterialHandler.getNeededFace(b);
+			if (neededFace != null && e.getBlocks().contains(b.getRelative(neededFace)))
 				DataHandler.breakBlock(b, null);
 
 			oldBlocks.add(b);

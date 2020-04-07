@@ -83,7 +83,7 @@ public class BlockUpdateListener implements Listener {
 		}
 
 		/* 1.-3. Scaffolding */
-		if (Bukkit.getVersion().contains("1.14") && m == Material.valueOf("SCAFFOLDING")) {
+		if (!Bukkit.getVersion().contains("1.13") && m == Material.valueOf("SCAFFOLDING")) {
 			if (!isScaffoldingOk(b)) {
 				e.setCancelled(true);
 				DataHandler.breakBlock(b, null);
@@ -100,7 +100,7 @@ public class BlockUpdateListener implements Listener {
 				System.out.println("needsBlockBelow: " + m);
 
 			// Needs to be checked BEFORE isSolid()
-			if (Bukkit.getVersion().contains("1.14")
+			if (!Bukkit.getVersion().contains("1.13")
 					&& (m == Material.valueOf("BAMBOO") || m == Material.valueOf("BAMBOO_SAPLING"))) {
 				if (!isBambooOk(b)) {
 					if (Main.DEBUG)
