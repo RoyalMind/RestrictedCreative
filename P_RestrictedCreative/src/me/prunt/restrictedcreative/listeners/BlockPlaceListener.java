@@ -17,7 +17,7 @@ import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 
 public class BlockPlaceListener implements Listener {
 	private Main main;
@@ -72,7 +72,7 @@ public class BlockPlaceListener implements Listener {
 		}
 
 		for (BlockState bs : states)
-			DataHandler.setAsTracked(bs.getBlock());
+			BlockHandler.setAsTracked(bs.getBlock());
 	}
 
 	/*
@@ -114,7 +114,7 @@ public class BlockPlaceListener implements Listener {
 			return;
 		}
 
-		DataHandler.setAsTracked(b);
+		BlockHandler.setAsTracked(b);
 	}
 
 	/*
@@ -230,7 +230,7 @@ public class BlockPlaceListener implements Listener {
 		Block middle = head.getRelative(bodyDir);
 		Block bottom = middle.getRelative(bodyDir);
 
-		return !(DataHandler.isTracked(middle) || DataHandler.isTracked(bottom));
+		return !(BlockHandler.isTracked(middle) || BlockHandler.isTracked(bottom));
 	}
 
 	// Return whether the iron golem would spawn if the head was placed
@@ -255,9 +255,9 @@ public class BlockPlaceListener implements Listener {
 		Block middle1 = head.getRelative(middleDir);
 		Block middle2 = head.getRelative(middleDir.getOppositeFace());
 
-		boolean middleRow = DataHandler.isTracked(middle) || DataHandler.isTracked(middle1)
-				|| DataHandler.isTracked(middle2);
-		boolean headBottom = DataHandler.isTracked(head) || DataHandler.isTracked(bottom);
+		boolean middleRow = BlockHandler.isTracked(middle) || BlockHandler.isTracked(middle1)
+				|| BlockHandler.isTracked(middle2);
+		boolean headBottom = BlockHandler.isTracked(head) || BlockHandler.isTracked(bottom);
 
 		return !(headBottom || middleRow);
 	}
@@ -408,9 +408,10 @@ public class BlockPlaceListener implements Listener {
 		Block middle1 = head.getRelative(headDir);
 		Block middle2 = head.getRelative(headDir.getOppositeFace());
 
-		boolean headRow = DataHandler.isTracked(head) || DataHandler.isTracked(head1) || DataHandler.isTracked(head2);
-		boolean middleRow = DataHandler.isTracked(middle1) || DataHandler.isTracked(middle2);
-		boolean middleBottom = DataHandler.isTracked(middle) || DataHandler.isTracked(bottom);
+		boolean headRow = BlockHandler.isTracked(head) || BlockHandler.isTracked(head1)
+				|| BlockHandler.isTracked(head2);
+		boolean middleRow = BlockHandler.isTracked(middle1) || BlockHandler.isTracked(middle2);
+		boolean middleBottom = BlockHandler.isTracked(middle) || BlockHandler.isTracked(bottom);
 
 		return !(middleBottom || headRow || middleRow);
 	}

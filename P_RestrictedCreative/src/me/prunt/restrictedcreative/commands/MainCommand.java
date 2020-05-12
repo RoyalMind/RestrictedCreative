@@ -8,7 +8,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
+import me.prunt.restrictedcreative.storage.handlers.CommandHandler;
+import me.prunt.restrictedcreative.storage.handlers.EntityHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class MainCommand implements CommandExecutor {
@@ -67,8 +69,8 @@ public class MainCommand implements CommandExecutor {
 
 			// Loops through entities
 			for (Entity e : w.getEntities()) {
-				if (DataHandler.isTracked(e))
-					DataHandler.removeTracking(e);
+				if (EntityHandler.isTracked(e))
+					EntityHandler.removeTracking(e);
 			}
 		}
 
@@ -83,7 +85,7 @@ public class MainCommand implements CommandExecutor {
 
 		if (args[1].equalsIgnoreCase("stats")) {
 			String msg = main.getUtils().getMessage(true, "block.stats").replaceAll("%total%",
-					DataHandler.getTotalCount());
+					BlockHandler.getTotalCount());
 			Utils.sendMessage(sender, msg);
 			return;
 		}
@@ -97,29 +99,29 @@ public class MainCommand implements CommandExecutor {
 
 		switch (args[1]) {
 		case "add":
-			if (DataHandler.getAddWithCommand().contains(p)) {
-				DataHandler.getAddWithCommand().remove(p);
+			if (CommandHandler.getAddWithCommand().contains(p)) {
+				CommandHandler.getAddWithCommand().remove(p);
 				main.getUtils().sendMessage(sender, true, "block.cancel");
 			} else {
-				DataHandler.getAddWithCommand().add(p);
+				CommandHandler.getAddWithCommand().add(p);
 				main.getUtils().sendMessage(sender, true, "block.add.add");
 			}
 			break;
 		case "remove":
-			if (DataHandler.getRemoveWithCommand().contains(p)) {
-				DataHandler.getRemoveWithCommand().remove(p);
+			if (CommandHandler.getRemoveWithCommand().contains(p)) {
+				CommandHandler.getRemoveWithCommand().remove(p);
 				main.getUtils().sendMessage(sender, true, "block.cancel");
 			} else {
-				DataHandler.getRemoveWithCommand().add(p);
+				CommandHandler.getRemoveWithCommand().add(p);
 				main.getUtils().sendMessage(sender, true, "block.remove.remove");
 			}
 			break;
 		case "info":
-			if (DataHandler.getInfoWithCommand().contains(p)) {
-				DataHandler.getInfoWithCommand().remove(p);
+			if (CommandHandler.getInfoWithCommand().contains(p)) {
+				CommandHandler.getInfoWithCommand().remove(p);
 				main.getUtils().sendMessage(sender, true, "block.cancel");
 			} else {
-				DataHandler.getInfoWithCommand().add(p);
+				CommandHandler.getInfoWithCommand().add(p);
 				main.getUtils().sendMessage(sender, true, "block.info.info");
 			}
 			break;

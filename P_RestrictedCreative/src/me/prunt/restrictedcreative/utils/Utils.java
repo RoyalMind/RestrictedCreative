@@ -39,7 +39,9 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
+import me.prunt.restrictedcreative.storage.handlers.InventoryHandler;
+import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.permission.Permission;
@@ -453,17 +455,17 @@ public class Utils {
 
 		if (Main.DEBUG) {
 			System.out.println("separateInventory: " + toCreative + " " + pi.gm);
-			System.out.println("... c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
-					+ (DataHandler.getSurvivalInv(p) != null));
+			System.out.println("... c?" + (InventoryHandler.getCreativeInv(p) != null) + " s?"
+					+ (InventoryHandler.getSurvivalInv(p) != null));
 		}
 
 		// Stores Player with PlayerInfo into HashMap
 		if (toCreative) {
-			DataHandler.saveSurvivalInv(p, pi);
-			setInventory(p, DataHandler.getCreativeInv(p));
+			InventoryHandler.saveSurvivalInv(p, pi);
+			setInventory(p, InventoryHandler.getCreativeInv(p));
 		} else {
-			DataHandler.saveCreativeInv(p, pi);
-			setInventory(p, DataHandler.getSurvivalInv(p));
+			InventoryHandler.saveCreativeInv(p, pi);
+			setInventory(p, InventoryHandler.getSurvivalInv(p));
 		}
 	}
 
@@ -537,7 +539,7 @@ public class Utils {
 					if (!vault.playerInGroup(p, group))
 						return;
 
-					DataHandler.addVaultGroup(p, group);
+					PermissionHandler.addVaultGroup(p, group);
 					vault.playerRemoveGroup(p, group);
 				}
 
@@ -546,15 +548,15 @@ public class Utils {
 					if (vault.playerInGroup(p, group))
 						return;
 
-					DataHandler.addVaultGroup(p, group);
+					PermissionHandler.addVaultGroup(p, group);
 					vault.playerAddGroup(p, group);
 				}
 			}
 		} else {
-			if (DataHandler.getVaultGroups(p) == null)
+			if (PermissionHandler.getVaultGroups(p) == null)
 				return;
 
-			for (String group : DataHandler.getVaultGroups(p)) {
+			for (String group : PermissionHandler.getVaultGroups(p)) {
 				if (vault.playerInGroup(p, group)) {
 					vault.playerRemoveGroup(p, group);
 				} else {
@@ -562,7 +564,7 @@ public class Utils {
 				}
 			}
 
-			DataHandler.removeVaultGroup(p);
+			PermissionHandler.removeVaultGroup(p);
 		}
 	}
 
@@ -580,7 +582,7 @@ public class Utils {
 						if (!vault.has(p, perm))
 							return;
 
-						DataHandler.addVaultPerm(p, perm);
+						PermissionHandler.addVaultPerm(p, perm);
 						vault.playerRemove(p, perm);
 					}
 
@@ -589,15 +591,15 @@ public class Utils {
 						if (vault.has(p, perm))
 							return;
 
-						DataHandler.addVaultPerm(p, perm);
+						PermissionHandler.addVaultPerm(p, perm);
 						vault.playerAdd(p, perm);
 					}
 				}
 			} else {
-				if (DataHandler.getVaultPerms(p) == null)
+				if (PermissionHandler.getVaultPerms(p) == null)
 					return;
 
-				for (String perm : DataHandler.getVaultPerms(p)) {
+				for (String perm : PermissionHandler.getVaultPerms(p)) {
 					if (vault.has(p, perm)) {
 						vault.playerRemove(p, perm);
 					} else {
@@ -605,7 +607,7 @@ public class Utils {
 					}
 				}
 
-				DataHandler.removeVaultPerm(p);
+				PermissionHandler.removeVaultPerm(p);
 			}
 		} else {
 			if (toCreative) {
@@ -620,14 +622,14 @@ public class Utils {
 					}
 				}
 
-				DataHandler.setPerms(p, attachment);
+				PermissionHandler.setPerms(p, attachment);
 			} else {
-				if (DataHandler.getPerms(p) == null)
+				if (PermissionHandler.getPerms(p) == null)
 					return;
 
-				PermissionAttachment attachment = DataHandler.getPerms(p);
+				PermissionAttachment attachment = PermissionHandler.getPerms(p);
 				p.removeAttachment(attachment);
-				DataHandler.removePerms(p);
+				PermissionHandler.removePerms(p);
 			}
 		}
 	}
@@ -637,10 +639,10 @@ public class Utils {
 		if (!getMain().getSettings().isEnabled("general.saving.inventories.enabled")) {
 			// Let the gamemode listener handle switching inventories
 			if (p.getGameMode() == GameMode.CREATIVE)
-				p.setGameMode(DataHandler.getPreviousGameMode(p));
+				p.setGameMode(InventoryHandler.getPreviousGameMode(p));
 
-			DataHandler.removeSurvivalInv(p);
-			DataHandler.removeCreativeInv(p);
+			InventoryHandler.removeSurvivalInv(p);
+			InventoryHandler.removeCreativeInv(p);
 
 			if (Main.DEBUG)
 				System.out.println("saveInventory: inv saving disabled");
@@ -652,23 +654,23 @@ public class Utils {
 		if (p.hasPermission("rc.bypass.tracking.inventory"))
 			return;
 
-		if (DataHandler.getSurvivalInv(p) == null && DataHandler.getCreativeInv(p) == null)
+		if (InventoryHandler.getSurvivalInv(p) == null && InventoryHandler.getCreativeInv(p) == null)
 			return;
 
 		if (Main.DEBUG)
-			System.out.println("saveInventory: s?" + (DataHandler.getSurvivalInv(p) != null) + " c?"
-					+ (DataHandler.getCreativeInv(p) != null));
+			System.out.println("saveInventory: s?" + (InventoryHandler.getSurvivalInv(p) != null) + " c?"
+					+ (InventoryHandler.getCreativeInv(p) != null));
 
 		PlayerInfo pi;
 		int type;
 		if (p.getGameMode() == GameMode.CREATIVE) { // creative inv remains with player, survival must be saved
-			pi = DataHandler.getSurvivalInv(p);
+			pi = InventoryHandler.getSurvivalInv(p);
 			type = 0;
 
 			if (Main.DEBUG)
 				System.out.println("saveInventory: survival " + (pi != null));
 		} else { // survival inv remains with player, creative must be saved
-			pi = DataHandler.getCreativeInv(p);
+			pi = InventoryHandler.getCreativeInv(p);
 			type = 1;
 
 			if (Main.DEBUG)
@@ -678,7 +680,7 @@ public class Utils {
 		if (pi != null) {
 			// Only one inventory per player is saved to the database - the one that the
 			// player doesn't carry at the moment
-			if (DataHandler.isUsingSQLite()) {
+			if (BlockHandler.isUsingSQLite()) {
 				// Inserts a new row if it doesn't exist already and updates it with new values
 				getMain().getDB()
 						.executeUpdate("INSERT OR IGNORE INTO " + getMain().getDB().getInvsTable()
@@ -705,8 +707,8 @@ public class Utils {
 			}
 		}
 
-		DataHandler.removeSurvivalInv(p);
-		DataHandler.removeCreativeInv(p);
+		InventoryHandler.removeSurvivalInv(p);
+		InventoryHandler.removeCreativeInv(p);
 	}
 
 	public void loadInventory(Player p) {
@@ -724,12 +726,12 @@ public class Utils {
 						rs.getString("effects"), rs.getInt("xp"), gm);
 
 				if (rs.getInt("type") == 0) {
-					DataHandler.saveSurvivalInv(p, pi);
+					InventoryHandler.saveSurvivalInv(p, pi);
 
 					if (Main.DEBUG)
 						System.out.println("loadInventory: is run " + pi.gm);
 				} else {
-					DataHandler.saveCreativeInv(p, pi);
+					InventoryHandler.saveCreativeInv(p, pi);
 
 					if (Main.DEBUG)
 						System.out.println("loadInventory: never run " + pi.gm);
@@ -741,7 +743,7 @@ public class Utils {
 		}
 
 		if (Main.DEBUG)
-			System.out.println("loadInventory: c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
-					+ (DataHandler.getSurvivalInv(p) != null));
+			System.out.println("loadInventory: c?" + (InventoryHandler.getCreativeInv(p) != null) + " s?"
+					+ (InventoryHandler.getSurvivalInv(p) != null));
 	}
 }

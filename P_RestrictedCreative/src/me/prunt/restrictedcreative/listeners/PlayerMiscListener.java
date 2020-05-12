@@ -22,7 +22,10 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
+import me.prunt.restrictedcreative.storage.handlers.CommandHandler;
+import me.prunt.restrictedcreative.storage.handlers.InventoryHandler;
+import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
 
 public class PlayerMiscListener implements Listener {
 	private Main main;
@@ -77,7 +80,7 @@ public class PlayerMiscListener implements Listener {
 			return;
 		}
 
-		DataHandler.setPreviousGameMode(p, p.getGameMode());
+		InventoryHandler.setPreviousGameMode(p, p.getGameMode());
 	}
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
@@ -86,7 +89,7 @@ public class PlayerMiscListener implements Listener {
 		String command = e.getMessage();
 
 		/* Old way of handling aliases */
-		if (DataHandler.isUsingOldAliases()) {
+		if (PermissionHandler.isUsingOldAliases()) {
 			// Loop through command list
 			for (String cmd : getMain().getSettings().getConfig().getConfigurationSection("commands").getKeys(false)) {
 				// Loop through alias list
@@ -149,7 +152,7 @@ public class PlayerMiscListener implements Listener {
 			return;
 
 		// Removes creative mode
-		p.setGameMode(DataHandler.getPreviousGameMode(p));
+		p.setGameMode(InventoryHandler.getPreviousGameMode(p));
 
 		// Switch inventories, permissions etc
 		getMain().getUtils().setCreative(p, false);
@@ -173,7 +176,7 @@ public class PlayerMiscListener implements Listener {
 		if (getMain().getUtils().isHeightOk(p))
 			return;
 
-		p.setGameMode(DataHandler.getPreviousGameMode(p));
+		p.setGameMode(InventoryHandler.getPreviousGameMode(p));
 	}
 
 	@EventHandler(ignoreCancelled = true)
@@ -204,7 +207,7 @@ public class PlayerMiscListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		// We don't care if blocks have already been loaded
-		if (Integer.valueOf(DataHandler.getTotalCount()) >= 0)
+		if (BlockHandler.isLoadingDone)
 			return;
 
 		// No need to control disabled features
@@ -221,34 +224,34 @@ public class PlayerMiscListener implements Listener {
 		getMain().getUtils().loadInventory(p);
 
 		// When force-gamemode is enabled, PlayerGamemodeChangeEvent isn't fired onjoin
-		if (!DataHandler.isForceGamemodeEnabled())
+		if (!InventoryHandler.isForceGamemodeEnabled())
 			return;
 
 		if (Main.DEBUG) {
 			System.out.println("onPlayerJoin: forced " + main.getServer().getDefaultGameMode());
-			System.out.println("... c?" + (DataHandler.getCreativeInv(p) != null) + " s?"
-					+ (DataHandler.getSurvivalInv(p) != null));
+			System.out.println("... c?" + (InventoryHandler.getCreativeInv(p) != null) + " s?"
+					+ (InventoryHandler.getSurvivalInv(p) != null));
 		}
 
 		// If player was switched to creative by default and it was previously survival
-		if (p.getGameMode() == GameMode.CREATIVE && DataHandler.getCreativeInv(p) != null) {
+		if (p.getGameMode() == GameMode.CREATIVE && InventoryHandler.getCreativeInv(p) != null) {
 			if (Main.DEBUG)
 				System.out.println("onPlayerJoin: setCreative true");
 
 			// Switch inventories, permissions etc
 			getMain().getUtils().setCreative(p, true);
-			DataHandler.setPreviousGameMode(p, GameMode.SURVIVAL);
+			InventoryHandler.setPreviousGameMode(p, GameMode.SURVIVAL);
 			return;
 		}
 
 		// If player was switched to ~survival by default and it was previously creative
-		if (p.getGameMode() != GameMode.CREATIVE && DataHandler.getSurvivalInv(p) != null) {
+		if (p.getGameMode() != GameMode.CREATIVE && InventoryHandler.getSurvivalInv(p) != null) {
 			if (Main.DEBUG)
 				System.out.println("onPlayerJoin: setCreative false");
 
 			// Switch inventories, permissions etc
 			getMain().getUtils().setCreative(p, false);
-			DataHandler.setPreviousGameMode(p, GameMode.CREATIVE);
+			InventoryHandler.setPreviousGameMode(p, GameMode.CREATIVE);
 			return;
 		}
 	}
@@ -257,9 +260,9 @@ public class PlayerMiscListener implements Listener {
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 
-		DataHandler.removeInfoWithCommand(p);
-		DataHandler.removeAddWithCommand(p);
-		DataHandler.removeRemoveWithCommand(p);
+		CommandHandler.removeInfoWithCommand(p);
+		CommandHandler.removeAddWithCommand(p);
+		CommandHandler.removeRemoveWithCommand(p);
 
 		getMain().getUtils().saveInventory(p);
 	}
@@ -268,9 +271,9 @@ public class PlayerMiscListener implements Listener {
 	public void onPlayerKick(PlayerKickEvent e) {
 		Player p = e.getPlayer();
 
-		DataHandler.removeInfoWithCommand(p);
-		DataHandler.removeAddWithCommand(p);
-		DataHandler.removeRemoveWithCommand(p);
+		CommandHandler.removeInfoWithCommand(p);
+		CommandHandler.removeAddWithCommand(p);
+		CommandHandler.removeRemoveWithCommand(p);
 
 		getMain().getUtils().saveInventory(p);
 	}

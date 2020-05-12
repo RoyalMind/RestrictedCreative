@@ -21,7 +21,7 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
 
 public class BlockPistonListener implements Listener {
@@ -63,7 +63,7 @@ public class BlockPistonListener implements Listener {
 			if (e.isCancelled())
 				return;
 
-			if (!DataHandler.isTracked(b))
+			if (!BlockHandler.isTracked(b))
 				continue;
 
 			if (Main.DEBUG)
@@ -80,22 +80,22 @@ public class BlockPistonListener implements Listener {
 				if (Main.DEBUG)
 					System.out.println("bedPull: " + b.getType() + " " + block.getType());
 
-				DataHandler.breakBlock(b, null, false);
-				DataHandler.breakBlock(block, null, false);
+				BlockHandler.breakBlock(b, null, false);
+				BlockHandler.breakBlock(block, null, false);
 				continue;
 			}
 
 			if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 			// If it's on top of another moving block and needs a block below
 			if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 			// If it's attached to another moving block
 			BlockFace neededFace = MaterialHandler.getNeededFace(b);
 			if (neededFace != null && e.getBlocks().contains(b.getRelative(neededFace)))
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 			oldBlocks.add(b);
 			newBlocks.add(b.getRelative(e.getDirection()));
@@ -103,11 +103,11 @@ public class BlockPistonListener implements Listener {
 
 		// Remove old blocks first
 		for (Block b : oldBlocks) {
-			DataHandler.removeTracking(b);
+			BlockHandler.removeTracking(b);
 		}
 		// Add new blocks afterwards
 		for (Block b : newBlocks) {
-			DataHandler.setAsTracked(b);
+			BlockHandler.setAsTracked(b);
 		}
 	}
 
@@ -135,7 +135,7 @@ public class BlockPistonListener implements Listener {
 			if (e.isCancelled())
 				return;
 
-			if (!DataHandler.isTracked(b))
+			if (!BlockHandler.isTracked(b))
 				continue;
 
 			if (Main.DEBUG)
@@ -152,8 +152,8 @@ public class BlockPistonListener implements Listener {
 				if (Main.DEBUG)
 					System.out.println("bedPush: " + b.getType() + " " + block.getType());
 
-				DataHandler.breakBlock(b, null, false);
-				DataHandler.breakBlock(block, null, false);
+				BlockHandler.breakBlock(b, null, false);
+				BlockHandler.breakBlock(block, null, false);
 				continue;
 			}
 
@@ -166,22 +166,22 @@ public class BlockPistonListener implements Listener {
 				if (Main.DEBUG)
 					System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
 
-				DataHandler.breakBlock(b, null, false);
-				DataHandler.breakBlock(block, null, false);
+				BlockHandler.breakBlock(b, null, false);
+				BlockHandler.breakBlock(block, null, false);
 				continue;
 			}
 
 			if (b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 			// If it's on top of another moving block and need a block below
 			if (e.getBlocks().contains(b.getRelative(BlockFace.DOWN)) && MaterialHandler.needsBlockBelow(b))
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 			// If it's attached to another moving block
 			BlockFace neededFace = MaterialHandler.getNeededFace(b);
 			if (neededFace != null && e.getBlocks().contains(b.getRelative(neededFace)))
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 			oldBlocks.add(b);
 			newBlocks.add(b.getRelative(e.getDirection()));
@@ -189,11 +189,11 @@ public class BlockPistonListener implements Listener {
 
 		// Remove old blocks first
 		for (Block b : oldBlocks) {
-			DataHandler.removeTracking(b);
+			BlockHandler.removeTracking(b);
 		}
 		// Add new blocks afterwards
 		for (Block b : newBlocks) {
-			DataHandler.setAsTracked(b);
+			BlockHandler.setAsTracked(b);
 		}
 	}
 
@@ -233,7 +233,7 @@ public class BlockPistonListener implements Listener {
 			Block bl = b.getRelative(bf);
 
 			// Checks if the surrounding block is placed in creative
-			if (!DataHandler.isTracked(bl))
+			if (!BlockHandler.isTracked(bl))
 				continue;
 
 			// If it's attached to the moving block
@@ -258,22 +258,22 @@ public class BlockPistonListener implements Listener {
 					if (Main.DEBUG)
 						System.out.println("removeSurroundingBlock: door " + b.getType() + " " + block.getType());
 
-					DataHandler.breakBlock(b, null, false);
-					DataHandler.breakBlock(block, null, false);
+					BlockHandler.breakBlock(b, null, false);
+					BlockHandler.breakBlock(block, null, false);
 					continue;
 				}
 
 				if (Main.DEBUG)
 					System.out.println("removeSurroundingBlock: " + bl.getType());
 
-				DataHandler.breakBlock(bl, null);
+				BlockHandler.breakBlock(bl, null);
 			}
 
 			if (bl.getFace(b) == MaterialHandler.getNeededFace(bl)) {
 				if (Main.DEBUG)
 					System.out.println("removeSurroundingBlock: " + bl.getType());
 
-				DataHandler.breakBlock(bl, null);
+				BlockHandler.breakBlock(bl, null);
 			}
 		}
 	}

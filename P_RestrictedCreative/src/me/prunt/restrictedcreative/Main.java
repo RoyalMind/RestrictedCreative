@@ -38,13 +38,15 @@ import me.prunt.restrictedcreative.listeners.PlayerItemListener;
 import me.prunt.restrictedcreative.listeners.PlayerMiscListener;
 import me.prunt.restrictedcreative.listeners.WorldEditListener;
 import me.prunt.restrictedcreative.storage.ConfigProvider;
-import me.prunt.restrictedcreative.storage.DataHandler;
 import me.prunt.restrictedcreative.storage.Database;
 import me.prunt.restrictedcreative.storage.SyncData;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
+import me.prunt.restrictedcreative.storage.handlers.InventoryHandler;
+import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class Main extends JavaPlugin {
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 	public static boolean EXTRADEBUG = false;
 
 	private Database database;
@@ -74,8 +76,8 @@ public class Main extends JavaPlugin {
 		}
 
 		// Save data for the last time
-		final List<String> fAdd = new ArrayList<>(DataHandler.addToDatabase);
-		final List<String> fDel = new ArrayList<>(DataHandler.removeFromDatabase);
+		final List<String> fAdd = new ArrayList<>(BlockHandler.addToDatabase);
+		final List<String> fDel = new ArrayList<>(BlockHandler.removeFromDatabase);
 		new SyncData(this, fAdd, fDel, true).run();
 
 		getDB().closeConnection();
@@ -144,7 +146,7 @@ public class Main extends JavaPlugin {
 		}
 
 		// Using old way of handling aliases... TODO
-		DataHandler.setUsingOldAliases(true);
+		PermissionHandler.setUsingOldAliases(true);
 	}
 
 	/**
@@ -153,15 +155,15 @@ public class Main extends JavaPlugin {
 	private void loadData() {
 		setDB(new Database(this));
 
-		DataHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
-		DataHandler.setForceGamemodeEnabled(Utils.isForceGamemodeEnabled());
+		BlockHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
+		InventoryHandler.setForceGamemodeEnabled(Utils.isForceGamemodeEnabled());
 
 		// Tracked blocks
 		getDB().executeUpdate(
 				"CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255), UNIQUE (block))");
 
 		// Tracked inventories
-		if (DataHandler.isUsingSQLite()) {
+		if (BlockHandler.isUsingSQLite()) {
 			ResultSet rs = getDB().executeQuery(
 					"SELECT name FROM sqlite_master WHERE type='table' AND name='" + getDB().getInvsTable() + "'");
 
@@ -210,12 +212,12 @@ public class Main extends JavaPlugin {
 		}
 
 		if (getSettings().isEnabled("general.loading.use-old-system")) {
-			DataHandler.loadFromDatabaseOld(this);
+			BlockHandler.loadFromDatabaseOld(this);
 		} else {
-			DataHandler.loadFromDatabaseNew(this);
+			BlockHandler.loadFromDatabaseNew(this);
 		}
 
-		DataHandler.startDataSync(this);
+		BlockHandler.startDataSync(this);
 	}
 
 	private CommandExecutor getExecutor(String name) {

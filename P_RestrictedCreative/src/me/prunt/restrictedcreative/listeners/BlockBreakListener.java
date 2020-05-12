@@ -17,130 +17,130 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class BlockBreakListener implements Listener {
-    private Main main;
+	private Main main;
 
-    public BlockBreakListener(Main main) {
-	this.main = main;
-    }
-
-    private Main getMain() {
-	return this.main;
-    }
-
-    /*
-     * Called when a block is broken by a player.
-     *
-     * Note: Plugins wanting to simulate a traditional block drop should set the
-     * block to air and utilize their own methods for determining what the default
-     * drop for the block being broken is and what to do about it, if anything.
-     *
-     * If a Block Break event is cancelled, the block will not break and experience
-     * will not drop.
-     */
-    // HIGHEST required for WorldGuard and similar plugins
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onBlockBreak(BlockBreakEvent e) {
-	Player p = e.getPlayer();
-	Block b = e.getBlock();
-	BlockData bd = b.getBlockData();
-	Material m = b.getType();
-
-	// No need to control blocks in disabled worlds
-	if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
-	    return;
-
-	// No need to control excluded blocks
-	if (getMain().getUtils().isExcludedFromTracking(b.getType()))
-	    return;
-
-	/* Disabled blocks for creative players */
-	if (p.getGameMode() == GameMode.CREATIVE && getMain().getUtils().isDisabledBreaking(m)
-		&& !p.hasPermission("rc.bypass.disable.breaking")
-		&& !p.hasPermission("rc.bypass.disable.breaking." + m)) {
-	    getMain().getUtils().sendMessage(p, true, "disabled.general");
-	    e.setCancelled(true);
-	    return;
+	public BlockBreakListener(Main main) {
+		this.main = main;
 	}
 
-	// Piston head
-	// Needs to be BEFORE isTracked() because PistonHead is not tracked
-	if (bd instanceof PistonHead) {
-	    PistonHead head = (PistonHead) bd;
-	    Block piston = b.getRelative(head.getFacing().getOppositeFace());
-
-	    if (Main.DEBUG)
-		System.out.println("PistonHead: " + piston.getType());
-
-	    remove(e, p, false, piston, b);
+	private Main getMain() {
+		return this.main;
 	}
 
-	// No need to control non-tracked blocks
-	if (!DataHandler.isTracked(b))
-	    return;
+	/*
+	 * Called when a block is broken by a player.
+	 *
+	 * Note: Plugins wanting to simulate a traditional block drop should set the
+	 * block to air and utilize their own methods for determining what the default
+	 * drop for the block being broken is and what to do about it, if anything.
+	 *
+	 * If a Block Break event is cancelled, the block will not break and experience
+	 * will not drop.
+	 */
+	// HIGHEST required for WorldGuard and similar plugins
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onBlockBreak(BlockBreakEvent e) {
+		Player p = e.getPlayer();
+		Block b = e.getBlock();
+		BlockData bd = b.getBlockData();
+		Material m = b.getType();
 
-	if (Main.DEBUG)
-	    System.out.println("onBlockBreak: " + m);
+		// No need to control blocks in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
 
-	// Door
-	if (bd instanceof Door) {
-	    Door door = (Door) bd;
-	    Block bl;
+		// No need to control excluded blocks
+		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
+			return;
 
-	    if (door.getHalf() == Half.TOP) {
-		bl = b.getRelative(BlockFace.DOWN);
-	    } else {
-		bl = b.getRelative(BlockFace.UP);
-	    }
+		/* Disabled blocks for creative players */
+		if (p.getGameMode() == GameMode.CREATIVE && getMain().getUtils().isDisabledBreaking(m)
+				&& !p.hasPermission("rc.bypass.disable.breaking")
+				&& !p.hasPermission("rc.bypass.disable.breaking." + m)) {
+			getMain().getUtils().sendMessage(p, true, "disabled.general");
+			e.setCancelled(true);
+			return;
+		}
 
-	    remove(e, p, false, bl);
+		// Piston head
+		// Needs to be BEFORE isTracked() because PistonHead is not tracked
+		if (bd instanceof PistonHead) {
+			PistonHead head = (PistonHead) bd;
+			Block piston = b.getRelative(head.getFacing().getOppositeFace());
+
+			if (Main.DEBUG)
+				System.out.println("PistonHead: " + piston.getType());
+
+			remove(e, p, false, piston, b);
+		}
+
+		// No need to control non-tracked blocks
+		if (!BlockHandler.isTracked(b))
+			return;
+
+		if (Main.DEBUG)
+			System.out.println("onBlockBreak: " + m);
+
+		// Door
+		if (bd instanceof Door) {
+			Door door = (Door) bd;
+			Block bl;
+
+			if (door.getHalf() == Half.TOP) {
+				bl = b.getRelative(BlockFace.DOWN);
+			} else {
+				bl = b.getRelative(BlockFace.UP);
+			}
+
+			remove(e, p, false, bl);
+		}
+
+		// Bed
+		else if (bd instanceof Bed) {
+			Bed bed = (Bed) bd;
+			Block bl;
+
+			if (bed.getPart() == Part.HEAD) {
+				bl = b.getRelative(bed.getFacing().getOppositeFace());
+			} else {
+				bl = b.getRelative(bed.getFacing());
+			}
+
+			remove(e, p, false, bl);
+		}
+
+		// Double plant
+		else if (MaterialHandler.isDoublePlant(b)) {
+			Block bl = b.getRelative(BlockFace.DOWN);
+
+			// If block below isn't a double plant, the one above must be
+			if (!MaterialHandler.isDoublePlant(bl))
+				bl = b.getRelative(BlockFace.UP);
+
+			remove(e, p, false, bl);
+		}
+
+		// Others
+		remove(e, p, true, b);
 	}
 
-	// Bed
-	else if (bd instanceof Bed) {
-	    Bed bed = (Bed) bd;
-	    Block bl;
+	private void remove(BlockBreakEvent e, Player p, boolean update, Block... blocks) {
+		if (Utils.isInstalled("Jobs") || Utils.isInstalled("mcMMO")) {
+			for (Block b : blocks)
+				BlockHandler.breakBlock(b, p, update);
 
-	    if (bed.getPart() == Part.HEAD) {
-		bl = b.getRelative(bed.getFacing().getOppositeFace());
-	    } else {
-		bl = b.getRelative(bed.getFacing());
-	    }
+			e.setCancelled(true);
+		} else {
+			for (Block b : blocks)
+				BlockHandler.removeTracking(b);
 
-	    remove(e, p, false, bl);
+			e.setDropItems(false);
+			e.setExpToDrop(0);
+		}
 	}
-
-	// Double plant
-	else if (MaterialHandler.isDoublePlant(b)) {
-	    Block bl = b.getRelative(BlockFace.DOWN);
-
-	    // If block below isn't a double plant, the one above must be
-	    if (!MaterialHandler.isDoublePlant(bl))
-		bl = b.getRelative(BlockFace.UP);
-
-	    remove(e, p, false, bl);
-	}
-
-	// Others
-	remove(e, p, true, b);
-    }
-
-    private void remove(BlockBreakEvent e, Player p, boolean update, Block... blocks) {
-	if (Utils.isInstalled("Jobs") || Utils.isInstalled("mcMMO")) {
-	    for (Block b : blocks)
-		DataHandler.breakBlock(b, p, update);
-
-	    e.setCancelled(true);
-	} else {
-	    for (Block b : blocks)
-		DataHandler.removeTracking(b);
-
-	    e.setDropItems(false);
-	    e.setExpToDrop(0);
-	}
-    }
 }

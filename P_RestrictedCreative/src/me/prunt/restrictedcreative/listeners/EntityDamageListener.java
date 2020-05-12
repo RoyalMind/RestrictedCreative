@@ -18,7 +18,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.EntityHandler;
 
 public class EntityDamageListener implements Listener {
 	private Main main;
@@ -53,13 +53,13 @@ public class EntityDamageListener implements Listener {
 				return;
 
 			// Item frame doesn't contain creative items
-			if (!DataHandler.hasTrackedItem(frame))
+			if (!EntityHandler.hasTrackedItem(frame))
 				return;
 
 			if (Main.DEBUG)
 				System.out.println("removeItem: " + is.getType());
 
-			DataHandler.removeItem(frame);
+			EntityHandler.removeItem(frame);
 		}
 
 		// Armor stand
@@ -67,7 +67,7 @@ public class EntityDamageListener implements Listener {
 			ArmorStand a = (ArmorStand) en;
 
 			for (EquipmentSlot slot : EquipmentSlot.values()) {
-				if (!DataHandler.isTrackedSlot(a, slot))
+				if (!EntityHandler.isTrackedSlot(a, slot))
 					continue;
 
 				EntityEquipment inv = a.getEquipment();
@@ -99,7 +99,7 @@ public class EntityDamageListener implements Listener {
 				if (Main.DEBUG)
 					System.out.println("removeSlotTracking: " + slot);
 
-				DataHandler.removeSlotTracking(a, slot);
+				EntityHandler.removeSlotTracking(a, slot);
 			}
 		}
 
@@ -150,7 +150,7 @@ public class EntityDamageListener implements Listener {
 		}
 
 		// No need to control non-tracked entities
-		if (!DataHandler.isTracked(en))
+		if (!EntityHandler.isTracked(en))
 			return;
 
 		if (Main.DEBUG)
@@ -175,7 +175,7 @@ public class EntityDamageListener implements Listener {
 			return;
 
 		// No need to control non-tracked entities
-		if (!DataHandler.isTracked(en))
+		if (!EntityHandler.isTracked(en))
 			return;
 
 		if (Main.DEBUG)
@@ -198,11 +198,11 @@ public class EntityDamageListener implements Listener {
 		if (getMain().getUtils().isDisabledWorld(en.getWorld().getName()))
 			return;
 
-		if (!DataHandler.isTracked(en)) {
+		if (!EntityHandler.isTracked(en)) {
 			if (en instanceof ItemFrame) {
 				ItemFrame frame = (ItemFrame) en;
 
-				if (DataHandler.hasTrackedItem(frame)) {
+				if (EntityHandler.hasTrackedItem(frame)) {
 					en.remove();
 
 					if (Main.DEBUG)

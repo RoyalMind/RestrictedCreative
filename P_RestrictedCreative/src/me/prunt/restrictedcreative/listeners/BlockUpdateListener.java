@@ -16,7 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
 
 public class BlockUpdateListener implements Listener {
@@ -40,7 +40,7 @@ public class BlockUpdateListener implements Listener {
 		Block b = e.getBlock();
 
 		// No need to control non-tracked blocks
-		if (!DataHandler.isTracked(b))
+		if (!BlockHandler.isTracked(b))
 			return;
 
 		// No need to control blocks in disabled worlds
@@ -65,7 +65,7 @@ public class BlockUpdateListener implements Listener {
 			// if rail is on slope and there isn't a block to support it
 			if (!isSolid(bl) || !isSlopeOk(b)) {
 				e.setCancelled(true);
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 			}
 			return;
 		}
@@ -74,7 +74,7 @@ public class BlockUpdateListener implements Listener {
 		if (m == Material.CHORUS_PLANT) {
 			if (!isChorusOk(b)) {
 				e.setCancelled(true);
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 				if (Main.DEBUG)
 					System.out.println("isChorusOk: false");
@@ -86,7 +86,7 @@ public class BlockUpdateListener implements Listener {
 		if (!Bukkit.getVersion().contains("1.13") && m == Material.valueOf("SCAFFOLDING")) {
 			if (!isScaffoldingOk(b)) {
 				e.setCancelled(true);
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 
 				if (Main.DEBUG)
 					System.out.println("isScaffoldingOk: false");
@@ -107,7 +107,7 @@ public class BlockUpdateListener implements Listener {
 						System.out.println("isBambooOk: false");
 
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			}
@@ -117,26 +117,26 @@ public class BlockUpdateListener implements Listener {
 			case LILY_PAD:
 				if (ma != Material.WATER) {
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			case KELP:
 			case KELP_PLANT:
 				if (!isKelpOk(b)) {
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			case CACTUS:
 				if (!isCactusOk(b)) {
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			case SUGAR_CANE:
 				if (!isSugarCaneOk(b)) {
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			default:
@@ -147,7 +147,7 @@ public class BlockUpdateListener implements Listener {
 			if (MaterialHandler.isDoublePlant(b)) {
 				if (!isDoublePlantOk(b)) {
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			}
@@ -156,7 +156,7 @@ public class BlockUpdateListener implements Listener {
 			if (MaterialHandler.isCarpet(b)) {
 				if (isBelowEmpty(b)) {
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			}
@@ -165,14 +165,14 @@ public class BlockUpdateListener implements Listener {
 			if (MaterialHandler.isCrop(b)) {
 				if (!isLightingOk(b) || !isSolid(bl)) {
 					e.setCancelled(true);
-					DataHandler.breakBlock(b, null);
+					BlockHandler.breakBlock(b, null);
 				}
 				return;
 			}
 
 			if (!isSolid(bl)) {
 				e.setCancelled(true);
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 			}
 			return;
 		}
@@ -188,7 +188,7 @@ public class BlockUpdateListener implements Listener {
 			// If the block (to which the first block is attached to) isn't solid
 			if (!isSolid(bl)) {
 				e.setCancelled(true);
-				DataHandler.breakBlock(b, null);
+				BlockHandler.breakBlock(b, null);
 			}
 		}
 	}
@@ -265,7 +265,7 @@ public class BlockUpdateListener implements Listener {
 	private boolean isSolid(Block b) {
 		Material m = b.getType();
 		BlockData bd = b.getBlockData();
-		
+
 		return m.isSolid() && (!(bd instanceof Piston) || !((Piston) bd).isExtended());
 	}
 

@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.FaceAttachable;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.type.Bell;
 import org.bukkit.block.data.type.Cake;
@@ -115,6 +116,7 @@ public class MaterialHandler {
 		return false;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static BlockFace getNeededFace(Block b) {
 		BlockData bd = b.getBlockData();
 
@@ -152,7 +154,8 @@ public class MaterialHandler {
 			return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 		if (bd instanceof WallSign)
 			return d.getFacing().getOppositeFace(); // TESTED 1.13.2
-		if (bd instanceof Switch) {
+		if ((Bukkit.getVersion().contains("1.13") || Bukkit.getVersion().contains("1.14")) && bd instanceof Switch) {
+			// TODO: FaceAttachable
 			switch (((Switch) bd).getFace()) {
 			case CEILING:
 				return BlockFace.UP;
@@ -160,6 +163,17 @@ public class MaterialHandler {
 				return BlockFace.DOWN;
 			case WALL:
 				return d.getFacing().getOppositeFace(); // TESTED 1.13.2
+			}
+		}
+		if (!(Bukkit.getVersion().contains("1.13") || Bukkit.getVersion().contains("1.14"))
+				&& bd instanceof FaceAttachable) {
+			switch (((FaceAttachable) bd).getAttachedFace()) {
+			case CEILING:
+				return BlockFace.UP;
+			case FLOOR:
+				return BlockFace.DOWN;
+			case WALL:
+				return d.getFacing().getOppositeFace(); // TESTED 1.15.2
 			}
 		}
 		if (!Bukkit.getVersion().contains("1.13") && bd instanceof Bell) {

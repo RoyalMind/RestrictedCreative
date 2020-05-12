@@ -7,11 +7,11 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Bisected.Half;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Door;
-import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.block.data.type.Door.Hinge;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -30,7 +30,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
+import me.prunt.restrictedcreative.storage.handlers.CommandHandler;
+import me.prunt.restrictedcreative.storage.handlers.EntityHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
@@ -191,8 +193,8 @@ public class PlayerInteractListener implements Listener {
 			return;
 
 		/* Command /block */
-		if (DataHandler.isInfoWithCommand(p)) {
-			if (DataHandler.isTracked(b)) {
+		if (CommandHandler.isInfoWithCommand(p)) {
+			if (BlockHandler.isTracked(b)) {
 				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
 						b.getType().toString()));
 			} else {
@@ -200,18 +202,18 @@ public class PlayerInteractListener implements Listener {
 						b.getType().toString()));
 			}
 
-			DataHandler.removeInfoWithCommand(p);
+			CommandHandler.removeInfoWithCommand(p);
 			e.setCancelled(true);
-		} else if (DataHandler.isAddWithCommand(p)) {
-			DataHandler.setAsTracked(b);
-			DataHandler.removeAddWithCommand(p);
+		} else if (CommandHandler.isAddWithCommand(p)) {
+			BlockHandler.setAsTracked(b);
+			CommandHandler.removeAddWithCommand(p);
 			e.setCancelled(true);
 
 			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%",
 					b.getType().toString()));
-		} else if (DataHandler.isRemoveWithCommand(p)) {
-			DataHandler.removeTracking(b);
-			DataHandler.removeRemoveWithCommand(p);
+		} else if (CommandHandler.isRemoveWithCommand(p)) {
+			BlockHandler.removeTracking(b);
+			CommandHandler.removeRemoveWithCommand(p);
 			e.setCancelled(true);
 
 			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
@@ -219,7 +221,7 @@ public class PlayerInteractListener implements Listener {
 		}
 
 		// Creative placed cake shouldn't be edible
-		if (DataHandler.isTracked(b) && b.getType() == Material.CAKE) {
+		if (BlockHandler.isTracked(b) && b.getType() == Material.CAKE) {
 			getMain().getUtils().sendMessage(p, true, "disabled.interact");
 
 			e.setCancelled(true);
@@ -239,7 +241,7 @@ public class PlayerInteractListener implements Listener {
 		Material m = e.getItem().getType();
 
 		// Pumpkins can be carved with shears and they drop seeds
-		if (DataHandler.isTracked(b) && m == Material.SHEARS && b.getType() == Material.PUMPKIN) {
+		if (BlockHandler.isTracked(b) && m == Material.SHEARS && b.getType() == Material.PUMPKIN) {
 			getMain().getUtils().sendMessage(p, true, "disabled.interact");
 
 			e.setCancelled(true);
@@ -258,7 +260,7 @@ public class PlayerInteractListener implements Listener {
 		if (!MaterialHandler.isPlaceableEntity(m))
 			return;
 
-		DataHandler.addToTrackedLocs(b.getLocation());
+		EntityHandler.addToTrackedLocs(b.getLocation());
 	}
 
 	/*
@@ -276,8 +278,8 @@ public class PlayerInteractListener implements Listener {
 		EntityType et = en.getType();
 
 		/* Command /block */
-		if (DataHandler.isInfoWithCommand(p)) {
-			if (DataHandler.isTracked(en)) {
+		if (CommandHandler.isInfoWithCommand(p)) {
+			if (EntityHandler.isTracked(en)) {
 				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
 						et.toString()));
 			} else {
@@ -285,18 +287,18 @@ public class PlayerInteractListener implements Listener {
 						et.toString()));
 			}
 
-			DataHandler.removeInfoWithCommand(p);
+			CommandHandler.removeInfoWithCommand(p);
 			e.setCancelled(true);
-		} else if (DataHandler.isAddWithCommand(p)) {
-			DataHandler.setAsTracked(en);
-			DataHandler.removeAddWithCommand(p);
+		} else if (CommandHandler.isAddWithCommand(p)) {
+			EntityHandler.setAsTracked(en);
+			CommandHandler.removeAddWithCommand(p);
 			e.setCancelled(true);
 
 			Utils.sendMessage(p,
 					getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%", et.toString()));
-		} else if (DataHandler.isRemoveWithCommand(p)) {
-			DataHandler.removeTracking(en);
-			DataHandler.removeRemoveWithCommand(p);
+		} else if (CommandHandler.isRemoveWithCommand(p)) {
+			EntityHandler.removeTracking(en);
+			CommandHandler.removeRemoveWithCommand(p);
 			e.setCancelled(true);
 
 			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
@@ -316,7 +318,7 @@ public class PlayerInteractListener implements Listener {
 			ItemStack fis = frame.getItem();
 
 			if ((is != null && is.getType() != Material.AIR) && (fis == null || fis.getType() == Material.AIR)) {
-				DataHandler.setAsTrackedItem(frame);
+				EntityHandler.setAsTrackedItem(frame);
 				return;
 			}
 		}
@@ -372,7 +374,7 @@ public class PlayerInteractListener implements Listener {
 
 		// Survival player is taking creative item from armor stand
 		if (p.getGameMode() != GameMode.CREATIVE && e.getArmorStandItem().getType() != Material.AIR
-				&& DataHandler.isTrackedSlot(a, slot)) {
+				&& EntityHandler.isTrackedSlot(a, slot)) {
 			e.setCancelled(true);
 
 			EntityEquipment inv = a.getEquipment();
@@ -404,7 +406,7 @@ public class PlayerInteractListener implements Listener {
 			if (Main.DEBUG)
 				System.out.println("removeSlotTracking: " + slot);
 
-			DataHandler.removeSlotTracking(a, slot);
+			EntityHandler.removeSlotTracking(a, slot);
 
 			// Prevent double message
 			if (e.getHand() != EquipmentSlot.OFF_HAND)
@@ -421,12 +423,12 @@ public class PlayerInteractListener implements Listener {
 			System.out.println("onPlayerArmorStandManipulate: " + slot);
 
 		// Creative player is taking a creative item from armor stand
-		if (e.getArmorStandItem().getType() != Material.AIR && DataHandler.isTrackedSlot(a, slot))
-			DataHandler.removeSlotTracking(a, slot);
+		if (e.getArmorStandItem().getType() != Material.AIR && EntityHandler.isTrackedSlot(a, slot))
+			EntityHandler.removeSlotTracking(a, slot);
 
 		// Creative player is putting an item on the armor stand
 		if (e.getPlayerItem().getType() != Material.AIR)
-			DataHandler.setAsTrackedSlot(a, slot);
+			EntityHandler.setAsTrackedSlot(a, slot);
 	}
 
 	/*
@@ -483,14 +485,14 @@ public class PlayerInteractListener implements Listener {
 			Block attachable = door.getRelative(bf);
 
 			// Checks if the surrounding block is placed in creative
-			if (!DataHandler.isTracked(attachable))
+			if (!BlockHandler.isTracked(attachable))
 				continue;
 
 			BlockFace dir = MaterialHandler.getNeededFace(attachable);
 
 			// If it's attached to the original block
 			if (attachable.getFace(door) == dir && isNeededDirectionOk(attachable, dir))
-				DataHandler.breakBlock(attachable, p);
+				BlockHandler.breakBlock(attachable, p);
 		}
 	}
 

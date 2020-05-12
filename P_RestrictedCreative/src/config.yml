@@ -253,4 +253,5 @@ disable:
     - 'OAK_WALL_SIGN'
     - 'SPRUCE_WALL_SIGN'
     - 'CAMPFIRE'
+    - 'COMPOSTER'
     

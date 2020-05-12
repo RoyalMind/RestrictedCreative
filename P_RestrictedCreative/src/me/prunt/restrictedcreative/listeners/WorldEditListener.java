@@ -15,7 +15,7 @@ import com.sk89q.worldedit.util.eventbus.Subscribe;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.DataHandler;
+import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 
 public class WorldEditListener {
 	private Main main;
@@ -52,13 +52,13 @@ public class WorldEditListener {
 
 				// If a tracked block is removed
 				if (newBlock.getBlockType().getMaterial().isAir()) {
-					DataHandler.removeTracking(b);
+					BlockHandler.removeTracking(b);
 				}
 				// The block is changed/placed
 				else if (!p.hasPermission("rc.bypass.tracking.worldedit")
 						&& (main.getSettings().isEnabled("tracking.worldedit.extended")
 								|| p.getGameMode() == GameMode.CREATIVE)) {
-					DataHandler.setAsTracked(b);
+					BlockHandler.setAsTracked(b);
 				}
 
 				return getExtent().setBlock(position, newBlock);
