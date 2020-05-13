@@ -84,6 +84,19 @@ public class ConfigProvider {
 
 		return true;
 	}
+	
+	public void saveConfig() {
+		if (isDefault()) {
+			getMain().saveConfig();
+		} else {
+			File file = new File(getMain().getDataFolder(), getName());
+			try {
+				getConfig().save(file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	private FileConfiguration loadCustomConfig(String name) {
 		File file = new File(getMain().getDataFolder(), name);

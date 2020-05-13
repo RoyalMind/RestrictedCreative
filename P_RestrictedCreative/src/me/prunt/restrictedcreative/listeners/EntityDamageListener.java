@@ -111,8 +111,8 @@ public class EntityDamageListener implements Listener {
 			if (p.getGameMode() != GameMode.CREATIVE)
 				return;
 
-			// PVE
-			if (en instanceof LivingEntity) {
+			// PVE except armor stands
+			if (en instanceof LivingEntity && !(en instanceof ArmorStand)) {
 				// No need to control disabled features
 				if (!getMain().getSettings().isEnabled("limit.combat.pve"))
 					return;

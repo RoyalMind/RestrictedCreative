@@ -12,6 +12,11 @@ public class ChunkListener implements Listener {
 	 */
 	@EventHandler
 	public void onChunkLoad(ChunkLoadEvent e) {
+		// New chunks can't contain creative blocks
+		if (e.isNewChunk())
+			return;
+		
+		//BlockHandler.loadChunkFromDatabase(e.getChunk());
 		BlockHandler.loadBlocks(e.getChunk());
 	}
 }

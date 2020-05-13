@@ -1,6 +1,5 @@
 package me.prunt.restrictedcreative.storage.handlers;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.scheduler.BukkitTask;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.SyncData;
@@ -25,14 +23,13 @@ import me.prunt.restrictedcreative.utils.Utils;
 public class BlockHandler {
 	public static List<String> addToDatabase = new ArrayList<>();
 	public static List<String> removeFromDatabase = new ArrayList<>();
+
 	public static boolean isLoadingDone = false;
+	public static boolean usingAdvancedLoading = false;
 
 	private static HashMap<String, char[][]> blocksInChunk = new HashMap<>();
-
 	private static boolean usingSQLite = false;
-
 	private static int totalCount = -1;
-	private static int taskCount = 0;
 
 	public static boolean isTracked(Block b) {
 		if (b == null)
@@ -55,7 +52,7 @@ public class BlockHandler {
 		removeFromDatabase.remove(Utils.getBlockString(b));
 
 		if (Main.EXTRADEBUG)
-			System.out.println("setAsTracked: " + b.getType() + " " + Utils.getChunkString(b.getChunk()) + " vs "
+			System.out.println("setAsTracked: " + b.getType() + " " + Utils.getChunkString(b.getChunk()) + ", "
 					+ Utils.getBlockString(b));
 	}
 
@@ -180,8 +177,9 @@ public class BlockHandler {
 			System.out.println("loadFromDatabase: " + c + " took " + (System.currentTimeMillis() - start) + "ms");
 	}
 
-	public static void loadFromDatabaseOld(Main main) {
-		Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), new Runnable() {
+	public static void loadFromDatabaseBasic(Main main) {
+		// Start async processing
+		Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
 			@Override
 			public void run() {
 				long start = System.currentTimeMillis();
@@ -195,81 +193,6 @@ public class BlockHandler {
 				try {
 					while (rs.next()) {
 						String block = rs.getString("block");
-						Block b = Utils.getBlock(block);
-
-						if (b == null || b.isEmpty()) {
-							removeFromDatabase.add(block);
-						} else {
-							count++;
-							b.setMetadata("GMC", Main.getFMV());
-						}
-					}
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-
-				setTotalCount(count);
-
-				Utils.sendMessage(Bukkit.getConsoleSender(),
-						main.getUtils().getMessage(true, "database.loaded").replaceAll("%blocks%", getTotalCount()));
-
-				String took = String.valueOf(System.currentTimeMillis() - start);
-
-				Utils.sendMessage(Bukkit.getConsoleSender(),
-						main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
-			}
-		});
-	}
-
-	public static void loadFromDatabaseNew(Main main) {
-		// Start async processing
-		Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
-			@Override
-			public void run() {
-				long start = System.currentTimeMillis();
-
-				main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.load");
-
-				// Gets amount of blocks from database
-				ResultSet countRs = main.getDB().executeQuery("SELECT COUNT(*) FROM " + main.getDB().getBlocksTable());
-
-				int count = 0;
-				try {
-					if (countRs.next())
-						count = countRs.getInt(1);
-				} catch (SQLException e) {
-					Bukkit.getLogger().log(Level.WARNING, "Block counting was interrupted!");
-					e.printStackTrace();
-				}
-
-				int limit = 10000;
-				for (int i = 0; i <= count / limit; i++) {
-					taskCount++;
-					loadSectionFromDatabase(main, start, limit, limit * i);
-				}
-
-				if (Main.DEBUG)
-					System.out.println("loadFromDatabaseNew: " + taskCount);
-			}
-		});
-	}
-
-	private static BukkitTask loadSectionFromDatabase(Main main, long start, int limit, int offset) {
-		// Start async processing
-		return Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
-			@Override
-			public void run() {
-				int i = 0;
-				try {
-					// Gets a sections of blocks from database
-					PreparedStatement statement = main.getDB()
-							.getStatement("SELECT * FROM " + main.getDB().getBlocksTable() + " LIMIT ? OFFSET ?");
-					statement.setInt(1, limit);
-					statement.setInt(2, offset);
-					ResultSet rs = statement.executeQuery();
-
-					while (rs.next()) {
-						String block = rs.getString("block");
 						String chunk = Utils.getBlockChunk(block);
 
 						String world = block.split(";")[0];
@@ -277,34 +200,17 @@ public class BlockHandler {
 							continue;
 
 						addBlockToChunk(chunk, block);
-						i++;
+						count++;
 					}
 				} catch (SQLException e) {
 					Bukkit.getLogger().log(Level.WARNING, "Data loading was interrupted!");
 					e.printStackTrace();
 				}
 
-				setTotalCount(totalCount + i);
-
-				if (Main.DEBUG)
-					System.out.println("loadSectionFromDatabase: " + getTotalCount());
-
-				blockLoadingDone(main, start);
-			}
-		});
-	}
-
-	private static void blockLoadingDone(Main main, long start) {
-		if (taskCount-- != 0)
-			return;
-
-		Bukkit.getScheduler().runTask(main, new Runnable() {
-			@Override
-			public void run() {
 				int chunksLoaded = blocksInChunk.size();
 
 				if (Main.DEBUG)
-					System.out.println("blockLoadingDone: " + chunksLoaded + " chunks");
+					System.out.println("loadFromDatabase: " + chunksLoaded + " chunks");
 
 				int radius = 8;
 				for (World world : Bukkit.getWorlds()) {
@@ -322,6 +228,72 @@ public class BlockHandler {
 					}
 				}
 
+				setTotalCount(count);
+				isLoadingDone = true;
+
+				Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")
+						.replaceAll("%blocks%", getTotalCount()).replaceAll("%chunks%", String.valueOf(chunksLoaded)));
+
+				String took = String.valueOf(System.currentTimeMillis() - start);
+
+				Utils.sendMessage(Bukkit.getConsoleSender(),
+						main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
+			}
+		});
+	}
+
+	public static void loadFromDatabaseAdvanced(Main main) {
+		// Start async processing
+		Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
+			@Override
+			public void run() {
+				long start = System.currentTimeMillis();
+
+				main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.load");
+
+				// Gets all blocks from database
+				ResultSet rs = main.getDB().executeQuery("SELECT * FROM " + main.getDB().getBlocksTable());
+
+				int count = 0;
+				try {
+					while (rs.next()) {
+						String block = rs.getString("block");
+						String chunk = Utils.getBlockChunk(block);
+
+						String world = block.split(";")[0];
+						if (main.getUtils().isDisabledWorld(world) || Bukkit.getWorld(world) == null)
+							continue;
+
+						addBlockToChunk(chunk, block);
+						count++;
+					}
+				} catch (SQLException e) {
+					Bukkit.getLogger().log(Level.WARNING, "Data loading was interrupted!");
+					e.printStackTrace();
+				}
+
+				int chunksLoaded = blocksInChunk.size();
+
+				if (Main.DEBUG)
+					System.out.println("loadFromDatabase: " + chunksLoaded + " chunks");
+
+				int radius = 8;
+				for (World world : Bukkit.getWorlds()) {
+					// Ignore disabled worlds
+					if (main.getUtils().isDisabledWorld(world.getName()))
+						continue;
+
+					Chunk center = world.getSpawnLocation().getChunk();
+
+					for (int x = center.getX() - radius; x < center.getX() + radius; x++) {
+						for (int z = center.getZ() - radius; z < center.getZ() + radius; z++) {
+							Chunk c = world.getChunkAt(x, z);
+							loadBlocks(c);
+						}
+					}
+				}
+
+				setTotalCount(count);
 				isLoadingDone = true;
 
 				Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")

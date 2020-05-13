@@ -153,7 +153,7 @@ public class Main extends JavaPlugin {
 	 * Load data from database
 	 */
 	private void loadData() {
-		setDB(new Database(this));
+		setDB(new Database(this, null));
 
 		BlockHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
 		InventoryHandler.setForceGamemodeEnabled(Utils.isForceGamemodeEnabled());
@@ -211,10 +211,12 @@ public class Main extends JavaPlugin {
 					+ " OR type = 1 AND lastused < " + creative);
 		}
 
-		if (getSettings().isEnabled("general.loading.use-old-system")) {
-			BlockHandler.loadFromDatabaseOld(this);
+		if (getSettings().isEnabled("general.loading.use-advanced-system")) {
+			BlockHandler.usingAdvancedLoading = true;
+			BlockHandler.loadFromDatabaseAdvanced(this);
 		} else {
-			BlockHandler.loadFromDatabaseNew(this);
+			BlockHandler.usingAdvancedLoading = false;
+			BlockHandler.loadFromDatabaseBasic(this);
 		}
 
 		BlockHandler.startDataSync(this);

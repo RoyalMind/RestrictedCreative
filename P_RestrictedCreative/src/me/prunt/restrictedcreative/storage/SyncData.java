@@ -33,18 +33,16 @@ public class SyncData implements Runnable {
 			return;
 
 		long start = System.currentTimeMillis();
-		String or = BlockHandler.isUsingSQLite() ? "OR " : "";
 
 		main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.save");
 
 		main.getDB().setAutoCommit(false);
 
 		if (addedCount > 0)
-			syncData(toAdd, "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable() + " (block) VALUES (?)",
-					"database.added");
+			addData();
 
 		if (removedCount > 0)
-			syncData(toRemove, "DELETE FROM " + main.getDB().getBlocksTable() + " WHERE block = ?", "database.removed");
+			removeData();
 
 		main.getDB().setAutoCommit(true);
 
@@ -72,26 +70,36 @@ public class SyncData implements Runnable {
 		}
 	}
 
-	private void syncData(List<String> blocks, String statement, String message) {
-		PreparedStatement ps = main.getDB().getStatement(statement);
-		int count = 0;
-
-		try {
-			for (String block : blocks) {
-				ps.setString(1, block);
-				ps.executeUpdate();
-				count++;
-
-				if (count % 5000 == 0)
-					main.getDB().commit();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+	private void addData() {
+		List<String> blocks = toAdd;
+		String or = BlockHandler.isUsingSQLite() ? "OR " : "";
+		
+		String statement = "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable() + " (block) VALUES ";
+		
+		for (int i = 0; i < blocks.size(); i++) {
+			statement += "(" + blocks.get(i) + "),";
 		}
+		statement.substring(0, statement.length() - 1); // remove last comma
 
-		main.getDB().commit();
+		main.getDB().executeUpdate(statement);
 
 		Utils.sendMessage(Bukkit.getConsoleSender(),
-				main.getUtils().getMessage(true, message).replaceAll("%blocks%", String.valueOf(count)));
+				main.getUtils().getMessage(true, "database.added").replaceAll("%blocks%", String.valueOf(blocks.size())));
+	}
+
+	private void removeData() {
+		List<String> blocks = toRemove;
+		
+		String statement = "DELETE FROM " + main.getDB().getBlocksTable() + " WHERE ";
+		
+		for (int i = 0; i < blocks.size(); i++) {
+			statement += "block = " + blocks.get(i) + " OR ";
+		}
+		statement.substring(0, statement.length() - 4); // remove last OR
+
+		main.getDB().executeUpdate(statement);
+
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+				main.getUtils().getMessage(true, "database.removed").replaceAll("%blocks%", String.valueOf(blocks.size())));
 	}
 }

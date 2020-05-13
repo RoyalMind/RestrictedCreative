@@ -19,6 +19,7 @@ database:
   removed: '&eDeleted %blocks% old blocks from database.'
   deleted: '&eDeleted database. Full restart is required for changes to take effect.'
   done: '&aDone! Took %mills%ms'
+  incorrect-type: '&cYou can only choose between MySQL and SQLite!'
 gamemodes:
   creative:
     me: '&aSwitched to creative mode!'
