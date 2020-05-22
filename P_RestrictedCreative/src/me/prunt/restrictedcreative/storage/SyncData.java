@@ -77,7 +77,7 @@ public class SyncData implements Runnable {
 		String statement = "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable() + " (block) VALUES ";
 		
 		for (int i = 0; i < blocks.size(); i++) {
-			statement += "(" + blocks.get(i) + "),";
+			statement += "('" + blocks.get(i) + "'),";
 		}
 		statement.substring(0, statement.length() - 1); // remove last comma
 
@@ -93,7 +93,7 @@ public class SyncData implements Runnable {
 		String statement = "DELETE FROM " + main.getDB().getBlocksTable() + " WHERE ";
 		
 		for (int i = 0; i < blocks.size(); i++) {
-			statement += "block = " + blocks.get(i) + " OR ";
+			statement += "block = '" + blocks.get(i) + "' OR ";
 		}
 		statement.substring(0, statement.length() - 4); // remove last OR
 
