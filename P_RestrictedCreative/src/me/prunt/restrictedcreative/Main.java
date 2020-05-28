@@ -201,6 +201,7 @@ public class Main extends JavaPlugin {
 					+ " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player))");
 		}
 
+		// TODO - option to disable it!
 		if (getSettings().isEnabled("general.saving.inventories.enabled")) {
 			long survival = Instant.now().getEpochSecond()
 					- 86400 * getSettings().getInt("general.saving.inventories.purge.survival");
