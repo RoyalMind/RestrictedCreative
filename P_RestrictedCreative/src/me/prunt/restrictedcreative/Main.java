@@ -164,8 +164,9 @@ public class Main extends JavaPlugin {
 
 		// Tracked inventories
 		if (BlockHandler.isUsingSQLite()) {
-			ResultSet rs = getDB().executeQuery(
-					"SELECT name FROM sqlite_master WHERE type='table' AND name='" + getDB().getInvsTable() + "'");
+			String tableName = getDB().getInvsTable();
+			ResultSet rs = getDB()
+					.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + tableName + "'");
 
 			boolean tableExists = false;
 			try {
@@ -175,7 +176,6 @@ public class Main extends JavaPlugin {
 				e.printStackTrace();
 			}
 
-			String tableName = getDB().getInvsTable();
 			if (tableExists)
 				tableName += "_tmp";
 

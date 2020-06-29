@@ -1,6 +1,6 @@
 name: RestrictedCreative
 version: 2.3.7
-description: Extremely lightweight, but fully-featured and customizable Creative mode limiter.
+description: Extremely lightweight, but fully-featured and customizable creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
 website: 'https://www.spigotmc.org/resources/restrictedcreative.42790/'

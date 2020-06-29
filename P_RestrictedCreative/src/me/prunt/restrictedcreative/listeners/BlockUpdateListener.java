@@ -3,7 +3,6 @@ package me.prunt.restrictedcreative.listeners;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -18,6 +17,8 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
+import me.prunt.restrictedcreative.utils.MinecraftVersion;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class BlockUpdateListener implements Listener {
 	private Main main;
@@ -83,7 +84,7 @@ public class BlockUpdateListener implements Listener {
 		}
 
 		/* 1.-3. Scaffolding */
-		if (!Bukkit.getVersion().contains("1.13") && m == Material.valueOf("SCAFFOLDING")) {
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14) && m == Material.valueOf("SCAFFOLDING")) {
 			if (!isScaffoldingOk(b)) {
 				e.setCancelled(true);
 				BlockHandler.breakBlock(b, null);
@@ -100,7 +101,7 @@ public class BlockUpdateListener implements Listener {
 				System.out.println("needsBlockBelow: " + m);
 
 			// Needs to be checked BEFORE isSolid()
-			if (!Bukkit.getVersion().contains("1.13")
+			if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14)
 					&& (m == Material.valueOf("BAMBOO") || m == Material.valueOf("BAMBOO_SAPLING"))) {
 				if (!isBambooOk(b)) {
 					if (Main.DEBUG)
@@ -110,6 +111,23 @@ public class BlockUpdateListener implements Listener {
 					BlockHandler.breakBlock(b, null);
 				}
 				return;
+			}
+			if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_16)) {
+				if (m == Material.valueOf("WEEPING_VINES_PLANT")) {
+					if (!isWeepingVinesOk(b)) {
+						e.setCancelled(true);
+						BlockHandler.breakBlock(b, null);
+					}
+					return;
+				}
+
+				if (m == Material.valueOf("TWISTING_VINES_PLANT")) {
+					if (!isTwistingVinesOk(b)) {
+						e.setCancelled(true);
+						BlockHandler.breakBlock(b, null);
+					}
+					return;
+				}
 			}
 
 			// Needs to be checked BEFORE isSolid()
@@ -191,6 +209,20 @@ public class BlockUpdateListener implements Listener {
 				BlockHandler.breakBlock(b, null);
 			}
 		}
+	}
+
+	private boolean isWeepingVinesOk(Block b) {
+		Block bl = b.getRelative(BlockFace.UP);
+		Material ma = bl.getType();
+
+		return ma == Material.valueOf("WEEPING_VINES_PLANT") || isSolid(bl);
+	}
+
+	private boolean isTwistingVinesOk(Block b) {
+		Block bl = b.getRelative(BlockFace.DOWN);
+		Material ma = bl.getType();
+
+		return ma == Material.valueOf("TWISTING_VINES_PLANT") || isSolid(bl);
 	}
 
 	private boolean isScaffoldingOk(Block scaffolding) {

@@ -48,6 +48,35 @@ import net.milkbowl.vault.permission.Permission;
 
 public class Utils {
 	/* --- Static methods --- */
+	public static boolean isVersionOlderThanInclusive(MinecraftVersion version) {
+		return getCurrentVersion().compareTo(version) <= 0;
+	}
+
+	public static boolean isVersionNewerThanInclusive(MinecraftVersion version) {
+		return getCurrentVersion().compareTo(version) >= 0;
+	}
+
+	private static MinecraftVersion getCurrentVersion() {
+		String version = Bukkit.getVersion();
+
+		if (version.contains("1.19"))
+			return MinecraftVersion.v1_19;
+		if (version.contains("1.18"))
+			return MinecraftVersion.v1_18;
+		if (version.contains("1.17"))
+			return MinecraftVersion.v1_17;
+		if (version.contains("1.16"))
+			return MinecraftVersion.v1_16;
+		if (version.contains("1.15"))
+			return MinecraftVersion.v1_15;
+		if (version.contains("1.14"))
+			return MinecraftVersion.v1_14;
+		if (version.contains("1.13"))
+			return MinecraftVersion.v1_13;
+
+		return MinecraftVersion.UNKNOWN;
+	}
+
 	public static boolean isInstalled(String plugin) {
 		return Bukkit.getPluginManager().getPlugin(plugin) != null;
 	}
@@ -331,6 +360,9 @@ public class Utils {
 
 	// Check if item name is bad
 	private boolean isBadName(ItemStack is) {
+		if (is == null || is.getItemMeta() == null)
+			return false;
+
 		for (String name : getMain().getSettings().getStringList("confiscate.items.name")) {
 			String dn = is.getItemMeta().getDisplayName();
 

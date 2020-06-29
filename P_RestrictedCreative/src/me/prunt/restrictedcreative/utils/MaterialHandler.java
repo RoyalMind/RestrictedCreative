@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -120,7 +119,7 @@ public class MaterialHandler {
 	public static BlockFace getNeededFace(Block b) {
 		BlockData bd = b.getBlockData();
 
-		if (!Bukkit.getVersion().contains("1.13") && bd instanceof Lantern) {
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14) && bd instanceof Lantern) {
 			if (Main.DEBUG)
 				System.out.println("getNeededFace: Lantern");
 
@@ -154,7 +153,7 @@ public class MaterialHandler {
 			return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 		if (bd instanceof WallSign)
 			return d.getFacing().getOppositeFace(); // TESTED 1.13.2
-		if ((Bukkit.getVersion().contains("1.13") || Bukkit.getVersion().contains("1.14")) && bd instanceof Switch) {
+		if (Utils.isVersionOlderThanInclusive(MinecraftVersion.v1_14) && bd instanceof Switch) {
 			// TODO: FaceAttachable
 			switch (((Switch) bd).getFace()) {
 			case CEILING:
@@ -165,8 +164,7 @@ public class MaterialHandler {
 				return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 			}
 		}
-		if (!(Bukkit.getVersion().contains("1.13") || Bukkit.getVersion().contains("1.14"))
-				&& bd instanceof FaceAttachable) {
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_15) && bd instanceof FaceAttachable) {
 			switch (((FaceAttachable) bd).getAttachedFace()) {
 			case CEILING:
 				return BlockFace.UP;
@@ -176,7 +174,7 @@ public class MaterialHandler {
 				return d.getFacing().getOppositeFace(); // TESTED 1.15.2
 			}
 		}
-		if (!Bukkit.getVersion().contains("1.13") && bd instanceof Bell) {
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14) && bd instanceof Bell) {
 			switch (((Bell) bd).getAttachment()) {
 			case CEILING:
 				return BlockFace.UP;
@@ -221,13 +219,21 @@ public class MaterialHandler {
 	}
 
 	private static HashSet<Material> getTop() {
-		if (!Bukkit.getVersion().contains("1.13")) {
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14)) {
 			top.add(Material.valueOf("BAMBOO"));
 			top.add(Material.valueOf("BAMBOO_SAPLING"));
 			top.add(Material.valueOf("CORNFLOWER"));
 			top.add(Material.valueOf("LILY_OF_THE_VALLEY"));
 			top.add(Material.valueOf("WITHER_ROSE"));
 			top.add(Material.valueOf("SWEET_BERRY_BUSH"));
+
+			if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_16)) {
+				top.add(Material.valueOf("CRIMSON_FUNGUS"));
+				top.add(Material.valueOf("WARPED_FUNGUS"));
+				top.add(Material.valueOf("CRIMSON_ROOTS"));
+				top.add(Material.valueOf("WARPED_ROOTS"));
+				top.add(Material.valueOf("NETHER_SPROUTS"));
+			}
 		} else {
 			top.add(Material.valueOf("DANDELION_YELLOW"));
 		}
