@@ -61,7 +61,7 @@ public class BlockUpdateListener implements Listener {
 		if (Main.DEBUG && Main.EXTRADEBUG)
 			System.out.println("onBlockUpdate: " + m + " (" + ma + ")");
 
-		/* 1.-3. Rail */
+		/* 1.-4. Rail */
 		if (MaterialHandler.isRail(b)) {
 			// If the block below the rail isn't solid or
 			// if rail is on slope and there isn't a block to support it
@@ -72,7 +72,7 @@ public class BlockUpdateListener implements Listener {
 			return;
 		}
 
-		/* 1.-3. Chorus */
+		/* 1.-4. Chorus */
 		if (m == Material.CHORUS_PLANT) {
 			if (!isChorusOk(b)) {
 				e.setCancelled(true);
@@ -84,8 +84,9 @@ public class BlockUpdateListener implements Listener {
 			return;
 		}
 
-		/* 1.-3. Scaffolding */
-		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14) && m == Material.valueOf("SCAFFOLDING")) {
+		/* 1.-4. Scaffolding */
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14)
+				&& m == Material.valueOf("SCAFFOLDING")) {
 			if (!isScaffoldingOk(b)) {
 				e.setCancelled(true);
 				BlockHandler.breakBlock(b, null);
@@ -96,6 +97,33 @@ public class BlockUpdateListener implements Listener {
 			return;
 		}
 
+		/* 1.-4. Weeping & twisting vines */
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_16)) {
+			if (m == Material.valueOf("WEEPING_VINES")
+					|| m == Material.valueOf("WEEPING_VINES_PLANT")) {
+				if (!isWeepingVinesOk(b)) {
+					if (Main.DEBUG)
+						System.out.println("isWeepingVinesOk: false");
+
+					e.setCancelled(true);
+					BlockHandler.breakBlock(b, null);
+				}
+				return;
+			}
+
+			if (m == Material.valueOf("TWISTING_VINES")
+					|| m == Material.valueOf("TWISTING_VINES_PLANT")) {
+				if (!isTwistingVinesOk(b)) {
+					if (Main.DEBUG)
+						System.out.println("isTwistingVinesOk: false");
+
+					e.setCancelled(true);
+					BlockHandler.breakBlock(b, null);
+				}
+				return;
+			}
+		}
+
 		/* 4. Top blocks */
 		if (MaterialHandler.needsBlockBelow(b)) {
 			if (Main.DEBUG)
@@ -103,7 +131,8 @@ public class BlockUpdateListener implements Listener {
 
 			// Needs to be checked BEFORE isSolid()
 			if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14)
-					&& (m == Material.valueOf("BAMBOO") || m == Material.valueOf("BAMBOO_SAPLING"))) {
+					&& (m == Material.valueOf("BAMBOO")
+							|| m == Material.valueOf("BAMBOO_SAPLING"))) {
 				if (!isBambooOk(b)) {
 					if (Main.DEBUG)
 						System.out.println("isBambooOk: false");
@@ -112,23 +141,6 @@ public class BlockUpdateListener implements Listener {
 					BlockHandler.breakBlock(b, null);
 				}
 				return;
-			}
-			if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_16)) {
-				if (m == Material.valueOf("WEEPING_VINES_PLANT")) {
-					if (!isWeepingVinesOk(b)) {
-						e.setCancelled(true);
-						BlockHandler.breakBlock(b, null);
-					}
-					return;
-				}
-
-				if (m == Material.valueOf("TWISTING_VINES_PLANT")) {
-					if (!isTwistingVinesOk(b)) {
-						e.setCancelled(true);
-						BlockHandler.breakBlock(b, null);
-					}
-					return;
-				}
 			}
 
 			// Needs to be checked BEFORE isSolid()
@@ -216,14 +228,16 @@ public class BlockUpdateListener implements Listener {
 		Block bl = b.getRelative(BlockFace.UP);
 		Material ma = bl.getType();
 
-		return ma == Material.valueOf("WEEPING_VINES_PLANT") || isSolid(bl);
+		return ma == Material.valueOf("WEEPING_VINES")
+				|| ma == Material.valueOf("WEEPING_VINES_PLANT") || isSolid(bl);
 	}
 
 	private boolean isTwistingVinesOk(Block b) {
 		Block bl = b.getRelative(BlockFace.DOWN);
 		Material ma = bl.getType();
 
-		return ma == Material.valueOf("TWISTING_VINES_PLANT") || isSolid(bl);
+		return ma == Material.valueOf("TWISTING_VINES")
+				|| ma == Material.valueOf("TWISTING_VINES_PLANT") || isSolid(bl);
 	}
 
 	private boolean isScaffoldingOk(Block scaffolding) {
@@ -276,9 +290,9 @@ public class BlockUpdateListener implements Listener {
 		List<Block> horisontalChoruses = horisontalChoruses(b);
 		boolean validHorisontalChorusExists = validHorisontalChorusExists(horisontalChoruses);
 
-		// Chorus plant will break unless the block below is chorus plant or end stone
-		// or any horizontally adjacent block is a chorus plant above chorus plant or
-		// end stone
+		// Chorus plant will break unless the block below is (chorus plant or end stone)
+		// or any horizontally adjacent block is a chorus plant above (chorus plant or
+		// end stone)
 		if (!isBelowChorusOk(b) && !validHorisontalChorusExists)
 			return false;
 
@@ -330,7 +344,8 @@ public class BlockUpdateListener implements Listener {
 
 	private boolean isCactusOk(Block b) {
 		boolean nothingAround = isAroundCactusOk(b.getRelative(BlockFace.EAST))
-				&& isAroundCactusOk(b.getRelative(BlockFace.WEST)) && isAroundCactusOk(b.getRelative(BlockFace.NORTH))
+				&& isAroundCactusOk(b.getRelative(BlockFace.WEST))
+				&& isAroundCactusOk(b.getRelative(BlockFace.NORTH))
 				&& isAroundCactusOk(b.getRelative(BlockFace.SOUTH));
 
 		Material m = b.getRelative(BlockFace.DOWN).getType();
@@ -357,8 +372,8 @@ public class BlockUpdateListener implements Listener {
 		if (ma == Material.SUGAR_CANE)
 			return true;
 
-		boolean soil = ma == Material.GRASS_BLOCK || ma == Material.DIRT || ma == Material.SAND || ma == Material.PODZOL
-				|| ma == Material.COARSE_DIRT || ma == Material.RED_SAND;
+		boolean soil = ma == Material.GRASS_BLOCK || ma == Material.DIRT || ma == Material.SAND
+				|| ma == Material.PODZOL || ma == Material.COARSE_DIRT || ma == Material.RED_SAND;
 
 		Material east = bl.getRelative(BlockFace.EAST).getType();
 		Material west = bl.getRelative(BlockFace.WEST).getType();

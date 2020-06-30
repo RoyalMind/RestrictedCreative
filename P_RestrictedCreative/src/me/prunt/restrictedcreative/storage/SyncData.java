@@ -1,5 +1,7 @@
 package me.prunt.restrictedcreative.storage;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -31,16 +33,19 @@ public class SyncData implements Runnable {
 			return;
 
 		long start = System.currentTimeMillis();
+		String or = BlockHandler.isUsingSQLite() ? "OR " : "";
 
 		main.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.save");
 
 		main.getDB().setAutoCommit(false);
 
 		if (addedCount > 0)
-			addData();
+			syncData(toAdd, "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable()
+					+ " (block) VALUES (?)", "database.added");
 
 		if (removedCount > 0)
-			removeData();
+			syncData(toRemove, "DELETE FROM " + main.getDB().getBlocksTable() + " WHERE block = ?",
+					"database.removed");
 
 		main.getDB().setAutoCommit(true);
 
@@ -61,18 +66,42 @@ public class SyncData implements Runnable {
 
 					String took = String.valueOf(System.currentTimeMillis() - start);
 
-					Utils.sendMessage(Bukkit.getConsoleSender(),
-							main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
+					Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils()
+							.getMessage(true, "database.done").replaceAll("%mills%", took));
 				}
 			});
 		}
 	}
 
-	private void addData() {
+	private void syncData(List<String> blocks, String statement, String message) {
+		PreparedStatement ps = main.getDB().getStatement(statement);
+		int count = 0;
+
+		try {
+			for (String block : blocks) {
+				ps.setString(1, block);
+				ps.executeUpdate();
+				count++;
+
+				if (count % 5000 == 0)
+					main.getDB().commit();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		main.getDB().commit();
+
+		Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, message)
+				.replaceAll("%blocks%", String.valueOf(count)));
+	}
+
+	/*private void addData() {
 		List<String> blocks = toAdd;
 		String or = BlockHandler.isUsingSQLite() ? "OR " : "";
 
-		String statement = "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable() + " (block) VALUES ";
+		String statement = "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable()
+				+ " (block) VALUES ";
 
 		for (int i = 0; i < blocks.size(); i++) {
 			statement += "('" + blocks.get(i) + "'),";
@@ -81,8 +110,9 @@ public class SyncData implements Runnable {
 
 		main.getDB().executeUpdate(statement);
 
-		Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.added")
-				.replaceAll("%blocks%", String.valueOf(blocks.size())));
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+				main.getUtils().getMessage(true, "database.added").replaceAll("%blocks%",
+						String.valueOf(blocks.size())));
 	}
 
 	private void removeData() {
@@ -97,7 +127,8 @@ public class SyncData implements Runnable {
 
 		main.getDB().executeUpdate(statement);
 
-		Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.removed")
-				.replaceAll("%blocks%", String.valueOf(blocks.size())));
-	}
+		Utils.sendMessage(Bukkit.getConsoleSender(),
+				main.getUtils().getMessage(true, "database.removed").replaceAll("%blocks%",
+						String.valueOf(blocks.size())));
+	}*/
 }

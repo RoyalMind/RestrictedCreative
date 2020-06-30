@@ -43,7 +43,7 @@ commands:
     aliases:
     - 'gm3'
     - 'gmsp'
-    
+
 
 general:
   disabled-worlds:
@@ -59,7 +59,7 @@ general:
   loading:
     delay-login: true
     use-old-system: false
-  
+
 creative:
   armor:
     enabled: true
@@ -117,7 +117,7 @@ limit:
     wither: true
     snow-golem: true
     iron-golem: true
-  
+
 confiscate:
   invalid-items: true # NBT check requires ProtocolLib
   middle-click:
@@ -242,9 +242,10 @@ disable:
     #- 'ZOMBIE_PIGMAN_SPAWN_EGG'
     # 1.16
     - 'ZOMBIFIED_PIGLIN_SPAWN_EGG'
-    - 'STRIDER_SPAWN_EGG'
+    - 'PIGLIN_SPAWN_EGG'
     - 'HOGLIN_SPAWN_EGG'
     - 'ZOGLIN_SPAWN_EGG'
+    - 'STRIDER_SPAWN_EGG'
     on-ground:
     - 'JUKEBOX'
     - 'FLOWER_POT'
@@ -272,4 +273,3 @@ disable:
     - 'CRIMSON_WALL_SIGN'
     - 'WARPED_WALL_SIGN'
     - 'SOUL_CAMPFIRE'
-    

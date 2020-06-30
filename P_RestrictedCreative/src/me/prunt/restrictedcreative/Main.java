@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.WorldEdit;
@@ -46,7 +47,7 @@ import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class Main extends JavaPlugin {
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	public static boolean EXTRADEBUG = false;
 
 	private Database database;
@@ -112,22 +113,24 @@ public class Main extends JavaPlugin {
 		// In case of plugin reload
 		HandlerList.unregisterAll(this);
 
-		getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), this);
-		getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
-		getServer().getPluginManager().registerEvents(new BlockUpdateListener(this), this);
-		getServer().getPluginManager().registerEvents(new BlockChangeListener(this), this);
-		getServer().getPluginManager().registerEvents(new BlockExplodeListener(this), this);
-		getServer().getPluginManager().registerEvents(new BlockPistonListener(this), this);
+		PluginManager manager = getServer().getPluginManager();
 
-		getServer().getPluginManager().registerEvents(new ChunkListener(), this);
+		manager.registerEvents(new BlockPlaceListener(this), this);
+		manager.registerEvents(new BlockBreakListener(this), this);
+		manager.registerEvents(new BlockUpdateListener(this), this);
+		manager.registerEvents(new BlockChangeListener(this), this);
+		manager.registerEvents(new BlockExplodeListener(this), this);
+		manager.registerEvents(new BlockPistonListener(this), this);
 
-		getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
-		getServer().getPluginManager().registerEvents(new EntityCreateListener(this), this);
+		manager.registerEvents(new ChunkListener(), this);
 
-		getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
-		getServer().getPluginManager().registerEvents(new PlayerInventoryListener(this), this);
-		getServer().getPluginManager().registerEvents(new PlayerItemListener(this), this);
-		getServer().getPluginManager().registerEvents(new PlayerMiscListener(this), this);
+		manager.registerEvents(new EntityDamageListener(this), this);
+		manager.registerEvents(new EntityCreateListener(this), this);
+
+		manager.registerEvents(new PlayerInteractListener(this), this);
+		manager.registerEvents(new PlayerInventoryListener(this), this);
+		manager.registerEvents(new PlayerItemListener(this), this);
+		manager.registerEvents(new PlayerMiscListener(this), this);
 	}
 
 	/**
@@ -155,18 +158,20 @@ public class Main extends JavaPlugin {
 	private void loadData() {
 		setDB(new Database(this, null));
 
-		BlockHandler.setUsingSQLite(getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
+		BlockHandler.setUsingSQLite(
+				getSettings().getString("database.type").equalsIgnoreCase("sqlite"));
 		InventoryHandler.setForceGamemodeEnabled(Utils.isForceGamemodeEnabled());
 
 		// Tracked blocks
-		getDB().executeUpdate(
-				"CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable() + " (block VARCHAR(255), UNIQUE (block))");
+		getDB().executeUpdate("CREATE TABLE IF NOT EXISTS " + getDB().getBlocksTable()
+				+ " (block VARCHAR(255), UNIQUE (block))");
 
 		// Tracked inventories
 		if (BlockHandler.isUsingSQLite()) {
 			String tableName = getDB().getInvsTable();
 			ResultSet rs = getDB()
-					.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + tableName + "'");
+					.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='"
+							+ tableName + "'");
 
 			boolean tableExists = false;
 			try {
@@ -190,7 +195,8 @@ public class Main extends JavaPlugin {
 							+ " SELECT player, type, storage, armor, extra, effects, xp, MAX(lastused) as lastused FROM "
 							+ getDB().getInvsTable() + " GROUP BY player");
 					stm.addBatch("DROP TABLE " + getDB().getInvsTable());
-					stm.addBatch("ALTER TABLE " + tableName + " RENAME TO " + getDB().getInvsTable());
+					stm.addBatch(
+							"ALTER TABLE " + tableName + " RENAME TO " + getDB().getInvsTable());
 					stm.executeBatch();
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -208,16 +214,17 @@ public class Main extends JavaPlugin {
 			long creative = Instant.now().getEpochSecond()
 					- 86400 * getSettings().getInt("general.saving.inventories.purge.creative");
 
-			getDB().executeUpdate("DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < " + survival
-					+ " OR type = 1 AND lastused < " + creative);
+			getDB().executeUpdate(
+					"DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < "
+							+ survival + " OR type = 1 AND lastused < " + creative);
 		}
 
-		if (getSettings().isEnabled("general.loading.use-advanced-system")) {
-			BlockHandler.usingAdvancedLoading = true;
-			BlockHandler.loadFromDatabaseAdvanced(this);
-		} else {
+		if (getSettings().isEnabled("general.loading.use-old-system")) {
 			BlockHandler.usingAdvancedLoading = false;
 			BlockHandler.loadFromDatabaseBasic(this);
+		} else {
+			BlockHandler.usingAdvancedLoading = true;
+			BlockHandler.loadFromDatabaseAdvanced(this);
 		}
 
 		BlockHandler.startDataSync(this);

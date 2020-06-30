@@ -53,6 +53,10 @@ public class Utils {
 	}
 
 	public static boolean isVersionNewerThanInclusive(MinecraftVersion version) {
+		if (Main.EXTRADEBUG)
+			System.out.println(
+					"isVersionNewerThanInclusive: " + getCurrentVersion() + " vs " + version);
+
 		return getCurrentVersion().compareTo(version) >= 0;
 	}
 
@@ -136,7 +140,8 @@ public class Utils {
 
 	public static boolean isForceGamemodeEnabled() {
 		try {
-			FileInputStream in = new FileInputStream(new File(".").getAbsolutePath() + "/server.properties");
+			FileInputStream in = new FileInputStream(
+					new File(".").getAbsolutePath() + "/server.properties");
 			Properties prop = new Properties();
 
 			prop.load(in);
@@ -144,7 +149,8 @@ public class Utils {
 			in.close();
 
 			if (Main.DEBUG)
-				System.out.println("isForceGamemodeEnabled: '" + prop.getProperty("force-gamemode") + "' vs " + result);
+				System.out.println("isForceGamemodeEnabled: '" + prop.getProperty("force-gamemode")
+						+ "' vs " + result);
 
 			return result;
 		} catch (IOException e) {
@@ -185,8 +191,8 @@ public class Utils {
 	 * @return Whether the given type should be excluded from tracking
 	 */
 	public boolean isExcludedFromTracking(Material m) {
-		return getMain().getSettings().getMaterialList("tracking.blocks.exclude").contains(m) || !isTrackingEnabled()
-				|| m == Material.AIR;
+		return getMain().getSettings().getMaterialList("tracking.blocks.exclude").contains(m)
+				|| !isTrackingEnabled() || m == Material.AIR;
 	}
 
 	/**
@@ -194,8 +200,8 @@ public class Utils {
 	 * @return Whether the given type should be excluded from tracking
 	 */
 	public boolean isExcludedFromConfiscating(Material m) {
-		return getMain().getSettings().getMaterialList("confiscate.middle-click.exclude").contains(m)
-				|| m == Material.AIR;
+		return getMain().getSettings().getMaterialList("confiscate.middle-click.exclude")
+				.contains(m) || m == Material.AIR;
 	}
 
 	private boolean isInvalid(Material m) {
@@ -260,11 +266,13 @@ public class Utils {
 
 		// WorldGuard check
 		if (Utils.isInstalled("WorldGuard")) {
-			WorldGuardPlugin wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
+			WorldGuardPlugin wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager()
+					.getPlugin("WorldGuard");
 			LocalPlayer lp = wg.wrapPlayer(p);
 
 			// Gets all regions covering the block or player location
-			RegionQuery rq = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+			RegionQuery rq = WorldGuard.getInstance().getPlatform().getRegionContainer()
+					.createQuery();
 			ApplicableRegionSet set = rq.getApplicableRegions(BukkitAdapter.adapt(loc));
 
 			// Loops through applicable regions
@@ -282,7 +290,8 @@ public class Utils {
 						return true;
 
 					// Member check
-					if (getMain().getSettings().isEnabled("limit.regions.owner-based.allow-members")) {
+					if (getMain().getSettings()
+							.isEnabled("limit.regions.owner-based.allow-members")) {
 						if (rg.isMember(lp))
 							return true;
 					}
@@ -292,7 +301,8 @@ public class Utils {
 
 		// GriefPrevention check
 		if (Utils.isInstalled("GriefPrevention")) {
-			Claim claim = GriefPrevention.instance.dataStore.getClaimAt(b.getLocation(), false, null);
+			Claim claim = GriefPrevention.instance.dataStore.getClaimAt(b.getLocation(), false,
+					null);
 
 			if (claim == null)
 				return false;
@@ -467,7 +477,8 @@ public class Utils {
 			setPermissions(p, toCreative);
 
 		// Groups
-		if (Utils.isInstalled("Vault") && getMain().getSettings().isEnabled("creative.groups.enabled")
+		if (Utils.isInstalled("Vault")
+				&& getMain().getSettings().isEnabled("creative.groups.enabled")
 				&& !p.hasPermission("rc.bypass.creative.groups"))
 			setGroups(p, toCreative);
 
@@ -559,7 +570,8 @@ public class Utils {
 	}
 
 	private void setGroups(Player p, boolean toCreative) {
-		Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class).getProvider();
+		Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class)
+				.getProvider();
 
 		if (toCreative) {
 			for (String group : getMain().getSettings().getStringList("creative.groups.list")) {
@@ -601,11 +613,14 @@ public class Utils {
 	}
 
 	private void setPermissions(Player p, boolean toCreative) {
-		if (Utils.isInstalled("Vault") && getMain().getSettings().isEnabled("creative.permissions.use-vault")) {
-			Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class).getProvider();
+		if (Utils.isInstalled("Vault")
+				&& getMain().getSettings().isEnabled("creative.permissions.use-vault")) {
+			Permission vault = Bukkit.getServer().getServicesManager()
+					.getRegistration(Permission.class).getProvider();
 
 			if (toCreative) {
-				for (String perm : getMain().getSettings().getStringList("creative.permissions.list")) {
+				for (String perm : getMain().getSettings()
+						.getStringList("creative.permissions.list")) {
 					// Remove permission
 					if (perm.startsWith("-")) {
 						// .substring(1) removes "-" from the front
@@ -645,7 +660,8 @@ public class Utils {
 			if (toCreative) {
 				PermissionAttachment attachment = p.addAttachment(getMain());
 
-				for (String perm : getMain().getSettings().getStringList("creative.permissions.list")) {
+				for (String perm : getMain().getSettings()
+						.getStringList("creative.permissions.list")) {
 					if (perm.startsWith("-")) {
 						// .substring(1) removes "-" from the front
 						attachment.setPermission(perm.substring(1), false);
@@ -686,16 +702,18 @@ public class Utils {
 		if (p.hasPermission("rc.bypass.tracking.inventory"))
 			return;
 
-		if (InventoryHandler.getSurvivalInv(p) == null && InventoryHandler.getCreativeInv(p) == null)
+		if (InventoryHandler.getSurvivalInv(p) == null
+				&& InventoryHandler.getCreativeInv(p) == null)
 			return;
 
 		if (Main.DEBUG)
-			System.out.println("saveInventory: s?" + (InventoryHandler.getSurvivalInv(p) != null) + " c?"
-					+ (InventoryHandler.getCreativeInv(p) != null));
+			System.out.println("saveInventory: s?" + (InventoryHandler.getSurvivalInv(p) != null)
+					+ " c?" + (InventoryHandler.getCreativeInv(p) != null));
 
 		PlayerInfo pi;
 		int type;
-		if (p.getGameMode() == GameMode.CREATIVE) { // creative inv remains with player, survival must be saved
+		if (p.getGameMode() == GameMode.CREATIVE) { // creative inv remains with player, survival
+													// must be saved
 			pi = InventoryHandler.getSurvivalInv(p);
 			type = 0;
 
@@ -714,27 +732,31 @@ public class Utils {
 			// player doesn't carry at the moment
 			if (BlockHandler.isUsingSQLite()) {
 				// Inserts a new row if it doesn't exist already and updates it with new values
+				getMain().getDB().executeUpdate("INSERT OR IGNORE INTO "
+						+ getMain().getDB().getInvsTable()
+						+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
+						+ p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage()
+						+ "', '" + pi.getArmor() + "', '" + pi.getExtra() + "', '" + pi.getEffects()
+						+ "', " + p.getTotalExperience() + ", " + Instant.now().getEpochSecond()
+						+ ")");
 				getMain().getDB()
-						.executeUpdate("INSERT OR IGNORE INTO " + getMain().getDB().getInvsTable()
-								+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
-								+ p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '"
-								+ pi.getArmor() + "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', "
-								+ p.getTotalExperience() + ", " + Instant.now().getEpochSecond() + ")");
-				getMain().getDB()
-						.executeUpdate("UPDATE " + getMain().getDB().getInvsTable() + " SET type = " + type
-								+ ", storage = '" + pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '"
-								+ pi.getExtra() + "', effects = '" + pi.getEffects() + "', xp = "
-								+ p.getTotalExperience() + ", lastused = " + Instant.now().getEpochSecond()
+						.executeUpdate("UPDATE " + getMain().getDB().getInvsTable() + " SET type = "
+								+ type + ", storage = '" + pi.getStorage() + "', armor = '"
+								+ pi.getArmor() + "', extra = '" + pi.getExtra() + "', effects = '"
+								+ pi.getEffects() + "', xp = " + p.getTotalExperience()
+								+ ", lastused = " + Instant.now().getEpochSecond()
 								+ " WHERE player = '" + p.getUniqueId().toString() + "'");
 			} else {
 				// Inserts a new row or updates the old one if it already exists
 				getMain().getDB().executeUpdate("INSERT INTO " + getMain().getDB().getInvsTable()
 						+ " (player, type, storage, armor, extra, effects, xp, lastused) VALUES ('"
-						+ p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage() + "', '" + pi.getArmor()
-						+ "', '" + pi.getExtra() + "', '" + pi.getEffects() + "', " + p.getTotalExperience() + ", "
-						+ Instant.now().getEpochSecond() + ") ON DUPLICATE KEY UPDATE type = " + type + ", storage = '"
-						+ pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '" + pi.getExtra()
-						+ "', effects = '" + pi.getEffects() + "', xp = " + p.getTotalExperience() + ", lastused = "
+						+ p.getUniqueId().toString() + "', " + type + ", '" + pi.getStorage()
+						+ "', '" + pi.getArmor() + "', '" + pi.getExtra() + "', '" + pi.getEffects()
+						+ "', " + p.getTotalExperience() + ", " + Instant.now().getEpochSecond()
+						+ ") ON DUPLICATE KEY UPDATE type = " + type + ", storage = '"
+						+ pi.getStorage() + "', armor = '" + pi.getArmor() + "', extra = '"
+						+ pi.getExtra() + "', effects = '" + pi.getEffects() + "', xp = "
+						+ p.getTotalExperience() + ", lastused = "
 						+ Instant.now().getEpochSecond());
 			}
 		}
@@ -748,14 +770,16 @@ public class Utils {
 		if (p.hasPermission("rc.bypass.tracking.inventory"))
 			return;
 
-		ResultSet rs = getMain().getDB().executeQuery("SELECT * FROM " + getMain().getDB().getInvsTable()
-				+ " WHERE player = '" + p.getUniqueId().toString() + "'");
+		ResultSet rs = getMain().getDB()
+				.executeQuery("SELECT * FROM " + getMain().getDB().getInvsTable()
+						+ " WHERE player = '" + p.getUniqueId().toString() + "'");
 
 		try {
 			while (rs.next()) {
-				GameMode gm = (rs.getInt("type") == 0) ? Bukkit.getDefaultGameMode() : GameMode.CREATIVE;
-				PlayerInfo pi = new PlayerInfo(rs.getString("storage"), rs.getString("armor"), rs.getString("extra"),
-						rs.getString("effects"), rs.getInt("xp"), gm);
+				GameMode gm = (rs.getInt("type") == 0) ? Bukkit.getDefaultGameMode()
+						: GameMode.CREATIVE;
+				PlayerInfo pi = new PlayerInfo(rs.getString("storage"), rs.getString("armor"),
+						rs.getString("extra"), rs.getString("effects"), rs.getInt("xp"), gm);
 
 				if (rs.getInt("type") == 0) {
 					InventoryHandler.saveSurvivalInv(p, pi);
@@ -775,7 +799,7 @@ public class Utils {
 		}
 
 		if (Main.DEBUG)
-			System.out.println("loadInventory: c?" + (InventoryHandler.getCreativeInv(p) != null) + " s?"
-					+ (InventoryHandler.getSurvivalInv(p) != null));
+			System.out.println("loadInventory: c?" + (InventoryHandler.getCreativeInv(p) != null)
+					+ " s?" + (InventoryHandler.getSurvivalInv(p) != null));
 	}
 }

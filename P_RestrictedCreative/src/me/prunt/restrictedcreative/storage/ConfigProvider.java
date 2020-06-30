@@ -2,6 +2,7 @@ package me.prunt.restrictedcreative.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,12 +69,7 @@ public class ConfigProvider {
 	/* Methods */
 
 	public void reload() {
-		if (isDefault()) {
-			getMain().saveDefaultConfig();
-			getMain().reloadConfig();
-		} else {
-			setConfig(loadCustomConfig(getName()));
-		}
+		loadConfig();
 	}
 
 	public boolean isNone(String... paths) {
@@ -84,65 +80,43 @@ public class ConfigProvider {
 
 		return true;
 	}
-	
+
 	public void saveConfig() {
-		if (isDefault()) {
-			getMain().saveConfig();
-		} else {
+		try {
 			File file = new File(getMain().getDataFolder(), getName());
-			try {
-				getConfig().save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			getConfig().save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	private FileConfiguration loadCustomConfig(String name) {
-		File file = new File(getMain().getDataFolder(), name);
+	private void loadConfig() {
+		File file = new File(getMain().getDataFolder(), getName());
 
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
-			getMain().saveResource(name, false);
+			getMain().saveResource(getName(), false);
 		}
 
-		FileConfiguration config = new YamlConfiguration();
+		YamlConfiguration config = new YamlConfiguration();
 
 		try {
 			config.load(file);
 
+			InputStream stream = getMain().getResource(getName());
+			InputStreamReader reader = new InputStreamReader(stream, Charsets.UTF_8);
+			YamlConfiguration defaults = YamlConfiguration.loadConfiguration(reader);
+
 			// Update config with new paths and values
 			config.options().copyDefaults(true);
-			config.setDefaults(YamlConfiguration
-					.loadConfiguration(new InputStreamReader(getMain().getResource(name), Charsets.UTF_8)));
+			config.setDefaults(defaults);
+
 			config.save(file);
 		} catch (IOException | InvalidConfigurationException e) {
 			e.printStackTrace();
 		}
 
-		return config;
-	}
-
-	private void loadConfig() {
-		if (isDefault()) {
-			InputStreamReader reader = new InputStreamReader(getMain().getResource(name), Charsets.UTF_8);
-			YamlConfiguration defaults = YamlConfiguration.loadConfiguration(reader);
-			
-			// Update config with new paths and values
-			getMain().getConfig().options().copyDefaults(true);
-			getMain().getConfig().setDefaults(defaults);
-			getMain().saveConfig();
-
-			getMain().reloadConfig();
-
-			setConfig(getMain().getConfig());
-		} else {
-			setConfig(loadCustomConfig(getName()));
-		}
-	}
-
-	private boolean isDefault() {
-		return getName() == "config.yml";
+		setConfig(config);
 	}
 
 	/* Getters & setters */
