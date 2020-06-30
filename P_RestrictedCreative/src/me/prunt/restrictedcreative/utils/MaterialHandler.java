@@ -50,8 +50,8 @@ public class MaterialHandler {
 			Arrays.asList(Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS));
 
 	// Double plants
-	private static HashSet<Material> doublePlants = new HashSet<>(Arrays.asList(Material.TALL_GRASS, Material.SUNFLOWER,
-			Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.LARGE_FERN));
+	private static HashSet<Material> doublePlants = new HashSet<>(
+			Arrays.asList(Material.TALL_GRASS, Material.LARGE_FERN));
 
 	// Placeable entities (but not hangables)
 	private static HashSet<Material> entities = new HashSet<>(Arrays.asList(Material.END_CRYSTAL, Material.ARMOR_STAND,
@@ -119,11 +119,18 @@ public class MaterialHandler {
 	public static BlockFace getNeededFace(Block b) {
 		BlockData bd = b.getBlockData();
 
-		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14) && bd instanceof Lantern) {
-			if (Main.DEBUG)
-				System.out.println("getNeededFace: Lantern");
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_14)) {
+			if (bd instanceof Lantern) {
+				if (Main.DEBUG)
+					System.out.println("getNeededFace: Lantern");
 
-			return ((Lantern) bd).isHanging() ? BlockFace.UP : BlockFace.DOWN;
+				return ((Lantern) bd).isHanging() ? BlockFace.UP : BlockFace.DOWN;
+			}
+
+			if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_16)) {
+				if (b.getType() == Material.valueOf("SOUL_TORCH"))
+					return BlockFace.DOWN;
+			}
 		}
 
 		if (b.getType() == Material.TORCH)
@@ -139,6 +146,10 @@ public class MaterialHandler {
 		// getOppositeFace() because getFacing() returns where the item is "looking",
 		// opposite of where it is attached
 		// NB: this doesn't seem to be always true
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_16)) {
+			if (b.getType() == Material.valueOf("SOUL_WALL_TORCH"))
+				return ((Directional) bd).getFacing().getOppositeFace();
+		}
 		if (b.getType() == Material.WALL_TORCH)
 			return ((Directional) bd).getFacing().getOppositeFace(); // TESTED 1.15.2
 		if (bd instanceof RedstoneWallTorch)
@@ -203,6 +214,7 @@ public class MaterialHandler {
 	}
 
 	public static boolean isDoublePlant(Block b) {
+		doublePlants.addAll(Tag.TALL_FLOWERS.getValues());
 		return doublePlants.contains(b.getType());
 	}
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -376,14 +377,7 @@ public class BlockUpdateListener implements Listener {
 		Block bl = b.getRelative(BlockFace.DOWN);
 		Material ma = bl.getType();
 
-		if (ma == Material.valueOf("BAMBOO") || ma == Material.valueOf("BAMBOO_SAPLING"))
-			return true;
-
-		boolean isSoilOk = ma == Material.GRASS_BLOCK || ma == Material.DIRT || ma == Material.SAND
-				|| ma == Material.PODZOL || ma == Material.COARSE_DIRT || ma == Material.RED_SAND
-				|| ma == Material.GRAVEL || ma == Material.MYCELIUM;
-
-		return isSoilOk;
+		return Tag.BAMBOO_PLANTABLE_ON.isTagged(ma);
 	}
 
 	private boolean isKelpOk(Block b) {

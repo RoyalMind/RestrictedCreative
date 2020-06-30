@@ -1,7 +1,5 @@
 package me.prunt.restrictedcreative.storage;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -73,9 +71,9 @@ public class SyncData implements Runnable {
 	private void addData() {
 		List<String> blocks = toAdd;
 		String or = BlockHandler.isUsingSQLite() ? "OR " : "";
-		
+
 		String statement = "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable() + " (block) VALUES ";
-		
+
 		for (int i = 0; i < blocks.size(); i++) {
 			statement += "('" + blocks.get(i) + "'),";
 		}
@@ -83,15 +81,15 @@ public class SyncData implements Runnable {
 
 		main.getDB().executeUpdate(statement);
 
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-				main.getUtils().getMessage(true, "database.added").replaceAll("%blocks%", String.valueOf(blocks.size())));
+		Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.added")
+				.replaceAll("%blocks%", String.valueOf(blocks.size())));
 	}
 
 	private void removeData() {
 		List<String> blocks = toRemove;
-		
+
 		String statement = "DELETE FROM " + main.getDB().getBlocksTable() + " WHERE ";
-		
+
 		for (int i = 0; i < blocks.size(); i++) {
 			statement += "block = '" + blocks.get(i) + "' OR ";
 		}
@@ -99,7 +97,7 @@ public class SyncData implements Runnable {
 
 		main.getDB().executeUpdate(statement);
 
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-				main.getUtils().getMessage(true, "database.removed").replaceAll("%blocks%", String.valueOf(blocks.size())));
+		Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.removed")
+				.replaceAll("%blocks%", String.valueOf(blocks.size())));
 	}
 }

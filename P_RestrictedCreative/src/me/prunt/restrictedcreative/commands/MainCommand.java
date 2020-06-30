@@ -1,11 +1,5 @@
 package me.prunt.restrictedcreative.commands;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,7 +8,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import me.prunt.restrictedcreative.Main;
-import me.prunt.restrictedcreative.storage.Database;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.storage.handlers.CommandHandler;
 import me.prunt.restrictedcreative.storage.handlers.EntityHandler;
@@ -45,12 +38,10 @@ public class MainCommand implements CommandExecutor {
 				return true;
 			}
 			break;
-		/*case "convert":
-			if (sender.hasPermission("rc.commands.convert")) {
-				convert(sender, args);
-				return true;
-			}
-			break;*/
+		/*
+		 * case "convert": if (sender.hasPermission("rc.commands.convert")) {
+		 * convert(sender, args); return true; } break;
+		 */
 		case "i-am-sure-i-want-to-delete-all-plugin-data-from-database":
 			if (sender.hasPermission("rc.commands.delete")) {
 				delete(sender);
@@ -90,77 +81,61 @@ public class MainCommand implements CommandExecutor {
 		main.getUtils().sendMessage(sender, true, "database.deleted");
 	}
 
-	/*private void convert(CommandSender sender, String[] args) {
-		String type = main.getSettings().getString("database.type").toLowerCase();
-
-		if (!type.equalsIgnoreCase("mysql") && !type.equalsIgnoreCase("sqlite")) {
-			main.getUtils().sendMessage(sender, true, "database.incorrect-type");
-			return;
-		}
-
-		Database oldDb = new Database(main, type == "mysql" ? "sqlite" : "mysql");
-
-		Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
-			@Override
-			public void run() {
-				long start = System.currentTimeMillis();
-
-				main.getUtils().sendMessage(sender, true, "database.load");
-				
-				// Gets all old blocks from database
-				ResultSet rs = oldDb.executeQuery("SELECT * FROM " + oldDb.getBlocksTable());
-
-				int count = 0;
-				try {
-					while (rs.next()) {
-						String block = rs.getString("block");
-						String chunk = Utils.getBlockChunk(block);
-
-						String world = block.split(";")[0];
-						if (main.getUtils().isDisabledWorld(world) || Bukkit.getWorld(world) == null)
-							continue;
-
-						BlockHandler.addBlockToChunk(chunk, block);
-						count++;
-					}
-				} catch (SQLException e) {
-					Bukkit.getLogger().log(Level.WARNING, "Data loading was interrupted!");
-					e.printStackTrace();
-				}
-
-				int chunksLoaded = blocksInChunk.size();
-
-				if (Main.DEBUG)
-					System.out.println("loadFromDatabase: " + chunksLoaded + " chunks");
-
-				int radius = 8;
-				for (World world : Bukkit.getWorlds()) {
-					// Ignore disabled worlds
-					if (main.getUtils().isDisabledWorld(world.getName()))
-						continue;
-
-					Chunk center = world.getSpawnLocation().getChunk();
-
-					for (int x = center.getX() - radius; x < center.getX() + radius; x++) {
-						for (int z = center.getZ() - radius; z < center.getZ() + radius; z++) {
-							Chunk c = world.getChunkAt(x, z);
-							loadBlocks(c);
-						}
-					}
-				}
-
-				setTotalCount(count);
-
-				Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, "database.loaded")
-						.replaceAll("%blocks%", getTotalCount()).replaceAll("%chunks%", String.valueOf(chunksLoaded)));
-
-				String took = String.valueOf(System.currentTimeMillis() - start);
-
-				Utils.sendMessage(Bukkit.getConsoleSender(),
-						main.getUtils().getMessage(true, "database.done").replaceAll("%mills%", took));
-			}
-		});
-	}*/
+	/*
+	 * private void convert(CommandSender sender, String[] args) { String type =
+	 * main.getSettings().getString("database.type").toLowerCase();
+	 * 
+	 * if (!type.equalsIgnoreCase("mysql") && !type.equalsIgnoreCase("sqlite")) {
+	 * main.getUtils().sendMessage(sender, true, "database.incorrect-type"); return;
+	 * }
+	 * 
+	 * Database oldDb = new Database(main, type == "mysql" ? "sqlite" : "mysql");
+	 * 
+	 * Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
+	 * 
+	 * @Override public void run() { long start = System.currentTimeMillis();
+	 * 
+	 * main.getUtils().sendMessage(sender, true, "database.load");
+	 * 
+	 * // Gets all old blocks from database ResultSet rs =
+	 * oldDb.executeQuery("SELECT * FROM " + oldDb.getBlocksTable());
+	 * 
+	 * int count = 0; try { while (rs.next()) { String block =
+	 * rs.getString("block"); String chunk = Utils.getBlockChunk(block);
+	 * 
+	 * String world = block.split(";")[0]; if
+	 * (main.getUtils().isDisabledWorld(world) || Bukkit.getWorld(world) == null)
+	 * continue;
+	 * 
+	 * BlockHandler.addBlockToChunk(chunk, block); count++; } } catch (SQLException
+	 * e) { Bukkit.getLogger().log(Level.WARNING, "Data loading was interrupted!");
+	 * e.printStackTrace(); }
+	 * 
+	 * int chunksLoaded = blocksInChunk.size();
+	 * 
+	 * if (Main.DEBUG) System.out.println("loadFromDatabase: " + chunksLoaded +
+	 * " chunks");
+	 * 
+	 * int radius = 8; for (World world : Bukkit.getWorlds()) { // Ignore disabled
+	 * worlds if (main.getUtils().isDisabledWorld(world.getName())) continue;
+	 * 
+	 * Chunk center = world.getSpawnLocation().getChunk();
+	 * 
+	 * for (int x = center.getX() - radius; x < center.getX() + radius; x++) { for
+	 * (int z = center.getZ() - radius; z < center.getZ() + radius; z++) { Chunk c =
+	 * world.getChunkAt(x, z); loadBlocks(c); } } }
+	 * 
+	 * setTotalCount(count);
+	 * 
+	 * Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true,
+	 * "database.loaded") .replaceAll("%blocks%",
+	 * getTotalCount()).replaceAll("%chunks%", String.valueOf(chunksLoaded)));
+	 * 
+	 * String took = String.valueOf(System.currentTimeMillis() - start);
+	 * 
+	 * Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true,
+	 * "database.done").replaceAll("%mills%", took)); } }); }
+	 */
 
 	private void block(CommandSender sender, String[] args) {
 		if (args.length < 2) {

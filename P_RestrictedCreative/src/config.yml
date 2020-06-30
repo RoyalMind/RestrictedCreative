@@ -140,6 +140,10 @@ confiscate:
     - 'STRUCTURE_BLOCK'
     - 'STRUCTURE_VOID'
     - 'VOID_AIR'
+    - 'KNOWLEDGE_BOOK'
+    - 'DEBUG_STICK'
+    # 1.14
+    - 'JIGSAW'
     name:
     - 'Cash'
     lore:
@@ -232,9 +236,15 @@ disable:
     - 'RAVAGER_SPAWN_EGG'
     - 'TRADER_LLAMA_SPAWN_EGG'
     - 'WANDERING_TRADER_SPAWN_EGG'
+    # 1.15
+    - 'BEE_SPAWN_EGG'
     # 1.13 - 1.15
-    - 'ZOMBIE_PIGMAN_SPAWN_EGG'
+    #- 'ZOMBIE_PIGMAN_SPAWN_EGG'
     # 1.16
+    - 'ZOMBIFIED_PIGLIN_SPAWN_EGG'
+    - 'STRIDER_SPAWN_EGG'
+    - 'HOGLIN_SPAWN_EGG'
+    - 'ZOGLIN_SPAWN_EGG'
     on-ground:
     - 'JUKEBOX'
     - 'FLOWER_POT'
@@ -256,4 +266,10 @@ disable:
     - 'SPRUCE_WALL_SIGN'
     - 'CAMPFIRE'
     - 'COMPOSTER'
+    # 1.16
+    - 'CRIMSON_SIGN'
+    - 'WARPED_SIGN'
+    - 'CRIMSON_WALL_SIGN'
+    - 'WARPED_WALL_SIGN'
+    - 'SOUL_CAMPFIRE'
     
