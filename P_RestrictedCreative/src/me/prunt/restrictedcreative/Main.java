@@ -51,13 +51,13 @@ public class Main extends JavaPlugin {
 	public static boolean EXTRADEBUG = false;
 
 	private Database database;
-
 	private Utils utils;
 
 	private ConfigProvider config;
 	private ConfigProvider messages;
 
 	private static FixedMetadataValue fmv;
+	private WorldEditListener weListener;
 
 	@Override
 	public void onEnable() {
@@ -107,8 +107,15 @@ public class Main extends JavaPlugin {
 	 * Register event listeners
 	 */
 	public void registerListeners() {
-		if (Utils.isInstalled("WorldEdit") && getSettings().isEnabled("tracking.worldedit.enabled"))
-			WorldEdit.getInstance().getEventBus().register(new WorldEditListener(this));
+		if (Utils.isInstalled("WorldEdit")) {
+			if (this.weListener != null)
+				WorldEdit.getInstance().getEventBus().unregister(this.weListener);
+
+			if (getSettings().isEnabled("tracking.worldedit.enabled")) {
+				this.weListener = new WorldEditListener(this);
+				WorldEdit.getInstance().getEventBus().register(this.weListener);
+			}
+		}
 
 		// In case of plugin reload
 		HandlerList.unregisterAll(this);

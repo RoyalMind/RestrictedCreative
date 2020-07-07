@@ -1,6 +1,7 @@
 package me.prunt.restrictedcreative.storage.handlers;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -9,14 +10,15 @@ import org.bukkit.entity.Player;
 import me.prunt.restrictedcreative.utils.PlayerInfo;
 
 public class InventoryHandler {
-	private static HashMap<Player, PlayerInfo> survivalInvs = new HashMap<>();
-	private static HashMap<Player, PlayerInfo> creativeInvs = new HashMap<>();
+	private static Map<Player, PlayerInfo> survivalInvs = new HashMap<>();
+	private static Map<Player, PlayerInfo> creativeInvs = new HashMap<>();
 
-	private static HashMap<Player, GameMode> previousGameMode = new HashMap<>();
+	private static Map<Player, GameMode> previousGameMode = new HashMap<>();
 	private static boolean isForceGamemodeEnabled = false;
 
 	public static GameMode getPreviousGameMode(Player p) {
-		return previousGameMode.containsKey(p) ? previousGameMode.get(p) : Bukkit.getDefaultGameMode();
+		return previousGameMode.containsKey(p) ? previousGameMode.get(p)
+				: Bukkit.getDefaultGameMode();
 	}
 
 	public static void setPreviousGameMode(Player p, GameMode gm) {

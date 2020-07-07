@@ -6,6 +6,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extension.platform.Actor;
@@ -16,6 +17,7 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class WorldEditListener {
 	private Main main;
@@ -29,26 +31,37 @@ public class WorldEditListener {
 
 	@Subscribe
 	public void wrapForLogging(EditSessionEvent e) {
+		// Otherwise, this method is called 3 times for a single event
+		if (e.getStage() != Stage.BEFORE_CHANGE)
+			return;
+
 		if (Main.DEBUG)
-			System.out.println("wrapForLogging");
+			System.out.println("wrapForLogging: " + e.getStage());
 
 		Actor a = e.getActor();
 
 		if (a == null || !a.isPlayer() || e.getWorld() == null)
 			return;
 
-		Player p = Bukkit.getServer().getPlayer(a.getUniqueId());
 		String world = e.getWorld().getName();
-		World w = main.getServer().getWorld(world);
 
 		if (main.getUtils().isDisabledWorld(world))
 			return;
 
+		Player p = Bukkit.getServer().getPlayer(a.getUniqueId());
+		World w = main.getServer().getWorld(world);
+
 		e.setExtent(new AbstractDelegateExtent(e.getExtent()) {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			@Override
-			public boolean setBlock(BlockVector3 position, BlockStateHolder newBlock) throws WorldEditException {
-				Block b = w.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
+			public boolean setBlock(BlockVector3 position, BlockStateHolder newBlock)
+					throws WorldEditException {
+				Block b = w.getBlockAt(position.getBlockX(), position.getBlockY(),
+						position.getBlockZ());
+
+				if (Main.EXTRADEBUG)
+					System.out.println("setBlock: " + b.getType() + " " + Utils.getBlockString(b)
+							+ ", " + newBlock.getAsString());
 
 				// If a tracked block is removed
 				if (newBlock.getBlockType().getMaterial().isAir()) {

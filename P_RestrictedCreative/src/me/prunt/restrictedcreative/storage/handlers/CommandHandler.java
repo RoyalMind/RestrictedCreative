@@ -1,24 +1,24 @@
 package me.prunt.restrictedcreative.storage.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.bukkit.entity.Player;
 
 public class CommandHandler {
-	private static List<Player> addWithCommand = new ArrayList<>();
-	private static List<Player> removeWithCommand = new ArrayList<>();
-	private static List<Player> infoWithCommand = new ArrayList<>();
+	private static Set<Player> addWithCommand = new HashSet<>();
+	private static Set<Player> removeWithCommand = new HashSet<>();
+	private static Set<Player> infoWithCommand = new HashSet<>();
 
-	public static List<Player> getAddWithCommand() {
+	public static Set<Player> getAddWithCommand() {
 		return addWithCommand;
 	}
 
-	public static List<Player> getRemoveWithCommand() {
+	public static Set<Player> getRemoveWithCommand() {
 		return removeWithCommand;
 	}
 
-	public static List<Player> getInfoWithCommand() {
+	public static Set<Player> getInfoWithCommand() {
 		return infoWithCommand;
 	}
 

@@ -1,17 +1,18 @@
 package me.prunt.restrictedcreative.storage.handlers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
 public class PermissionHandler {
-	private static HashMap<Player, List<String>> vaultPerms = new HashMap<>();
-	private static HashMap<Player, List<String>> vaultGroups = new HashMap<>();
-	private static HashMap<Player, PermissionAttachment> permissions = new HashMap<>();
+	private static Map<Player, Set<String>> vaultPerms = new HashMap<>();
+	private static Map<Player, Set<String>> vaultGroups = new HashMap<>();
+	private static Map<Player, PermissionAttachment> permissions = new HashMap<>();
 
 	private static boolean usingOldAliases = false;
 
@@ -28,17 +29,17 @@ public class PermissionHandler {
 			permissions.remove(p);
 	}
 
-	public static List<String> getVaultPerms(Player p) {
+	public static Set<String> getVaultPerms(Player p) {
 		return vaultPerms.containsKey(p) ? vaultPerms.get(p) : null;
 	}
 
 	public static void addVaultPerm(Player p, String perm) {
-		List<String> prevPerms = getVaultPerms(p);
+		Set<String> prevPerms = getVaultPerms(p);
 
 		if (prevPerms != null) {
 			prevPerms.add(perm);
 		} else {
-			vaultPerms.put(p, new ArrayList<>(Arrays.asList(perm)));
+			vaultPerms.put(p, new HashSet<>(Arrays.asList(perm)));
 		}
 	}
 
@@ -47,17 +48,17 @@ public class PermissionHandler {
 			vaultPerms.remove(p);
 	}
 
-	public static List<String> getVaultGroups(Player p) {
+	public static Set<String> getVaultGroups(Player p) {
 		return vaultGroups.containsKey(p) ? vaultGroups.get(p) : null;
 	}
 
 	public static void addVaultGroup(Player p, String group) {
-		List<String> prevGroups = getVaultGroups(p);
+		Set<String> prevGroups = getVaultGroups(p);
 
 		if (prevGroups != null) {
 			vaultGroups.get(p).add(group);
 		} else {
-			vaultGroups.put(p, new ArrayList<>(Arrays.asList(group)));
+			vaultGroups.put(p, new HashSet<>(Arrays.asList(group)));
 		}
 	}
 

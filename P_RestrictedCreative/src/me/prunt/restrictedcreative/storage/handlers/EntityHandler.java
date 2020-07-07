@@ -1,7 +1,7 @@
 package me.prunt.restrictedcreative.storage.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class EntityHandler {
-	private static List<String> trackedLocs = new ArrayList<>();
+	private static Set<String> trackedLocs = new HashSet<>();
 
 	public static boolean isTracked(Entity e) {
 		if (e == null)

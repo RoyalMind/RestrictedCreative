@@ -4,7 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -21,13 +24,13 @@ import me.prunt.restrictedcreative.utils.BlocksHub;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class BlockHandler {
-	public static List<String> addToDatabase = new ArrayList<>();
-	public static List<String> removeFromDatabase = new ArrayList<>();
+	public static Set<String> addToDatabase = new HashSet<>();
+	public static Set<String> removeFromDatabase = new HashSet<>();
 
 	public static boolean isLoadingDone = false;
 	public static boolean usingAdvancedLoading = false;
 
-	private static HashMap<String, char[][]> blocksInChunk = new HashMap<>();
+	private static Map<String, char[][]> blocksInChunk = new HashMap<>();
 	private static boolean usingSQLite = false;
 	private static int totalCount = -1;
 

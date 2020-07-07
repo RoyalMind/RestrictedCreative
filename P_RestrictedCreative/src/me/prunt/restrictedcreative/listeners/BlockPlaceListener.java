@@ -52,24 +52,31 @@ public class BlockPlaceListener implements Listener {
 		if (p.getGameMode() != GameMode.CREATIVE)
 			return;
 
-		// No need to track excluded blocks
-		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
-			return;
-
-		// No need to track bypassed players
-		if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
-			return;
-
-		if (Main.DEBUG)
-			System.out.println("onBlockMultiPlace: " + b.getType());
-
-		/* Disabled blocks */
-		if (getMain().getUtils().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
+		/*
+		 * Disabled blocks
+		 * 
+		 * Must come before excluded check in order for it to work when tracking is
+		 * disabled
+		 */
+		if (getMain().getUtils().isDisabledPlacing(m)
+				&& !p.hasPermission("rc.bypass.disable.placing")
 				&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
 			getMain().getUtils().sendMessage(p, true, "disabled.general");
 			e.setCancelled(true);
 			return;
 		}
+
+		// No need to track excluded blocks
+		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
+			return;
+
+		// No need to track bypassed players
+		if (p.hasPermission("rc.bypass.tracking.blocks")
+				|| p.hasPermission("rc.bypass.tracking.blocks." + m))
+			return;
+
+		if (Main.DEBUG)
+			System.out.println("onBlockMultiPlace: " + b.getType());
 
 		for (BlockState bs : states)
 			BlockHandler.setAsTracked(bs.getBlock());
@@ -100,14 +107,16 @@ public class BlockPlaceListener implements Listener {
 			return;
 
 		// No need to track bypassed players
-		if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
+		if (p.hasPermission("rc.bypass.tracking.blocks")
+				|| p.hasPermission("rc.bypass.tracking.blocks." + m))
 			return;
 
 		if (Main.DEBUG)
 			System.out.println("onBlockPlace: " + b.getType());
 
 		/* Disabled blocks */
-		if (getMain().getUtils().isDisabledPlacing(m) && !p.hasPermission("rc.bypass.disable.placing")
+		if (getMain().getUtils().isDisabledPlacing(m)
+				&& !p.hasPermission("rc.bypass.disable.placing")
 				&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
 			getMain().getUtils().sendMessage(p, true, "disabled.general");
 			e.setCancelled(true);
@@ -154,7 +163,8 @@ public class BlockPlaceListener implements Listener {
 		case CARVED_PUMPKIN:
 		case JACK_O_LANTERN:
 			// Iron golem
-			if (getMain().getSettings().isEnabled("limit.creation.iron-golem") && couldIronGolemBeBuilt(head)) {
+			if (getMain().getSettings().isEnabled("limit.creation.iron-golem")
+					&& couldIronGolemBeBuilt(head)) {
 				// Golem was built in survival mode
 				if (p.getGameMode() != GameMode.CREATIVE && canSurvivalBuildIronGolem(head))
 					return;
@@ -164,7 +174,8 @@ public class BlockPlaceListener implements Listener {
 				return;
 			}
 			// Snow golem
-			else if (getMain().getSettings().isEnabled("limit.creation.snow-golem") && couldSnowGolemBeBuilt(head)) {
+			else if (getMain().getSettings().isEnabled("limit.creation.snow-golem")
+					&& couldSnowGolemBeBuilt(head)) {
 				// Golem was built in survival mode
 				if (p.getGameMode() != GameMode.CREATIVE && canSurvivalBuildSnowGolem(head))
 					return;
@@ -398,7 +409,8 @@ public class BlockPlaceListener implements Listener {
 	// (whether a survival player should be allowed to create a wither from it)
 	public boolean canSurvivalBuildWither(Block head) {
 		head = getMiddleHead(head);
-		BlockFace headDir = getRowDirection(head, Material.WITHER_SKELETON_SKULL, Material.WITHER_SKELETON_WALL_SKULL);
+		BlockFace headDir = getRowDirection(head, Material.WITHER_SKELETON_SKULL,
+				Material.WITHER_SKELETON_WALL_SKULL);
 		Block head1 = head.getRelative(headDir);
 		Block head2 = head.getRelative(headDir.getOppositeFace());
 

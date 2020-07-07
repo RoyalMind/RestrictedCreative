@@ -36,14 +36,16 @@ import me.prunt.restrictedcreative.Main;
 
 public class MaterialHandler {
 	// Items that will break if block below is air
-	private static HashSet<Material> top = new HashSet<>(Arrays.asList(Material.DEAD_BUSH, Material.DANDELION,
-			Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP, Material.WHITE_TULIP, Material.BLUE_ORCHID,
-			Material.ALLIUM, Material.POPPY, Material.AZURE_BLUET, Material.OXEYE_DAISY, Material.RED_MUSHROOM,
-			Material.BROWN_MUSHROOM, Material.SUGAR_CANE, Material.MELON_STEM, Material.PUMPKIN_STEM,
-			Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM, Material.CACTUS, Material.LILY_PAD,
-			Material.KELP, Material.KELP_PLANT, Material.GRASS, Material.FERN, Material.TALL_SEAGRASS,
-			Material.STONE_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
-			Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.NETHER_WART));
+	private static HashSet<Material> top = new HashSet<>(Arrays.asList(Material.DEAD_BUSH,
+			Material.DANDELION, Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP,
+			Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY,
+			Material.AZURE_BLUET, Material.OXEYE_DAISY, Material.RED_MUSHROOM,
+			Material.BROWN_MUSHROOM, Material.SUGAR_CANE, Material.MELON_STEM,
+			Material.PUMPKIN_STEM, Material.ATTACHED_MELON_STEM, Material.ATTACHED_PUMPKIN_STEM,
+			Material.CACTUS, Material.LILY_PAD, Material.KELP, Material.KELP_PLANT, Material.GRASS,
+			Material.FERN, Material.TALL_SEAGRASS, Material.STONE_PRESSURE_PLATE,
+			Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.LIGHT_WEIGHTED_PRESSURE_PLATE,
+			Material.NETHER_WART));
 
 	// Crops
 	private static HashSet<Material> crops = new HashSet<>(
@@ -54,9 +56,10 @@ public class MaterialHandler {
 			Arrays.asList(Material.TALL_GRASS, Material.LARGE_FERN));
 
 	// Placeable entities (but not hangables)
-	private static HashSet<Material> entities = new HashSet<>(Arrays.asList(Material.END_CRYSTAL, Material.ARMOR_STAND,
-			Material.MINECART, Material.CHEST_MINECART, Material.COMMAND_BLOCK_MINECART, Material.FURNACE_MINECART,
-			Material.HOPPER_MINECART, Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT,
+	private static HashSet<Material> entities = new HashSet<>(Arrays.asList(Material.END_CRYSTAL,
+			Material.ARMOR_STAND, Material.MINECART, Material.CHEST_MINECART,
+			Material.COMMAND_BLOCK_MINECART, Material.FURNACE_MINECART, Material.HOPPER_MINECART,
+			Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT,
 			Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT, Material.SPRUCE_BOAT));
 
 	// List of colorable leather armor
@@ -175,7 +178,8 @@ public class MaterialHandler {
 				return d.getFacing().getOppositeFace(); // TESTED 1.13.2
 			}
 		}
-		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_15) && bd instanceof FaceAttachable) {
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_15)
+				&& bd instanceof FaceAttachable) {
 			switch (((FaceAttachable) bd).getAttachedFace()) {
 			case CEILING:
 				return BlockFace.UP;
@@ -214,7 +218,14 @@ public class MaterialHandler {
 	}
 
 	public static boolean isDoublePlant(Block b) {
-		doublePlants.addAll(Tag.TALL_FLOWERS.getValues());
+		if (Utils.isVersionNewerThanInclusive(MinecraftVersion.v1_15)) {
+			doublePlants.addAll(Tag.TALL_FLOWERS.getValues());
+		} else {
+			doublePlants.add(Material.SUNFLOWER);
+			doublePlants.add(Material.LILAC);
+			doublePlants.add(Material.ROSE_BUSH);
+			doublePlants.add(Material.PEONY);
+		}
 		return doublePlants.contains(b.getType());
 	}
 
