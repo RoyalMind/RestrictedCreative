@@ -102,6 +102,20 @@ public class BlockPlaceListener implements Listener {
 		if (p.getGameMode() != GameMode.CREATIVE)
 			return;
 
+		/*
+		 * Disabled blocks
+		 * 
+		 * Must come before excluded check in order for it to work when tracking is
+		 * disabled
+		 */
+		if (getMain().getUtils().isDisabledPlacing(m)
+				&& !p.hasPermission("rc.bypass.disable.placing")
+				&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
+			getMain().getUtils().sendMessage(p, true, "disabled.general");
+			e.setCancelled(true);
+			return;
+		}
+
 		// No need to track excluded blocks
 		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
 			return;
@@ -113,15 +127,6 @@ public class BlockPlaceListener implements Listener {
 
 		if (Main.DEBUG)
 			System.out.println("onBlockPlace: " + b.getType());
-
-		/* Disabled blocks */
-		if (getMain().getUtils().isDisabledPlacing(m)
-				&& !p.hasPermission("rc.bypass.disable.placing")
-				&& !p.hasPermission("rc.bypass.disable.placing." + m)) {
-			getMain().getUtils().sendMessage(p, true, "disabled.general");
-			e.setCancelled(true);
-			return;
-		}
 
 		BlockHandler.setAsTracked(b);
 	}

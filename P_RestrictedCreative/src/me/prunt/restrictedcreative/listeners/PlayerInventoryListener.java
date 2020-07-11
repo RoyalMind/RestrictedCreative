@@ -72,12 +72,11 @@ public class PlayerInventoryListener implements Listener {
 
 				// Replaces it with a new one, but without NBT data
 				e.setCursor(new ItemStack(is.getType(), is.getAmount()));
-				return;
 			}
 		}
 
 		// Checks if cursor item exists
-		// Not above because it needs specifically that kind of ItemStack
+		// Must be after middle-click check, because is needs specific cursor itemstack
 		if (is == null || is.getType() == Material.AIR)
 			is = e.getCurrentItem();
 

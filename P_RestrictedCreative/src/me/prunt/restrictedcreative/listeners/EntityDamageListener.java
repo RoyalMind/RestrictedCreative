@@ -35,7 +35,8 @@ public class EntityDamageListener implements Listener {
 	 * Called when an entity is damaged by an entity
 	 */
 	// HIGHEST required for WorldGuard and similar plugins
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+	// BEWARE - it was changed to HIGH in 2.3, but PlotSquared needs HIGHEST
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onEntityDamage(EntityDamageByEntityEvent e) {
 		Entity en = e.getEntity();
 

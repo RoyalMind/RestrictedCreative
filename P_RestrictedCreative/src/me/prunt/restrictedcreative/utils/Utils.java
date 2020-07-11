@@ -30,6 +30,10 @@ import org.bukkit.potion.PotionEffect;
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.Town;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
@@ -320,7 +324,25 @@ public class Utils {
 			}
 		}
 
+		// TownyAdvanced check
+		if (Utils.isInstalled("Towny")) {
+			// Owner check
+			if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")) {
+				try {
+					Resident resident = TownyAPI.getInstance().getDataSource()
+							.getResident(p.getName());
+					Town town = TownyAPI.getInstance().getTownBlock(p.getLocation()).getTown();
+
+					if (resident.getTown().equals(town))
+						return true;
+				} catch (NotRegisteredException e) {
+					return false;
+				}
+			}
+		}
+
 		return false;
+
 	}
 
 	private boolean isInvalidNBT(ItemStack is) {
