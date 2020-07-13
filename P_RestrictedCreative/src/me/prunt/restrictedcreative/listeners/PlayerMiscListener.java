@@ -50,7 +50,8 @@ public class PlayerMiscListener implements Listener {
 			return;
 
 		if (Main.DEBUG)
-			System.out.println("onPlayerGameModeChange: " + p.getGameMode() + " -> " + e.getNewGameMode());
+			System.out.println(
+					"onPlayerGameModeChange: " + p.getGameMode() + " -> " + e.getNewGameMode());
 
 		// Player wants to switch into creative mode
 		if (e.getNewGameMode() == GameMode.CREATIVE) {
@@ -91,12 +92,15 @@ public class PlayerMiscListener implements Listener {
 		/* Old way of handling aliases */
 		if (PermissionHandler.isUsingOldAliases()) {
 			// Loop through command list
-			for (String cmd : getMain().getSettings().getConfig().getConfigurationSection("commands").getKeys(false)) {
+			for (String cmd : getMain().getSettings().getConfig()
+					.getConfigurationSection("commands").getKeys(false)) {
 				// Loop through alias list
-				for (String alias : getMain().getSettings().getStringList("commands." + cmd + ".aliases")) {
+				for (String alias : getMain().getSettings()
+						.getStringList("commands." + cmd + ".aliases")) {
 					// If the message matches or starts with the alias
 					// (+ space to not catch other commands)
-					if (command.startsWith("/" + alias + " ") || command.equalsIgnoreCase("/" + alias)) {
+					if (command.startsWith("/" + alias + " ")
+							|| command.equalsIgnoreCase("/" + alias)) {
 						List<String> argList = new ArrayList<>(
 								Arrays.asList(command.substring(alias.length() + 1).split(" ")));
 						// Remove empty strings caused by double spaces and such
@@ -151,6 +155,9 @@ public class PlayerMiscListener implements Listener {
 		if (p.getGameMode() != GameMode.CREATIVE)
 			return;
 
+		if (Main.DEBUG)
+			System.out.println("onPlayerChangedWorld");
+
 		// Removes creative mode
 		p.setGameMode(InventoryHandler.getPreviousGameMode(p));
 
@@ -198,6 +205,9 @@ public class PlayerMiscListener implements Listener {
 		// No need to control bypassed players
 		if (p.hasPermission("rc.bypass.limit.item.drop"))
 			return;
+
+		if (Main.DEBUG)
+			System.out.println("onPlayerDeath");
 
 		// Removes all drops
 		e.getDrops().clear();
@@ -281,8 +291,8 @@ public class PlayerMiscListener implements Listener {
 	private boolean illegalContainerOpened(Player p) {
 		InventoryType it = p.getOpenInventory().getType();
 
-		return it != InventoryType.PLAYER && it != InventoryType.CRAFTING && it != InventoryType.CREATIVE
-				&& !p.hasPermission("rc.bypass.tracking.inventory")
+		return it != InventoryType.PLAYER && it != InventoryType.CRAFTING
+				&& it != InventoryType.CREATIVE && !p.hasPermission("rc.bypass.tracking.inventory")
 				&& getMain().getSettings().isEnabled("limit.item.drop");
 	}
 }

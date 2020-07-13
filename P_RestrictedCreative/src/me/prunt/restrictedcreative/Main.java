@@ -37,6 +37,7 @@ import me.prunt.restrictedcreative.listeners.PlayerInteractListener;
 import me.prunt.restrictedcreative.listeners.PlayerInventoryListener;
 import me.prunt.restrictedcreative.listeners.PlayerItemListener;
 import me.prunt.restrictedcreative.listeners.PlayerMiscListener;
+import me.prunt.restrictedcreative.listeners.SlimefunListener;
 import me.prunt.restrictedcreative.listeners.WorldEditListener;
 import me.prunt.restrictedcreative.storage.ConfigProvider;
 import me.prunt.restrictedcreative.storage.Database;
@@ -138,6 +139,9 @@ public class Main extends JavaPlugin {
 		manager.registerEvents(new PlayerInventoryListener(this), this);
 		manager.registerEvents(new PlayerItemListener(this), this);
 		manager.registerEvents(new PlayerMiscListener(this), this);
+
+		if (Utils.isInstalled("Slimefun"))
+			manager.registerEvents(new SlimefunListener(this), this);
 	}
 
 	/**

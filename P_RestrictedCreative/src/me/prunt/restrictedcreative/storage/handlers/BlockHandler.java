@@ -262,6 +262,8 @@ public class BlockHandler {
 				if (Main.DEBUG)
 					System.out.println("loadFromDatabase: " + chunksLoaded + " chunks");
 
+				// Even if plugin.yml has "load: STARTUP" the server doesn't fire an event for
+				// spawn chunks
 				int radius = 8;
 				for (World world : Bukkit.getWorlds()) {
 					// Ignore disabled worlds

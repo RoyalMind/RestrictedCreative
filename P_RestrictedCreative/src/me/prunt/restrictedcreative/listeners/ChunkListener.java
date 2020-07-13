@@ -4,7 +4,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 
+import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
+import me.prunt.restrictedcreative.utils.Utils;
 
 public class ChunkListener implements Listener {
 	/*
@@ -15,8 +17,11 @@ public class ChunkListener implements Listener {
 		// New chunks can't contain creative blocks
 		if (e.isNewChunk())
 			return;
-		
-		//BlockHandler.loadChunkFromDatabase(e.getChunk());
+
+		if (Main.EXTRADEBUG)
+			System.out.println("onChunkLoad: " + Utils.getChunkString(e.getChunk()));
+
+		// BlockHandler.loadChunkFromDatabase(e.getChunk());
 		BlockHandler.loadBlocks(e.getChunk());
 	}
 }

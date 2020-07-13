@@ -30,24 +30,11 @@ import org.bukkit.potion.PotionEffect;
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
-import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
-import com.palmergames.bukkit.towny.object.Resident;
-import com.palmergames.bukkit.towny.object.Town;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionQuery;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.storage.handlers.InventoryHandler;
 import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
-import me.ryanhamshire.GriefPrevention.Claim;
-import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.permission.Permission;
 
 public class Utils {
@@ -263,83 +250,18 @@ public class Utils {
 		if (p.hasPermission("rc.bypass.limit.regions"))
 			return true;
 
-		// Gets the player or block location
-		Location loc = p.getLocation();
-		if (b != null)
-			loc = b.getLocation();
-
 		// WorldGuard check
-		if (Utils.isInstalled("WorldGuard")) {
-			WorldGuardPlugin wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager()
-					.getPlugin("WorldGuard");
-			LocalPlayer lp = wg.wrapPlayer(p);
-
-			// Gets all regions covering the block or player location
-			RegionQuery rq = WorldGuard.getInstance().getPlatform().getRegionContainer()
-					.createQuery();
-			ApplicableRegionSet set = rq.getApplicableRegions(BukkitAdapter.adapt(loc));
-
-			// Loops through applicable regions
-			for (ProtectedRegion rg : set) {
-				// Whitelist check
-				if (getMain().getSettings().isEnabled("limit.regions.whitelist.enabled")) {
-					// If it's whitelisted
-					if (isWhitelistedRegion(rg.getId()))
-						return true;
-				}
-
-				// Owner check
-				if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")) {
-					if (rg.isOwner(lp))
-						return true;
-
-					// Member check
-					if (getMain().getSettings()
-							.isEnabled("limit.regions.owner-based.allow-members")) {
-						if (rg.isMember(lp))
-							return true;
-					}
-				}
-			}
-		}
+		if (Utils.isInstalled("WorldGuard") && WorldGuardUtils.canBuildHere(main, p, b, m))
+			return true;
 
 		// GriefPrevention check
-		if (Utils.isInstalled("GriefPrevention")) {
-			Claim claim = GriefPrevention.instance.dataStore.getClaimAt(b.getLocation(), false,
-					null);
-
-			if (claim == null)
-				return false;
-
-			// Owner check
-			if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")) {
-				if (claim.getOwnerName().equalsIgnoreCase(p.getName()))
-					return true;
-
-				// Member check
-				if (getMain().getSettings().isEnabled("limit.regions.owner-based.allow-members")) {
-					if (claim.allowBuild(p, m) == null)
-						return true;
-				}
-			}
-		}
+		if (Utils.isInstalled("GriefPrevention")
+				&& GriefPreventionUtils.canBuildHere(main, p, b, m))
+			return true;
 
 		// TownyAdvanced check
-		if (Utils.isInstalled("Towny")) {
-			// Owner check
-			if (getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")) {
-				try {
-					Resident resident = TownyAPI.getInstance().getDataSource()
-							.getResident(p.getName());
-					Town town = TownyAPI.getInstance().getTownBlock(p.getLocation()).getTown();
-
-					if (resident.getTown().equals(town))
-						return true;
-				} catch (NotRegisteredException e) {
-					return false;
-				}
-			}
-		}
+		if (Utils.isInstalled("Towny") && TownyAdvancedUtils.canBuildHere(main, p, b, m))
+			return true;
 
 		return false;
 
@@ -486,10 +408,16 @@ public class Utils {
 			return true;
 
 		double y = p.getLocation().getY();
-		int above_y = getMain().getSettings().getInt("limit.moving.above-y");
-		int below_y = getMain().getSettings().getInt("limit.moving.below-y");
 
-		return (below_y > 0 && y < below_y) && (above_y > 0 && y > above_y);
+		int above_y = getMain().getSettings().getInt("limit.moving.above-y");
+		if (above_y < 0)
+			above_y = Integer.MIN_VALUE;
+
+		int below_y = getMain().getSettings().getInt("limit.moving.below-y");
+		if (below_y < 0)
+			below_y = Integer.MAX_VALUE;
+
+		return above_y <= y && y <= below_y;
 	}
 
 	public void setCreative(Player p, boolean toCreative) {
@@ -519,8 +447,8 @@ public class Utils {
 		PlayerInfo pi = getPlayerInfo(p);
 
 		if (Main.DEBUG) {
-			System.out.println("separateInventory: " + toCreative + " " + pi.gm);
-			System.out.println("... c?" + (InventoryHandler.getCreativeInv(p) != null) + " s?"
+			System.out.println("separateInventory: " + toCreative + " " + pi.gm + " c?"
+					+ (InventoryHandler.getCreativeInv(p) != null) + " s?"
 					+ (InventoryHandler.getSurvivalInv(p) != null));
 		}
 
