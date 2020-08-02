@@ -109,12 +109,12 @@ public class Utils {
 	}
 
 	public static String getBlockChunk(String block) {
-		String[] sl = block.split(";");
+		String[] blockParts = block.split(";");
 
 		// Get chunk data from given block string
-		String world = sl[0];
-		int chunkX = Integer.valueOf(sl[1]) >> 4; // ">> 4" == "/ 16", but faster
-		int chunkZ = Integer.valueOf(sl[3]) >> 4; // ">> 4" == "/ 16", but faster
+		String world = blockParts[0];
+		int chunkX = Integer.valueOf(blockParts[1]) >> 4; // ">> 4" == "/ 16", but faster
+		int chunkZ = Integer.valueOf(blockParts[3]) >> 4; // ">> 4" == "/ 16", but faster
 
 		return world + ";" + chunkX + ";" + chunkZ;
 	}

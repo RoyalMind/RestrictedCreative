@@ -35,9 +35,6 @@ public class WorldEditListener {
 		if (e.getStage() != Stage.BEFORE_CHANGE)
 			return;
 
-		if (Main.DEBUG)
-			System.out.println("wrapForLogging: " + e.getStage());
-
 		Actor a = e.getActor();
 
 		if (a == null || !a.isPlayer() || e.getWorld() == null)
@@ -50,6 +47,16 @@ public class WorldEditListener {
 
 		Player p = Bukkit.getServer().getPlayer(a.getUniqueId());
 		World w = main.getServer().getWorld(world);
+
+		if (p.hasPermission("rc.bypass.tracking.worldedit"))
+			return;
+
+		if (!main.getSettings().isEnabled("tracking.worldedit.extended")
+				&& p.getGameMode() != GameMode.CREATIVE)
+			return;
+
+		if (Main.DEBUG)
+			System.out.println("wrapForLogging: " + p.getGameMode());
 
 		e.setExtent(new AbstractDelegateExtent(e.getExtent()) {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -68,9 +75,7 @@ public class WorldEditListener {
 					BlockHandler.removeTracking(b);
 				}
 				// The block is changed/placed
-				else if (!p.hasPermission("rc.bypass.tracking.worldedit")
-						&& (main.getSettings().isEnabled("tracking.worldedit.extended")
-								|| p.getGameMode() == GameMode.CREATIVE)) {
+				else {
 					BlockHandler.setAsTracked(b);
 				}
 

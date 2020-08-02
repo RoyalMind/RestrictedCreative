@@ -1,6 +1,8 @@
 package me.prunt.restrictedcreative.listeners;
 
+import org.bukkit.GameMode;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -53,12 +55,17 @@ public class SlimefunListener implements Listener {
 	public void onPlayerRightClick(PlayerRightClickEvent e) {
 		Block b = e.getClickedBlock().orElse(null);
 		SlimefunItem sfb = e.getSlimefunBlock().orElse(null);
+		Player p = e.getPlayer();
 
 		if (b == null || sfb == null)
 			return;
 
 		// No need to control blocks in disabled worlds
 		if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
+			return;
+
+		// No need to track non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
 			return;
 
 		if (Main.DEBUG)

@@ -2,7 +2,7 @@ package me.prunt.restrictedcreative.storage;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 
@@ -12,11 +12,11 @@ import me.prunt.restrictedcreative.utils.Utils;
 
 public class SyncData implements Runnable {
 	private Main main;
-	private List<String> toAdd;
-	private List<String> toRemove;
+	private Set<String> toAdd;
+	private Set<String> toRemove;
 	private boolean onDisable;
 
-	public SyncData(Main main, List<String> fAdd, List<String> fDel, boolean onDisable) {
+	public SyncData(Main main, Set<String> fAdd, Set<String> fDel, boolean onDisable) {
 		this.main = main;
 		this.toAdd = fAdd;
 		this.toRemove = fDel;
@@ -73,62 +73,52 @@ public class SyncData implements Runnable {
 		}
 	}
 
-	private void syncData(List<String> blocks, String statement, String message) {
+	private void syncData(Set<String> blocks, String statement, String message) {
 		PreparedStatement ps = main.getDB().getStatement(statement);
 		int count = 0;
+
+		if (Main.DEBUG)
+			System.out.println("syncData: starting");
 
 		try {
 			for (String block : blocks) {
 				ps.setString(1, block);
-				ps.executeUpdate();
+				ps.addBatch();
 				count++;
 
-				if (count % 5000 == 0)
-					main.getDB().commit();
+				if (count % 4096 == 0) {
+					if (Main.DEBUG)
+						System.out.println("executeBatch: " + count);
+
+					ps.executeBatch();
+					ps.clearBatch();
+				}
 			}
+
+			if (Main.DEBUG)
+				System.out.println("executeBatch: " + count);
+
+			ps.executeBatch();
+			ps.clearBatch();
+			main.getDB().commit();
+
+			if (Main.DEBUG)
+				System.out.println("commited");
+
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
+		} finally {
+			try {
+				ps.close();
 
-		main.getDB().commit();
+				if (Main.DEBUG)
+					System.out.println("closed");
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 
 		Utils.sendMessage(Bukkit.getConsoleSender(), main.getUtils().getMessage(true, message)
 				.replaceAll("%blocks%", String.valueOf(count)));
 	}
-
-	/*private void addData() {
-		List<String> blocks = toAdd;
-		String or = BlockHandler.isUsingSQLite() ? "OR " : "";
-
-		String statement = "INSERT " + or + "IGNORE INTO " + main.getDB().getBlocksTable()
-				+ " (block) VALUES ";
-
-		for (int i = 0; i < blocks.size(); i++) {
-			statement += "('" + blocks.get(i) + "'),";
-		}
-		statement.substring(0, statement.length() - 1); // remove last comma
-
-		main.getDB().executeUpdate(statement);
-
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-				main.getUtils().getMessage(true, "database.added").replaceAll("%blocks%",
-						String.valueOf(blocks.size())));
-	}
-
-	private void removeData() {
-		List<String> blocks = toRemove;
-
-		String statement = "DELETE FROM " + main.getDB().getBlocksTable() + " WHERE ";
-
-		for (int i = 0; i < blocks.size(); i++) {
-			statement += "block = '" + blocks.get(i) + "' OR ";
-		}
-		statement.substring(0, statement.length() - 4); // remove last OR
-
-		main.getDB().executeUpdate(statement);
-
-		Utils.sendMessage(Bukkit.getConsoleSender(),
-				main.getUtils().getMessage(true, "database.removed").replaceAll("%blocks%",
-						String.valueOf(blocks.size())));
-	}*/
 }

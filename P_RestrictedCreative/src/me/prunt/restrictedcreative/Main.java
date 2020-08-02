@@ -4,10 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -22,6 +22,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.WorldEdit;
 
+import co.aikar.taskchain.BukkitTaskChainFactory;
+import co.aikar.taskchain.TaskChain;
+import co.aikar.taskchain.TaskChainFactory;
 import me.prunt.restrictedcreative.commands.MainCommand;
 import me.prunt.restrictedcreative.commands.SwitchCommand;
 import me.prunt.restrictedcreative.listeners.BlockBreakListener;
@@ -53,6 +56,7 @@ public class Main extends JavaPlugin {
 
 	private Database database;
 	private Utils utils;
+	private static TaskChainFactory taskChainFactory;
 
 	private ConfigProvider config;
 	private ConfigProvider messages;
@@ -63,6 +67,7 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		setFMV(new FixedMetadataValue(getInstance(), "true"));
+		taskChainFactory = BukkitTaskChainFactory.create(this);
 		setUtils(new Utils(this));
 
 		loadConfigs();
@@ -78,8 +83,8 @@ public class Main extends JavaPlugin {
 		}
 
 		// Save data for the last time
-		final List<String> fAdd = new ArrayList<>(BlockHandler.addToDatabase);
-		final List<String> fDel = new ArrayList<>(BlockHandler.removeFromDatabase);
+		final Set<String> fAdd = new HashSet<>(BlockHandler.addToDatabase);
+		final Set<String> fDel = new HashSet<>(BlockHandler.removeFromDatabase);
 		new SyncData(this, fAdd, fDel, true).run();
 
 		getDB().closeConnection();
@@ -109,10 +114,22 @@ public class Main extends JavaPlugin {
 	 */
 	public void registerListeners() {
 		if (Utils.isInstalled("WorldEdit")) {
-			if (this.weListener != null)
+			if (DEBUG)
+				System.out.println("registerListeners: WorldEdit "
+						+ getSettings().isEnabled("tracking.worldedit.enabled"));
+
+			if (this.weListener != null) {
+				if (DEBUG)
+					System.out.println("registerListeners: unregister WorldEdit");
+
 				WorldEdit.getInstance().getEventBus().unregister(this.weListener);
+				this.weListener = null;
+			}
 
 			if (getSettings().isEnabled("tracking.worldedit.enabled")) {
+				if (DEBUG)
+					System.out.println("registerListeners: register WorldEdit");
+
 				this.weListener = new WorldEditListener(this);
 				WorldEdit.getInstance().getEventBus().register(this.weListener);
 			}
@@ -218,7 +235,7 @@ public class Main extends JavaPlugin {
 					+ " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player))");
 		}
 
-		// TODO - option to disable it!
+		// TODO - option to disable purge!
 		if (getSettings().isEnabled("general.saving.inventories.enabled")) {
 			long survival = Instant.now().getEpochSecond()
 					- 86400 * getSettings().getInt("general.saving.inventories.purge.survival");
@@ -307,5 +324,13 @@ public class Main extends JavaPlugin {
 
 	public void setUtils(Utils utils) {
 		this.utils = utils;
+	}
+
+	public static <T> TaskChain<T> newChain() {
+		return taskChainFactory.newChain();
+	}
+
+	public static <T> TaskChain<T> newSharedChain(String name) {
+		return taskChainFactory.newSharedChain(name);
 	}
 }
