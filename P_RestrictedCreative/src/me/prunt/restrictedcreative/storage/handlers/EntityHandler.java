@@ -1,5 +1,6 @@
 package me.prunt.restrictedcreative.storage.handlers;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class EntityHandler {
@@ -20,12 +22,19 @@ public class EntityHandler {
 		if (e == null)
 			return false;
 
+		if (Main.DEBUG)
+			System.out.println("isTracked: " + e.getType() + " "
+					+ Arrays.toString(e.getScoreboardTags().toArray()));
+
 		return e.getScoreboardTags().contains("GMC");
 	}
 
 	public static void setAsTracked(Entity e) {
 		if (e == null)
 			return;
+
+		if (Main.DEBUG)
+			System.out.println("setAsTracked: " + e.getType());
 
 		e.addScoreboardTag("GMC");
 	}
@@ -92,11 +101,13 @@ public class EntityHandler {
 	}
 
 	public static void addToTrackedLocs(Location loc) {
+		if (Main.DEBUG)
+			System.out.println("addToTrackedLocs: " + Utils.getLocString(loc));
+
 		trackedLocs.add(Utils.getLocString(loc));
 	}
 
 	public static void removeFromTrackedLocs(Location loc) {
-		if (isTrackedLoc(loc))
-			trackedLocs.remove(Utils.getLocString(loc));
+		trackedLocs.remove(Utils.getLocString(loc));
 	}
 }

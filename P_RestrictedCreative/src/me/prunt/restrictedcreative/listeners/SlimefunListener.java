@@ -32,6 +32,10 @@ public class SlimefunListener implements Listener {
 	public void onAndroidMine(AndroidMineEvent e) {
 		Block b = e.getBlock();
 
+		// No need to control disabled feature
+		if (!getMain().getSettings().isEnabled("limit.interact.slimefun"))
+			return;
+
 		// No need to control blocks in disabled worlds
 		if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
 			return;
@@ -58,6 +62,11 @@ public class SlimefunListener implements Listener {
 		Player p = e.getPlayer();
 
 		if (b == null || sfb == null)
+			return;
+
+		// No need to control disabled feature
+		if (!getMain().getSettings().isEnabled("limit.interact.slimefun")
+				|| p.hasPermission("rc.bypass.limit.interact.slimefun"))
 			return;
 
 		// No need to control blocks in disabled worlds

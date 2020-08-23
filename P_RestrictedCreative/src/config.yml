@@ -103,6 +103,7 @@ limit:
     inventories: true
     entities: true
     breeding: true
+    slimefun: true
   item:
     drop: true
     pickup: true

@@ -54,11 +54,12 @@ public class BlockBreakListener implements Listener {
 		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 			return;
 
-		// No need to control excluded blocks
-		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
-			return;
-
-		/* Disabled blocks for creative players */
+		/*
+		 * Disabled blocks for creative players
+		 * 
+		 * Must come before excluded check in order for it to work when tracking is
+		 * disabled
+		 */
 		if (p.getGameMode() == GameMode.CREATIVE && getMain().getUtils().isDisabledBreaking(m)
 				&& !p.hasPermission("rc.bypass.disable.breaking")
 				&& !p.hasPermission("rc.bypass.disable.breaking." + m)) {
@@ -66,6 +67,10 @@ public class BlockBreakListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+
+		// No need to control excluded blocks
+		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
+			return;
 
 		// Piston head
 		// Needs to be BEFORE isTracked() because PistonHead is not tracked

@@ -358,7 +358,7 @@ public class BlockPlaceListener implements Listener {
 
 	// Return the direction in which the body is situated
 	// or null if it's not a complete body
-	BlockFace getMiddleBody(Block head, Material type) {
+	BlockFace getMiddleBody(Block head, Material... types) {
 		BlockFace body = null;
 		boolean isMiddleBody = false;
 
@@ -387,8 +387,8 @@ public class BlockPlaceListener implements Listener {
 			}
 
 			Block middle = head.getRelative(body);
-			if (middle.getType() == type) {
-				isMiddleBody = getRowDirection(middle, type) != null;
+			if (Arrays.asList(types).contains(middle.getType())) {
+				isMiddleBody = getRowDirection(middle, types) != null;
 			}
 		}
 
@@ -401,13 +401,13 @@ public class BlockPlaceListener implements Listener {
 		if (head == null)
 			return false;
 
-		BlockFace middle = getMiddleBody(head, Material.SOUL_SAND);
+		BlockFace middle = getMiddleBody(head, Material.SOUL_SAND, Material.SOUL_SOIL);
 		if (middle == null)
 			return false;
 
 		Block bottom = head.getRelative(middle).getRelative(middle);
 
-		return bottom.getType() == Material.SOUL_SAND;
+		return bottom.getType() == Material.SOUL_SAND || bottom.getType() == Material.SOUL_SOIL;
 	}
 
 	// Return whether the wither's body is built in survival

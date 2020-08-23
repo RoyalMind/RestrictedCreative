@@ -108,45 +108,36 @@ public class EntityDamageListener implements Listener {
 		if (e.getDamager() instanceof Player) {
 			Player p = (Player) e.getDamager();
 
-			// No need to control non-creative players
-			if (p.getGameMode() != GameMode.CREATIVE)
-				return;
+			// Only need to control creative players
+			if (p.getGameMode() == GameMode.CREATIVE) {
+				// PVE except armor stands
+				if (en instanceof LivingEntity && !(en instanceof ArmorStand)) {
+					// Only need to control enabled features and non-bypassed players
+					if (!getMain().getSettings().isEnabled("limit.combat.pve")
+							&& !(p.hasPermission("rc.bypass.limit.combat.pve") || p
+									.hasPermission("rc.bypass.limit.combat.pve." + en.getType()))) {
+						if (Main.DEBUG)
+							System.out.println("PVE: " + en.getType());
 
-			// PVE except armor stands
-			if (en instanceof LivingEntity && !(en instanceof ArmorStand)) {
-				// No need to control disabled features
-				if (!getMain().getSettings().isEnabled("limit.combat.pve"))
-					return;
+						e.setCancelled(true);
+						getMain().getUtils().sendMessage(p, true, "disabled.general");
+						return;
+					}
+				}
 
-				// No need to control bypassed players
-				if (p.hasPermission("rc.bypass.limit.combat.pve")
-						|| p.hasPermission("rc.bypass.limit.combat.pve." + en.getType()))
-					return;
+				// PVP
+				else if (en instanceof Player) {
+					// Only need to control enabled features and non-bypassed players
+					if (!getMain().getSettings().isEnabled("limit.combat.pvp")
+							&& !p.hasPermission("rc.bypass.limit.combat.pvp")) {
+						if (Main.DEBUG)
+							System.out.println("PVP: " + en.getName());
 
-				if (Main.DEBUG)
-					System.out.println("PVE: " + en.getType());
-
-				e.setCancelled(true);
-				getMain().getUtils().sendMessage(p, true, "disabled.general");
-				return;
-			}
-
-			// PVP
-			else if (en instanceof Player) {
-				// No need to control disabled features
-				if (!getMain().getSettings().isEnabled("limit.combat.pvp"))
-					return;
-
-				// No need to control bypassed players
-				if (p.hasPermission("rc.bypass.limit.combat.pvp"))
-					return;
-
-				if (Main.DEBUG)
-					System.out.println("PVP: " + en.getName());
-
-				e.setCancelled(true);
-				getMain().getUtils().sendMessage(p, true, "disabled.general");
-				return;
+						e.setCancelled(true);
+						getMain().getUtils().sendMessage(p, true, "disabled.general");
+						return;
+					}
+				}
 			}
 		}
 

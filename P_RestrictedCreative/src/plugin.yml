@@ -1,5 +1,5 @@
 name: RestrictedCreative
-version: 2.4.2
+version: 2.4.3
 description: Extremely lightweight, but fully-featured and customizable creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
@@ -62,6 +62,7 @@ permissions:
       rc.bypass.limit.interact.inventories: true # per InventoryType enum
       rc.bypass.limit.interact.entities: true # per EntityType enum
       rc.bypass.limit.interact.breeding: true # per EntityType enum
+      rc.bypass.limit.interact.slimefun: true
       rc.bypass.limit.item.drop: true # per Material enum
       rc.bypass.limit.item.pickup: true # per Material enum
       rc.bypass.limit.item.throw: true # per Material enum
@@ -183,6 +184,9 @@ permissions:
     default: false
   rc.bypass.limit.interact.breeding:
     description: Allows to breed animals in creative mode.
+    default: false
+  rc.bypass.limit.interact.slimefun:
+    description: Allows to interact with Slimefun items in creative mode.
     default: false
   rc.bypass.limit.item.drop:
     description: Allows to drop items in creative mode.
