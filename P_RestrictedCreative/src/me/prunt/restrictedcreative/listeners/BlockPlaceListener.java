@@ -9,10 +9,14 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.type.Dispenser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
@@ -186,6 +190,76 @@ public class BlockPlaceListener implements Listener {
 					return;
 
 				getMain().getUtils().sendMessage(p, true, "disabled.creature");
+				e.setCancelled(true);
+				return;
+			}
+
+			return;
+		default:
+			return;
+		}
+	}
+
+	/*
+	 * Called when an item is dispensed from a block.
+	 * 
+	 * If a Block Dispense event is cancelled, the block will not dispense the item.
+	 */
+	// HIGHEST required for WorldGuard and similar plugins
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onBlockDispense(BlockDispenseEvent e) {
+		Block b = e.getBlock();
+
+		// No need to check creations in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
+			return;
+
+		BlockData bd = b.getBlockData();
+
+		// Only dispensers can place blocks
+		if (!(bd instanceof Dispenser))
+			return;
+
+		BlockFace dir = ((Directional) bd).getFacing();
+		Block head = b.getRelative(dir);
+
+		switch (e.getItem().getType()) {
+		// Wither
+		case WITHER_SKELETON_SKULL:
+		case WITHER_SKELETON_WALL_SKULL:
+			if (!getMain().getSettings().isEnabled("limit.creation.wither"))
+				return;
+
+			if (!couldWitherBeBuilt(head))
+				return;
+
+			// Wither was built in survival mode
+			if (canSurvivalBuildWither(head))
+				return;
+
+			e.setCancelled(true);
+			return;
+		// Golem
+		case PUMPKIN:
+		case CARVED_PUMPKIN:
+		case JACK_O_LANTERN:
+			// Iron golem
+			if (getMain().getSettings().isEnabled("limit.creation.iron-golem")
+					&& couldIronGolemBeBuilt(head)) {
+				// Golem was built in survival mode
+				if (canSurvivalBuildIronGolem(head))
+					return;
+
+				e.setCancelled(true);
+				return;
+			}
+			// Snow golem
+			else if (getMain().getSettings().isEnabled("limit.creation.snow-golem")
+					&& couldSnowGolemBeBuilt(head)) {
+				// Golem was built in survival mode
+				if (canSurvivalBuildSnowGolem(head))
+					return;
+
 				e.setCancelled(true);
 				return;
 			}
@@ -419,7 +493,7 @@ public class BlockPlaceListener implements Listener {
 		Block head1 = head.getRelative(headDir);
 		Block head2 = head.getRelative(headDir.getOppositeFace());
 
-		BlockFace bodyDir = getMiddleBody(head, Material.SOUL_SAND);
+		BlockFace bodyDir = getMiddleBody(head, Material.SOUL_SAND, Material.SOUL_SOIL);
 		Block middle = head.getRelative(bodyDir);
 		Block bottom = middle.getRelative(bodyDir);
 		Block middle1 = head.getRelative(headDir);

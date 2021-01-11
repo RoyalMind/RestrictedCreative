@@ -209,7 +209,7 @@ public class BlockHandler {
 				}
 
 				setTotalCount(count);
-				isLoadingDone = true;
+				BlockHandler.isLoadingDone = true;
 
 				Utils.sendMessage(Bukkit.getConsoleSender(),
 						main.getUtils().getMessage(true, "database.loaded").replaceAll("%blocks%",
@@ -327,7 +327,7 @@ public class BlockHandler {
 									+ chunksTook + " ms");
 
 						setTotalCount(fBlocksLoaded);
-						isLoadingDone = true;
+						BlockHandler.isLoadingDone = true;
 
 						Utils.sendMessage(Bukkit.getConsoleSender(),
 								main.getUtils().getMessage(true, "database.loaded")

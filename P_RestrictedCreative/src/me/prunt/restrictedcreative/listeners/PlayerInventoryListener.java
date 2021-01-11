@@ -8,6 +8,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import me.prunt.restrictedcreative.Main;
@@ -35,10 +38,17 @@ public class PlayerInventoryListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onInventoryCreative(InventoryCreativeEvent e) {
 		Player p = (Player) e.getWhoClicked();
+		Inventory i = e.getClickedInventory();
+		InventoryHolder h = i.getHolder();
 		ItemStack is = e.getCursor();
 
 		// No need to control inventories in disabled worlds
 		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
+
+		// Check if clicked inventory isn't player's own inventory
+		if (i.getType() != InventoryType.PLAYER && (h instanceof Player)
+				&& ((Player) h).getName().equalsIgnoreCase(p.getName()))
 			return;
 
 		if (Main.DEBUG)

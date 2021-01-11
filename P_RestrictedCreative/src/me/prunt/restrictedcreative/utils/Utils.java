@@ -227,7 +227,8 @@ public class Utils {
 	 * @param string Paths of messages to send to the player
 	 */
 	public void sendMessage(CommandSender sender, boolean prefix, String... paths) {
-		sendMessage(sender, getMessage(prefix, paths));
+		if (sender != null)
+			sendMessage(sender, getMessage(prefix, paths));
 	}
 
 	/**

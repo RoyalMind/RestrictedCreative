@@ -78,8 +78,6 @@ public class MaterialHandler {
 			return true;
 		if (bd instanceof Comparator)
 			return true;
-		if (bd instanceof Door)
-			return true;
 		if (bd instanceof RedstoneWire)
 			return true;
 		if (bd instanceof Repeater)
@@ -103,6 +101,8 @@ public class MaterialHandler {
 		if (Tag.WOODEN_PRESSURE_PLATES.isTagged(m))
 			return true;
 
+		if (isDoor(b))
+			return true;
 		if (isCrop(b))
 			return true;
 		if (isRail(b))
@@ -209,6 +209,10 @@ public class MaterialHandler {
 		return null;
 	}
 
+	public static boolean isDoor(Block b) {
+		return b.getBlockData() instanceof Door;
+	}
+
 	public static boolean isCrop(Block b) {
 		return crops.contains(b.getType());
 	}
@@ -256,6 +260,7 @@ public class MaterialHandler {
 				top.add(Material.valueOf("CRIMSON_ROOTS"));
 				top.add(Material.valueOf("WARPED_ROOTS"));
 				top.add(Material.valueOf("NETHER_SPROUTS"));
+				top.add(Material.valueOf("POLISHED_BLACKSTONE_PRESSURE_PLATE"));
 			}
 		} else {
 			top.add(Material.valueOf("DANDELION_YELLOW"));

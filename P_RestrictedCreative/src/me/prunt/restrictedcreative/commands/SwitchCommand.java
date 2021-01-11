@@ -49,12 +49,8 @@ public class SwitchCommand implements CommandExecutor {
 			// Commands shouldn't work in disabled regions
 			if ((getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")
 					|| getMain().getSettings().isEnabled("limit.regions.whitelist.enabled"))
-					&& !getMain().getUtils().canBuildHere(p, p.getLocation().getBlock(), Material.DIRT)) {
-				getMain().getUtils().sendMessage(p, true, "disabled.region");
-				return true;
-			}
-			if (getMain().getUtils().isDisabledWorld(p.getWorld().getName())
-					&& !p.hasPermission("rc.bypass.general.disabled-worlds")) {
+					&& !getMain().getUtils().canBuildHere(p, p.getLocation().getBlock(),
+							Material.DIRT)) {
 				getMain().getUtils().sendMessage(p, true, "disabled.region");
 				return true;
 			}
@@ -67,8 +63,8 @@ public class SwitchCommand implements CommandExecutor {
 				Player p1 = Bukkit.getPlayer(args[0]);
 
 				if (p1 == null || !p1.isOnline()) {
-					Utils.sendMessage(sender,
-							main.getUtils().getMessage(true, "not-found").replaceAll("%player%", args[0]));
+					Utils.sendMessage(sender, main.getUtils().getMessage(true, "not-found")
+							.replaceAll("%player%", args[0]));
 					return true;
 				}
 
@@ -81,8 +77,9 @@ public class SwitchCommand implements CommandExecutor {
 
 				p1.setGameMode(this.gm);
 				main.getUtils().sendMessage(p1, true, "gamemodes." + getName() + ".me");
-				Utils.sendMessage(sender, main.getUtils().getMessage(true, "gamemodes." + getName() + ".other")
-						.replaceAll("%player%", p1.getName()));
+				Utils.sendMessage(sender,
+						main.getUtils().getMessage(true, "gamemodes." + getName() + ".other")
+								.replaceAll("%player%", p1.getName()));
 				return true;
 			}
 

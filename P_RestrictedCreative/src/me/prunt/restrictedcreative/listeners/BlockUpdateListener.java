@@ -10,6 +10,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.type.Piston;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -124,7 +125,7 @@ public class BlockUpdateListener implements Listener {
 			}
 		}
 
-		/* 4. Top blocks */
+		/* 5. Top blocks */
 		if (MaterialHandler.needsBlockBelow(b)) {
 			if (Main.DEBUG)
 				System.out.println("needsBlockBelow: " + m);
@@ -195,6 +196,15 @@ public class BlockUpdateListener implements Listener {
 			// Needs to be checked BEFORE isSolid()
 			if (MaterialHandler.isCrop(b)) {
 				if (!isLightingOk(b) || !isSolid(bl)) {
+					e.setCancelled(true);
+					BlockHandler.breakBlock(b, null);
+				}
+				return;
+			}
+
+			// Needs to be checked BEFORE isSolid()
+			if (MaterialHandler.isDoor(b)) {
+				if (!isDoorOk(b) || !isSolid(bl)) {
 					e.setCancelled(true);
 					BlockHandler.breakBlock(b, null);
 				}
@@ -313,7 +323,10 @@ public class BlockUpdateListener implements Listener {
 		Material m = b.getType();
 		BlockData bd = b.getBlockData();
 
-		return m.isSolid() && (!(bd instanceof Piston) || !((Piston) bd).isExtended());
+		boolean isPistonOk = !(bd instanceof Piston) || !((Piston) bd).isExtended();
+		boolean isTrapdoorOk = !(bd instanceof TrapDoor) || !((TrapDoor) bd).isOpen();
+
+		return m.isSolid() && isPistonOk && isTrapdoorOk;
 	}
 
 	private List<Block> horisontalChoruses(Block b) {
@@ -340,6 +353,16 @@ public class BlockUpdateListener implements Listener {
 
 	private boolean isLightingOk(Block b) {
 		return b.getLightFromSky() >= 5 || b.getLightFromBlocks() >= 8;
+	}
+
+	private boolean isDoorOk(Block b) {
+		Block bl = b.getRelative(BlockFace.DOWN);
+		BlockData bd = bl.getBlockData();
+
+		if (bd instanceof TrapDoor && ((TrapDoor) bd).isOpen())
+			return false;
+
+		return isSolid(bl);
 	}
 
 	private boolean isCactusOk(Block b) {

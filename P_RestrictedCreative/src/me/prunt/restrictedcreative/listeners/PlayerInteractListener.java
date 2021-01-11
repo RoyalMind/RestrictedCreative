@@ -12,6 +12,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Door.Hinge;
 import org.bukkit.block.data.type.TrapDoor;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -39,8 +40,8 @@ import me.prunt.restrictedcreative.utils.Utils;
 public class PlayerInteractListener implements Listener {
 	private Main main;
 
-	private static final List<BlockFace> ALL_SIDES = Arrays.asList(BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH,
-			BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST);
+	private static final List<BlockFace> ALL_SIDES = Arrays.asList(BlockFace.DOWN, BlockFace.UP,
+			BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST);
 
 	public PlayerInteractListener(Main main) {
 		this.main = main;
@@ -195,11 +196,11 @@ public class PlayerInteractListener implements Listener {
 		/* Command /block */
 		if (CommandHandler.isInfoWithCommand(p)) {
 			if (BlockHandler.isTracked(b)) {
-				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
-						b.getType().toString()));
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true")
+						.replaceAll("%material%", b.getType().toString()));
 			} else {
-				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false").replaceAll("%material%",
-						b.getType().toString()));
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false")
+						.replaceAll("%material%", b.getType().toString()));
 			}
 
 			CommandHandler.removeInfoWithCommand(p);
@@ -209,15 +210,15 @@ public class PlayerInteractListener implements Listener {
 			CommandHandler.removeAddWithCommand(p);
 			e.setCancelled(true);
 
-			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%",
-					b.getType().toString()));
+			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.add.added")
+					.replaceAll("%material%", b.getType().toString()));
 		} else if (CommandHandler.isRemoveWithCommand(p)) {
 			BlockHandler.removeTracking(b);
 			CommandHandler.removeRemoveWithCommand(p);
 			e.setCancelled(true);
 
-			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
-					b.getType().toString()));
+			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed")
+					.replaceAll("%material%", b.getType().toString()));
 		}
 
 		// Creative placed cake shouldn't be edible
@@ -253,7 +254,8 @@ public class PlayerInteractListener implements Listener {
 			return;
 
 		// No need to track bypassed players
-		if (p.hasPermission("rc.bypass.tracking.blocks") || p.hasPermission("rc.bypass.tracking.blocks." + m))
+		if (p.hasPermission("rc.bypass.tracking.blocks")
+				|| p.hasPermission("rc.bypass.tracking.blocks." + m))
 			return;
 
 		// No need to track non-entity materials
@@ -280,11 +282,11 @@ public class PlayerInteractListener implements Listener {
 		/* Command /block */
 		if (CommandHandler.isInfoWithCommand(p)) {
 			if (EntityHandler.isTracked(en)) {
-				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true").replaceAll("%material%",
-						et.toString()));
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.true")
+						.replaceAll("%material%", et.toString()));
 			} else {
-				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false").replaceAll("%material%",
-						et.toString()));
+				Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.info.false")
+						.replaceAll("%material%", et.toString()));
 			}
 
 			CommandHandler.removeInfoWithCommand(p);
@@ -294,15 +296,15 @@ public class PlayerInteractListener implements Listener {
 			CommandHandler.removeAddWithCommand(p);
 			e.setCancelled(true);
 
-			Utils.sendMessage(p,
-					getMain().getUtils().getMessage(true, "block.add.added").replaceAll("%material%", et.toString()));
+			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.add.added")
+					.replaceAll("%material%", et.toString()));
 		} else if (CommandHandler.isRemoveWithCommand(p)) {
 			EntityHandler.removeTracking(en);
 			CommandHandler.removeRemoveWithCommand(p);
 			e.setCancelled(true);
 
-			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed").replaceAll("%material%",
-					et.toString()));
+			Utils.sendMessage(p, getMain().getUtils().getMessage(true, "block.remove.removed")
+					.replaceAll("%material%", et.toString()));
 		}
 
 		// No need to track non-creative players
@@ -317,7 +319,8 @@ public class PlayerInteractListener implements Listener {
 			ItemFrame frame = (ItemFrame) en;
 			ItemStack fis = frame.getItem();
 
-			if ((is != null && is.getType() != Material.AIR) && (fis == null || fis.getType() == Material.AIR)) {
+			if ((is != null && is.getType() != Material.AIR)
+					&& (fis == null || fis.getType() == Material.AIR)) {
 				EntityHandler.setAsTrackedItem(frame);
 				return;
 			}
@@ -359,7 +362,8 @@ public class PlayerInteractListener implements Listener {
 			return;
 
 		// No need to control disabled features
-		if (p.getGameMode() == GameMode.CREATIVE && getMain().getSettings().isEnabled("limit.interact.entities")) {
+		if (p.getGameMode() == GameMode.CREATIVE
+				&& getMain().getSettings().isEnabled("limit.interact.entities")) {
 			getMain().getUtils().sendMessage(p, true, "disabled.general");
 
 			if (Main.DEBUG)
@@ -475,7 +479,8 @@ public class PlayerInteractListener implements Listener {
 		if (bd instanceof Door) {
 			Door door = (Door) bd;
 
-			Block bl = door.getHalf() == Half.TOP ? b.getRelative(BlockFace.DOWN) : b.getRelative(BlockFace.UP);
+			Block bl = door.getHalf() == Half.TOP ? b.getRelative(BlockFace.DOWN)
+					: b.getRelative(BlockFace.UP);
 			checkSurroundingBlocks(p, bl, ALL_SIDES);
 		}
 	}
@@ -490,7 +495,7 @@ public class PlayerInteractListener implements Listener {
 
 			BlockFace dir = MaterialHandler.getNeededFace(attachable);
 
-			// If it's attached to the original block
+			// If it's attached to the original door
 			if (attachable.getFace(door) == dir && isNeededDirectionOk(attachable, dir))
 				BlockHandler.breakBlock(attachable, p);
 		}
@@ -498,6 +503,10 @@ public class PlayerInteractListener implements Listener {
 
 	private boolean isNeededDirectionOk(Block bl, BlockFace dir) {
 		BlockData bd = bl.getBlockData();
+
+		// Signs can be attached to a door no matter the direction
+		if (bd instanceof WallSign)
+			return false;
 
 		if (bd instanceof Door) {
 			if (Main.DEBUG)
