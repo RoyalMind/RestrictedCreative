@@ -1,5 +1,5 @@
 name: RestrictedCreative
-version: 2.4.5
+version: 2.4.6
 description: Extremely lightweight, but fully-featured and customizable creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
@@ -30,7 +30,7 @@ permissions:
 
   rc.commands.*:
     description: Allows every command.
-    default: OP
+    default: op
     children:
       rc.commands.rc: true
       rc.commands.creative: true
@@ -93,45 +93,45 @@ permissions:
     
   rc.commands.rc:
     description: Allows to use the main command.
-    default: OP
+    default: op
     
   rc.commands.creative:
     description: Allows to enter the creative mode.
-    default: OP
+    default: op
   rc.commands.survival:
     description: Allows to enter the survival mode.
-    default: OP
+    default: op
   rc.commands.adventure:
     description: Allows to enter the adventure mode.
-    default: OP
+    default: op
   rc.commands.spectator:
     description: Allows to enter the spectator mode.
-    default: OP
+    default: op
   rc.commands.creative.others:
     description: Allows to put other players to creative mode.
-    default: OP
+    default: op
   rc.commands.survival.others:
     description: Allows to put other players to survival mode.
-    default: OP
+    default: op
   rc.commands.adventure.others:
     description: Allows to put other players to adventure mode.
-    default: OP
+    default: op
   rc.commands.spectator.others:
     description: Allows to put other players to spectator mode.
-    default: OP
+    default: op
     
   rc.commands.reload:
     description: Allows to use the reload command.
-    default: OP
+    default: op
   rc.commands.delete:
     description: Allows to use the delete command.
-    default: OP
+    default: op
   rc.commands.convert:
     description: Allows to use the conversion command.
-    default: OP
+    default: op
   rc.commands.block:
     description: Allows to use the block info command.
-    default: OP
+    default: op
     
     
   rc.bypass.general.disable-worlds:

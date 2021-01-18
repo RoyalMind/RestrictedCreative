@@ -82,7 +82,7 @@ public class BlockChangeListener implements Listener {
 			return;
 
 		if (Main.DEBUG)
-			System.out.println("onEntityChangeBlock: " + e.getTo());
+			System.out.println("onEntityChangeBlock: " + en.getType() + " " + e.getTo());
 
 		// Crops trampled by mobs
 		Block bl = b.getRelative(BlockFace.UP);
@@ -101,17 +101,25 @@ public class BlockChangeListener implements Listener {
 			return;
 
 		// Lily pad broken by boat
-		if (m == Material.LILY_PAD) {
-			BlockHandler.breakBlock(b, null);
-
+		if (m == Material.LILY_PAD && BlockHandler.isTracked(b)) {
 			if (Main.DEBUG)
 				System.out.println("Lily pad broken by boat");
 
+			BlockHandler.breakBlock(b, null);
+			return;
+		}
+
+		// Wither destroying blocks
+		if (en.getType() == EntityType.WITHER && BlockHandler.isTracked(b)) {
+			if (Main.DEBUG)
+				System.out.println("Block destroyed by Wither: " + b.getType());
+
+			BlockHandler.breakBlock(b, null);
 			return;
 		}
 
 		// Falling block transforming into regular block and vice versa
-		else if (e.getEntityType() == EntityType.FALLING_BLOCK) {
+		if (e.getEntityType() == EntityType.FALLING_BLOCK) {
 			// Regular block starts to fall and becomes FALLING_BLOCK
 			if (e.getTo() == Material.AIR) {
 				BlockHandler.removeTracking(b);
