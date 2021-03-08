@@ -373,11 +373,11 @@ public class PlayerInteractListener implements Listener {
 			return;
 		}
 
-		if (e.getArmorStandItem() == null)
+		if (e.getArmorStandItem().getType().isAir())
 			return;
 
 		// Survival player is taking creative item from armor stand
-		if (p.getGameMode() != GameMode.CREATIVE && e.getArmorStandItem().getType() != Material.AIR
+		if (p.getGameMode() != GameMode.CREATIVE && !e.getArmorStandItem().getType().isAir()
 				&& EntityHandler.isTrackedSlot(a, slot)) {
 			e.setCancelled(true);
 

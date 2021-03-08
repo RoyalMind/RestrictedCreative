@@ -78,6 +78,10 @@ public class BlockBreakListener implements Listener {
 			PistonHead head = (PistonHead) bd;
 			Block piston = b.getRelative(head.getFacing().getOppositeFace());
 
+			// No need to control non-tracked pistons
+			if (!BlockHandler.isTracked(piston))
+				return;
+
 			if (Main.DEBUG)
 				System.out.println("PistonHead: " + piston.getType());
 

@@ -196,6 +196,7 @@ public class EntityDamageListener implements Listener {
 
 				if (EntityHandler.hasTrackedItem(frame)) {
 					en.remove();
+					e.setCancelled(true);
 
 					if (Main.DEBUG)
 						System.out.println("removeTrackedItem: " + frame.getItem().getType());
@@ -203,6 +204,16 @@ public class EntityDamageListener implements Listener {
 			}
 
 			return;
+		} else {
+			if (en instanceof ItemFrame) {
+				ItemFrame frame = (ItemFrame) en;
+
+				if (!EntityHandler.hasTrackedItem(frame)) {
+					// Drop item frame content in the ground
+					en.getWorld().dropItem(en.getLocation(), frame.getItem());
+					en.remove();
+				}
+			}
 		}
 
 		if (Main.DEBUG)
