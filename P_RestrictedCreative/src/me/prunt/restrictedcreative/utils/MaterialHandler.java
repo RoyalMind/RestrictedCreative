@@ -36,7 +36,7 @@ import me.prunt.restrictedcreative.Main;
 
 public class MaterialHandler {
 	// Items that will break if block below is air
-	private static HashSet<Material> top = new HashSet<>(Arrays.asList(Material.DEAD_BUSH,
+	private static final HashSet<Material> top = new HashSet<>(Arrays.asList(Material.DEAD_BUSH,
 			Material.DANDELION, Material.ORANGE_TULIP, Material.PINK_TULIP, Material.RED_TULIP,
 			Material.WHITE_TULIP, Material.BLUE_ORCHID, Material.ALLIUM, Material.POPPY,
 			Material.AZURE_BLUET, Material.OXEYE_DAISY, Material.RED_MUSHROOM,
@@ -48,22 +48,22 @@ public class MaterialHandler {
 			Material.NETHER_WART));
 
 	// Crops
-	private static HashSet<Material> crops = new HashSet<>(
+	private static final HashSet<Material> crops = new HashSet<>(
 			Arrays.asList(Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS));
 
 	// Double plants
-	private static HashSet<Material> doublePlants = new HashSet<>(
+	private static final HashSet<Material> doublePlants = new HashSet<>(
 			Arrays.asList(Material.TALL_GRASS, Material.LARGE_FERN));
 
 	// Placeable entities (but not hangables)
-	private static HashSet<Material> entities = new HashSet<>(Arrays.asList(Material.END_CRYSTAL,
+	private static final HashSet<Material> entities = new HashSet<>(Arrays.asList(Material.END_CRYSTAL,
 			Material.ARMOR_STAND, Material.MINECART, Material.CHEST_MINECART,
 			Material.COMMAND_BLOCK_MINECART, Material.FURNACE_MINECART, Material.HOPPER_MINECART,
 			Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT,
 			Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT, Material.SPRUCE_BOAT));
 
 	// List of colorable leather armor
-	private static List<ItemStack> armorList = Arrays.asList(new ItemStack(Material.LEATHER_BOOTS),
+	private static final List<ItemStack> armorList = Arrays.asList(new ItemStack(Material.LEATHER_BOOTS),
 			new ItemStack(Material.LEATHER_LEGGINGS), new ItemStack(Material.LEATHER_CHESTPLATE),
 			new ItemStack(Material.LEATHER_HELMET));
 
@@ -112,10 +112,7 @@ public class MaterialHandler {
 		if (isCarpet(b))
 			return true;
 
-		if (getNeededFace(b) == BlockFace.DOWN)
-			return true;
-
-		return false;
+		return getNeededFace(b) == BlockFace.DOWN;
 	}
 
 	@SuppressWarnings("deprecation")

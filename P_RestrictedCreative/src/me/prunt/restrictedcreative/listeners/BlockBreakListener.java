@@ -22,7 +22,7 @@ import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class BlockBreakListener implements Listener {
-	private Main main;
+	private final Main main;
 
 	public BlockBreakListener(Main main) {
 		this.main = main;

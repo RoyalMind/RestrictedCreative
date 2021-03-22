@@ -6,18 +6,9 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -26,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.potion.PotionEffect;
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
@@ -88,7 +80,12 @@ public class Utils {
 
 	// Return location coordinates as a string
 	public static String getLocString(Location loc) {
-		return loc.getWorld().getName() + ";" + loc.getBlockX() + ";" + loc.getBlockZ();
+		World w = loc.getWorld();
+
+		if (w == null)
+			return null;
+
+		return w.getName() + ";" + loc.getBlockX() + ";" + loc.getBlockZ();
 	}
 
 	// Return block from a position string
@@ -96,16 +93,18 @@ public class Utils {
 		// Get coordinates from given string
 		String[] sl = s.split(";");
 		String world = sl[0];
-		int x = Integer.valueOf(sl[1]);
-		int y = Integer.valueOf(sl[2]);
-		int z = Integer.valueOf(sl[3]);
+		int x = Integer.parseInt(sl[1]);
+		int y = Integer.parseInt(sl[2]);
+		int z = Integer.parseInt(sl[3]);
+
+		World w = Bukkit.getServer().getWorld(world);
 
 		// Return null if world doesn't exist
-		if (Bukkit.getServer().getWorld(world) == null)
+		if (w == null)
 			return null;
 
 		// Return block from given coordinates
-		return Bukkit.getServer().getWorld(world).getBlockAt(x, y, z);
+		return w.getBlockAt(x, y, z);
 	}
 
 	public static String getBlockChunk(String block) {
@@ -113,8 +112,8 @@ public class Utils {
 
 		// Get chunk data from given block string
 		String world = blockParts[0];
-		int chunkX = Integer.valueOf(blockParts[1]) >> 4; // ">> 4" == "/ 16", but faster
-		int chunkZ = Integer.valueOf(blockParts[3]) >> 4; // ">> 4" == "/ 16", but faster
+		int chunkX = Integer.parseInt(blockParts[1]) >> 4; // ">> 4" == "/ 16", but faster
+		int chunkZ = Integer.parseInt(blockParts[3]) >> 4; // ">> 4" == "/ 16", but faster
 
 		return world + ";" + chunkX + ";" + chunkZ;
 	}
@@ -151,7 +150,7 @@ public class Utils {
 	}
 
 	/* --- Non-static methods --- */
-	private Main main;
+	private final Main main;
 
 	public Utils(Main main) {
 		this.main = main;
@@ -170,11 +169,10 @@ public class Utils {
 	}
 
 	/**
-	 * @param m Material type
-	 * @return Whether tracking is enabled in the config
+	 * @return Whether tracking is disabled in the config
 	 */
-	public boolean isTrackingEnabled() {
-		return getMain().getSettings().isEnabled("tracking.blocks.enabled");
+	public boolean isTrackingDisabled() {
+		return !getMain().getSettings().isEnabled("tracking.blocks.enabled");
 	}
 
 	/**
@@ -183,7 +181,7 @@ public class Utils {
 	 */
 	public boolean isExcludedFromTracking(Material m) {
 		return getMain().getSettings().getMaterialList("tracking.blocks.exclude").contains(m)
-				|| !isTrackingEnabled() || m == Material.AIR;
+				|| isTrackingDisabled() || m == Material.AIR;
 	}
 
 	/**
@@ -224,7 +222,7 @@ public class Utils {
 	/**
 	 * @param sender Player to send the message to
 	 * @param prefix Whether to include a prefix in the message
-	 * @param string Paths of messages to send to the player
+	 * @param paths Paths of messages to send to the player
 	 */
 	public void sendMessage(CommandSender sender, boolean prefix, String... paths) {
 		if (sender != null)
@@ -233,38 +231,41 @@ public class Utils {
 
 	/**
 	 * @param prefix Whether to include a prefix in the message
-	 * @param string Paths of messages to send to the player
+	 * @param paths Paths of messages to send to the player
 	 */
 	public String getMessage(boolean prefix, String... paths) {
 		if (getMain().getMessages().isNone(paths))
 			return "";
 
 		String msg = prefix ? getMain().getMessages().getMessage("prefix") : "";
-		for (String path : paths)
-			msg += getMain().getMessages().getMessage(path);
 
-		return msg;
+		StringBuilder sb = new StringBuilder(msg);
+		for (String path : paths)
+			sb.append(getMain().getMessages().getMessage(path));
+
+		return sb.toString();
 	}
 
-	public boolean canBuildHere(Player p, Block b, Material m) {
+	public boolean cannotBuildHere(Player p, Block b, Material m) {
 		// No need to check bypassed players
 		if (p.hasPermission("rc.bypass.limit.regions"))
-			return true;
+			return false;
 
 		// WorldGuard check
 		if (Utils.isInstalled("WorldGuard") && WorldGuardUtils.canBuildHere(main, p, b, m))
-			return true;
+			return false;
 
 		// GriefPrevention check
 		if (Utils.isInstalled("GriefPrevention")
 				&& GriefPreventionUtils.canBuildHere(main, p, b, m))
-			return true;
+			return false;
 
 		// TownyAdvanced check
+		//noinspection RedundantIfStatement
 		if (Utils.isInstalled("Towny") && TownyAdvancedUtils.canBuildHere(main, p, b, m))
-			return true;
+			return false;
 
-		return false;
+		return true;
 
 	}
 
@@ -301,7 +302,7 @@ public class Utils {
 		ItemMeta im = is.getItemMeta();
 
 		// Displayname length check
-		if (im.getDisplayName() != null && im.getDisplayName().length() > 30)
+		if (im != null && im.getDisplayName().length() > 30)
 			return true;
 
 		// Enchantments check
@@ -319,9 +320,12 @@ public class Utils {
 			return false;
 
 		for (String name : getMain().getSettings().getStringList("confiscate.items.name")) {
-			String dn = is.getItemMeta().getDisplayName();
+			ItemMeta im = is.getItemMeta();
+			if (im == null)
+				return false;
 
-			if (dn != null && dn.contains(name))
+			String dn = im.getDisplayName();
+			if (dn.contains(name))
 				return true;
 		}
 
@@ -331,8 +335,11 @@ public class Utils {
 	// Check if item lore is bad
 	private boolean isBadLore(ItemStack is) {
 		for (String name : getMain().getSettings().getStringList("confiscate.items.lore")) {
-			List<String> lores = is.getItemMeta().getLore();
+			ItemMeta im = is.getItemMeta();
+			if (im == null)
+				return false;
 
+			List<String> lores = im.getLore();
 			if (lores == null)
 				return false;
 
@@ -377,6 +384,7 @@ public class Utils {
 
 		// Lore
 		if (!p.hasPermission("rc.bypass.confiscate.items.lore")) {
+			//noinspection RedundantIfStatement
 			if (getMain().getUtils().isBadLore(is))
 				return true;
 		}
@@ -390,6 +398,9 @@ public class Utils {
 
 		for (ItemStack is : armorList) {
 			LeatherArmorMeta lam = (LeatherArmorMeta) is.getItemMeta();
+			if (lam == null)
+				continue;
+
 			lam.setColor(c);
 			is.setItemMeta(lam);
 		}
@@ -521,8 +532,9 @@ public class Utils {
 	}
 
 	private void setGroups(Player p, boolean toCreative) {
-		Permission vault = Bukkit.getServer().getServicesManager().getRegistration(Permission.class)
-				.getProvider();
+		RegisteredServiceProvider<Permission> provider =
+				Bukkit.getServer().getServicesManager().getRegistration(Permission.class);
+		Permission vault = Objects.requireNonNull(provider).getProvider();
 
 		if (toCreative) {
 			for (String group : getMain().getSettings().getStringList("creative.groups.list")) {
@@ -566,8 +578,9 @@ public class Utils {
 	private void setPermissions(Player p, boolean toCreative) {
 		if (Utils.isInstalled("Vault")
 				&& getMain().getSettings().isEnabled("creative.permissions.use-vault")) {
-			Permission vault = Bukkit.getServer().getServicesManager()
-					.getRegistration(Permission.class).getProvider();
+			RegisteredServiceProvider<Permission> provider =
+					Bukkit.getServer().getServicesManager().getRegistration(Permission.class);
+			Permission vault = Objects.requireNonNull(provider).getProvider();
 
 			if (toCreative) {
 				for (String perm : getMain().getSettings()
@@ -627,7 +640,9 @@ public class Utils {
 					return;
 
 				PermissionAttachment attachment = PermissionHandler.getPerms(p);
-				p.removeAttachment(attachment);
+				if (attachment != null)
+					p.removeAttachment(attachment);
+
 				PermissionHandler.removePerms(p);
 			}
 		}

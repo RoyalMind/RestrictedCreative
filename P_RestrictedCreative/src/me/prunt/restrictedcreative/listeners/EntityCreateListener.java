@@ -93,7 +93,7 @@ public class EntityCreateListener implements Listener {
 			return;
 
 		// No need to track disabled features
-		if (!getMain().getUtils().isTrackingEnabled())
+		if (getMain().getUtils().isTrackingDisabled())
 			return;
 
 		// No need to track non-creative players

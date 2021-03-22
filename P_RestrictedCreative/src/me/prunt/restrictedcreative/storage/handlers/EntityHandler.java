@@ -16,7 +16,7 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class EntityHandler {
-	private static Set<String> trackedLocs = new HashSet<>();
+	private static final Set<String> trackedLocs = new HashSet<>();
 
 	public static boolean isTracked(Entity e) {
 		if (e == null)

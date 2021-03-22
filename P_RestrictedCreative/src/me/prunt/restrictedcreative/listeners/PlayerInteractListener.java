@@ -78,7 +78,7 @@ public class PlayerInteractListener implements Listener {
 		// Region check
 		if ((getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")
 				|| getMain().getSettings().isEnabled("limit.regions.whitelist.enabled"))
-				&& !getMain().getUtils().canBuildHere(p, e.getClickedBlock(), ma)) {
+				&& getMain().getUtils().cannotBuildHere(p, e.getClickedBlock(), ma)) {
 			e.setCancelled(true);
 			getMain().getUtils().sendMessage(p, true, "disabled.region");
 			return;

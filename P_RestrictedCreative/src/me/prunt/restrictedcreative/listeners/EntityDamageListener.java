@@ -21,7 +21,7 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.EntityHandler;
 
 public class EntityDamageListener implements Listener {
-	private Main main;
+	private final Main main;
 
 	public EntityDamageListener(Main main) {
 		this.main = main;
@@ -50,7 +50,7 @@ public class EntityDamageListener implements Listener {
 			ItemStack is = frame.getItem();
 
 			// The item isn't going to pop off
-			if (is == null || is.getType() == Material.AIR)
+			if (is.getType() == Material.AIR)
 				return;
 
 			// Item frame doesn't contain creative items
@@ -72,6 +72,9 @@ public class EntityDamageListener implements Listener {
 					continue;
 
 				EntityEquipment inv = a.getEquipment();
+				if (inv == null)
+					continue;
+
 				ItemStack air = new ItemStack(Material.AIR);
 
 				switch (slot) {
@@ -208,7 +211,7 @@ public class EntityDamageListener implements Listener {
 			if (en instanceof ItemFrame) {
 				ItemFrame frame = (ItemFrame) en;
 
-				if (!EntityHandler.hasTrackedItem(frame)) {
+				if (!frame.getItem().getType().isAir() && !EntityHandler.hasTrackedItem(frame)) {
 					// Drop item frame content in the ground
 					en.getWorld().dropItem(en.getLocation(), frame.getItem());
 					en.remove();

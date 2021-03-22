@@ -49,8 +49,8 @@ public class SwitchCommand implements CommandExecutor {
 			// Commands shouldn't work in disabled regions
 			if ((getMain().getSettings().isEnabled("limit.regions.owner-based.enabled")
 					|| getMain().getSettings().isEnabled("limit.regions.whitelist.enabled"))
-					&& !getMain().getUtils().canBuildHere(p, p.getLocation().getBlock(),
-							Material.DIRT)) {
+					&& getMain().getUtils().cannotBuildHere(p, p.getLocation().getBlock(),
+                    Material.DIRT)) {
 				getMain().getUtils().sendMessage(p, true, "disabled.region");
 				return true;
 			}

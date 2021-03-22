@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.GameMode;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,7 +30,7 @@ import me.prunt.restrictedcreative.storage.handlers.InventoryHandler;
 import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
 
 public class PlayerMiscListener implements Listener {
-	private Main main;
+	private final Main main;
 
 	public PlayerMiscListener(Main main) {
 		this.main = main;
@@ -84,38 +86,52 @@ public class PlayerMiscListener implements Listener {
 		InventoryHandler.setPreviousGameMode(p, p.getGameMode());
 	}
 
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+	public void onCommandAliases(PlayerCommandPreprocessEvent e) {
+		Player p = e.getPlayer();
+		String command = e.getMessage();
+
+		/* Old way of handling aliases */
+		if (!PermissionHandler.isUsingOldAliases())
+			return;
+
+		ConfigurationSection section = getMain().getSettings().getConfig().getConfigurationSection("commands");
+		if (section == null)
+			return;
+
+		// Loop through command list
+		for (String cmd : section.getKeys(false)) {
+			// Loop through alias list
+			for (String alias : getMain().getSettings().getStringList("commands." + cmd + ".aliases")) {
+				// If the message doesn't match or start with the alias
+				// (+ space to not catch other commands)
+				if (!command.startsWith("/" + alias + " ")
+						&& !command.equalsIgnoreCase("/" + alias))
+					continue;
+
+				String[] arguments = command.substring(alias.length() + 1).split(" ");
+				List<String> argList = new ArrayList<>(Arrays.asList(arguments));
+
+				// Remove empty strings caused by double spaces and such
+				argList.removeAll(Arrays.asList("", null));
+				arguments = argList.toArray(new String[0]);
+
+				PluginCommand pc = main.getCommand(cmd);
+				if (pc != null) {
+					pc.execute(p, alias, arguments);
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
+	}
+
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
 		Player p = e.getPlayer();
 		String command = e.getMessage();
 
-		/* Old way of handling aliases */
-		if (PermissionHandler.isUsingOldAliases()) {
-			// Loop through command list
-			for (String cmd : getMain().getSettings().getConfig()
-					.getConfigurationSection("commands").getKeys(false)) {
-				// Loop through alias list
-				for (String alias : getMain().getSettings()
-						.getStringList("commands." + cmd + ".aliases")) {
-					// If the message matches or starts with the alias
-					// (+ space to not catch other commands)
-					if (command.startsWith("/" + alias + " ")
-							|| command.equalsIgnoreCase("/" + alias)) {
-						List<String> argList = new ArrayList<>(
-								Arrays.asList(command.substring(alias.length() + 1).split(" ")));
-						// Remove empty strings caused by double spaces and such
-						argList.removeAll(Arrays.asList("", null));
-						String[] arguments = argList.toArray(new String[0]);
-
-						main.getCommand(cmd).execute(p, alias, arguments);
-						e.setCancelled(true);
-						return;
-					}
-				}
-			}
-		}
-
-		// No need to control drops in disabled worlds
+		// No need to control commands in disabled worlds
 		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
 			return;
 
@@ -262,6 +278,7 @@ public class PlayerMiscListener implements Listener {
 			// Switch inventories, permissions etc
 			getMain().getUtils().setCreative(p, false);
 			InventoryHandler.setPreviousGameMode(p, GameMode.CREATIVE);
+			//noinspection UnnecessaryReturnStatement
 			return;
 		}
 	}
