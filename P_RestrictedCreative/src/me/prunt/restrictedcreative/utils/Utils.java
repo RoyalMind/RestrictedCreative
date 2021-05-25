@@ -9,6 +9,8 @@ import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -775,5 +777,14 @@ public class Utils {
         if (Main.DEBUG)
             System.out.println("loadInventory: c?" + (InventoryHandler.getCreativeInv(p) != null)
                     + " s?" + (InventoryHandler.getSurvivalInv(p) != null));
+    }
+
+    public static void dropContainerContents(BlockState bs) {
+		if (!(bs instanceof Container))
+		    return;
+
+        for (ItemStack is : ((Container) bs).getInventory().getContents()) {
+            bs.getWorld().dropItemNaturally(bs.getLocation(), is);
+        }
     }
 }

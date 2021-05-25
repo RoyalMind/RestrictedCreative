@@ -236,8 +236,10 @@ public class MaterialHandler {
 	public static List<ItemStack> getArmorList(String type) {
 		switch (type.toLowerCase()) {
 			case "netherite":
-				return Arrays.asList(new ItemStack(Material.NETHERITE_BOOTS), new ItemStack(Material.NETHERITE_LEGGINGS),
-						new ItemStack(Material.NETHERITE_CHESTPLATE), new ItemStack(Material.NETHERITE_HELMET));
+				return Arrays.asList(new ItemStack(Material.valueOf("NETHERITE_BOOTS")),
+						new ItemStack(Material.valueOf("NETHERITE_LEGGINGS")),
+						new ItemStack(Material.valueOf("NETHERITE_CHESTPLATE")),
+						new ItemStack(Material.valueOf("NETHERITE_HELMET")));
 			case "diamond":
 				return Arrays.asList(new ItemStack(Material.DIAMOND_BOOTS), new ItemStack(Material.DIAMOND_LEGGINGS),
 						new ItemStack(Material.DIAMOND_CHESTPLATE), new ItemStack(Material.DIAMOND_HELMET));

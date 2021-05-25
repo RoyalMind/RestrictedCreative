@@ -137,13 +137,6 @@ public class BlockBreakListener implements Listener {
 			remove(e, p, false, bl);
 		}
 
-		// Drop container contents
-		else if (bs instanceof Container) {
-			for (ItemStack is : ((Container) bs).getInventory().getContents()) {
-				b.getWorld().dropItemNaturally(b.getLocation(), is);
-			}
-		}
-
 		// Others
 		remove(e, p, true, b);
 	}
@@ -155,8 +148,10 @@ public class BlockBreakListener implements Listener {
 
 			e.setCancelled(true);
 		} else {
-			for (Block b : blocks)
+			for (Block b : blocks) {
+				Utils.dropContainerContents(b.getState());
 				BlockHandler.removeTracking(b);
+			}
 
 			e.setDropItems(false);
 			e.setExpToDrop(0);

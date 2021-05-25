@@ -78,6 +78,8 @@ public class BlockHandler {
 	}
 
 	public static void breakBlock(Block b, Player p, boolean update) {
+		Utils.dropContainerContents(b.getState());
+
 		// BlocksHub
 		if (Utils.isInstalled("BlocksHub")) {
 			new BlocksHub(b, p, update);
