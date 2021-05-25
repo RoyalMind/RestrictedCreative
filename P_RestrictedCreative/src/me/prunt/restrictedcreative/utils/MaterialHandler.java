@@ -62,11 +62,6 @@ public class MaterialHandler {
 			Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT,
 			Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT, Material.SPRUCE_BOAT));
 
-	// List of colorable leather armor
-	private static final List<ItemStack> armorList = Arrays.asList(new ItemStack(Material.LEATHER_BOOTS),
-			new ItemStack(Material.LEATHER_LEGGINGS), new ItemStack(Material.LEATHER_CHESTPLATE),
-			new ItemStack(Material.LEATHER_HELMET));
-
 	public static boolean needsBlockBelow(Block b) {
 		BlockData bd = b.getBlockData();
 		Material m = b.getType();
@@ -238,8 +233,28 @@ public class MaterialHandler {
 		return entities.contains(m);
 	}
 
-	public static List<ItemStack> getArmorList() {
-		return armorList;
+	public static List<ItemStack> getArmorList(String type) {
+		switch (type.toLowerCase()) {
+			case "netherite":
+				return Arrays.asList(new ItemStack(Material.NETHERITE_BOOTS), new ItemStack(Material.NETHERITE_LEGGINGS),
+						new ItemStack(Material.NETHERITE_CHESTPLATE), new ItemStack(Material.NETHERITE_HELMET));
+			case "diamond":
+				return Arrays.asList(new ItemStack(Material.DIAMOND_BOOTS), new ItemStack(Material.DIAMOND_LEGGINGS),
+						new ItemStack(Material.DIAMOND_CHESTPLATE), new ItemStack(Material.DIAMOND_HELMET));
+			case "golden":
+				return Arrays.asList(new ItemStack(Material.GOLDEN_BOOTS), new ItemStack(Material.GOLDEN_LEGGINGS),
+						new ItemStack(Material.GOLDEN_CHESTPLATE), new ItemStack(Material.GOLDEN_HELMET));
+			case "iron":
+				return Arrays.asList(new ItemStack(Material.IRON_BOOTS), new ItemStack(Material.IRON_LEGGINGS),
+						new ItemStack(Material.IRON_CHESTPLATE), new ItemStack(Material.IRON_HELMET));
+			case "chainmail":
+				return Arrays.asList(new ItemStack(Material.CHAINMAIL_BOOTS), new ItemStack(Material.CHAINMAIL_LEGGINGS),
+						new ItemStack(Material.CHAINMAIL_CHESTPLATE), new ItemStack(Material.CHAINMAIL_HELMET));
+			case "leather":
+			default:
+				return Arrays.asList(new ItemStack(Material.LEATHER_BOOTS), new ItemStack(Material.LEATHER_LEGGINGS),
+						new ItemStack(Material.LEATHER_CHESTPLATE), new ItemStack(Material.LEATHER_HELMET));
+		}
 	}
 
 	private static HashSet<Material> getTop() {

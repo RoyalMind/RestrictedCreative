@@ -24,7 +24,7 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 
 public class BlockPlaceListener implements Listener {
-	private Main main;
+	private final Main main;
 
 	public BlockPlaceListener(Main main) {
 		this.main = main;
@@ -121,7 +121,9 @@ public class BlockPlaceListener implements Listener {
 		}
 
 		// No need to track excluded blocks
-		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
+		// AIR is allowed because ItemsAdder plugin had issues otherwise:
+		// https://github.com/PluginBugs/Issues-ItemsAdder/issues/866
+		if (getMain().getUtils().isExcludedFromTracking(b.getType()) && m != Material.AIR)
 			return;
 
 		// No need to track bypassed players
@@ -180,7 +182,6 @@ public class BlockPlaceListener implements Listener {
 
 				getMain().getUtils().sendMessage(p, true, "disabled.creature");
 				e.setCancelled(true);
-				return;
 			}
 			// Snow golem
 			else if (getMain().getSettings().isEnabled("limit.creation.snow-golem")
@@ -191,12 +192,7 @@ public class BlockPlaceListener implements Listener {
 
 				getMain().getUtils().sendMessage(p, true, "disabled.creature");
 				e.setCancelled(true);
-				return;
 			}
-
-			return;
-		default:
-			return;
 		}
 	}
 
@@ -224,49 +220,43 @@ public class BlockPlaceListener implements Listener {
 		Block head = b.getRelative(dir);
 
 		switch (e.getItem().getType()) {
-		// Wither
-		case WITHER_SKELETON_SKULL:
-		case WITHER_SKELETON_WALL_SKULL:
-			if (!getMain().getSettings().isEnabled("limit.creation.wither"))
-				return;
+			// Wither
+			case WITHER_SKELETON_SKULL:
+			case WITHER_SKELETON_WALL_SKULL:
+				if (!getMain().getSettings().isEnabled("limit.creation.wither"))
+					return;
 
-			if (!couldWitherBeBuilt(head))
-				return;
+				if (!couldWitherBeBuilt(head))
+					return;
 
-			// Wither was built in survival mode
-			if (canSurvivalBuildWither(head))
-				return;
-
-			e.setCancelled(true);
-			return;
-		// Golem
-		case PUMPKIN:
-		case CARVED_PUMPKIN:
-		case JACK_O_LANTERN:
-			// Iron golem
-			if (getMain().getSettings().isEnabled("limit.creation.iron-golem")
-					&& couldIronGolemBeBuilt(head)) {
-				// Golem was built in survival mode
-				if (canSurvivalBuildIronGolem(head))
+				// Wither was built in survival mode
+				if (canSurvivalBuildWither(head))
 					return;
 
 				e.setCancelled(true);
 				return;
-			}
-			// Snow golem
-			else if (getMain().getSettings().isEnabled("limit.creation.snow-golem")
-					&& couldSnowGolemBeBuilt(head)) {
-				// Golem was built in survival mode
-				if (canSurvivalBuildSnowGolem(head))
-					return;
+			// Golem
+			case PUMPKIN:
+			case CARVED_PUMPKIN:
+			case JACK_O_LANTERN:
+				// Iron golem
+				if (getMain().getSettings().isEnabled("limit.creation.iron-golem")
+						&& couldIronGolemBeBuilt(head)) {
+					// Golem was built in survival mode
+					if (canSurvivalBuildIronGolem(head))
+						return;
 
-				e.setCancelled(true);
-				return;
-			}
+					e.setCancelled(true);
+				}
+				// Snow golem
+				else if (getMain().getSettings().isEnabled("limit.creation.snow-golem")
+						&& couldSnowGolemBeBuilt(head)) {
+					// Golem was built in survival mode
+					if (canSurvivalBuildSnowGolem(head))
+						return;
 
-			return;
-		default:
-			return;
+					e.setCancelled(true);
+				}
 		}
 	}
 
@@ -352,10 +342,6 @@ public class BlockPlaceListener implements Listener {
 		return !(headBottom || middleRow);
 	}
 
-	BlockFace getRowDirection(Block middle) {
-		return getRowDirection(middle, middle.getType());
-	}
-
 	// Return the direction in which the row is located
 	// or null if the given block isn't in the middle
 	BlockFace getRowDirection(Block middle, Material... type) {
@@ -394,7 +380,7 @@ public class BlockPlaceListener implements Listener {
 		Block newHead = null;
 
 		for (int i = 0; !isMiddleHead; i++) {
-			BlockFace bf = null;
+			BlockFace bf;
 
 			switch (i) {
 			case 0:

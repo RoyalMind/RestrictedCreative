@@ -38,7 +38,7 @@ import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class PlayerInteractListener implements Listener {
-	private Main main;
+	private final Main main;
 
 	private static final List<BlockFace> ALL_SIDES = Arrays.asList(BlockFace.DOWN, BlockFace.UP,
 			BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST);
@@ -85,7 +85,7 @@ public class PlayerInteractListener implements Listener {
 		}
 
 		// Confiscate
-		if (getMain().getUtils().shouldConfiscate(p, is)) {
+		if (is != null && getMain().getUtils().shouldConfiscate(p, is)) {
 			p.getInventory().remove(is);
 			e.setCancelled(true);
 
@@ -319,8 +319,7 @@ public class PlayerInteractListener implements Listener {
 			ItemFrame frame = (ItemFrame) en;
 			ItemStack fis = frame.getItem();
 
-			if ((is != null && is.getType() != Material.AIR)
-					&& (fis == null || fis.getType() == Material.AIR)) {
+			if (!is.getType().isAir() && !fis.getType().isAir()) {
 				EntityHandler.setAsTrackedItem(frame);
 				return;
 			}
@@ -383,6 +382,9 @@ public class PlayerInteractListener implements Listener {
 
 			EntityEquipment inv = a.getEquipment();
 			ItemStack air = new ItemStack(Material.AIR);
+
+			if (inv == null)
+				return;
 
 			switch (slot) {
 			case CHEST:
@@ -513,10 +515,7 @@ public class PlayerInteractListener implements Listener {
 				System.out.println("getDoorFace: " + getDoorFace((Door) bd) + " vs " + dir);
 
 			// If they're not facing each other, they're in illegal position
-			if (getDoorFace((Door) bd) != dir.getOppositeFace())
-				return false;
-
-			return true;
+			return getDoorFace((Door) bd) == dir.getOppositeFace();
 		}
 
 		if (bd instanceof TrapDoor) {
@@ -532,10 +531,7 @@ public class PlayerInteractListener implements Listener {
 				return false;
 
 			// If trapdoors are open, they have the same face as the blocks attached to them
-			if (open && dir != face)
-				return false;
-
-			return true;
+			return !open || dir == face;
 		}
 
 		return true;

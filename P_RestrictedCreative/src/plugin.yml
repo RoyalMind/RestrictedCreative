@@ -1,6 +1,6 @@
 name: RestrictedCreative
-version: 2.4.8
-description: Extremely lightweight, but fully-featured and customizable creative mode limiter.
+version: 2.5
+description: Lightweight, but fully-featured and customizable creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
 website: 'https://www.spigotmc.org/resources/restrictedcreative.42790/'
@@ -21,7 +21,7 @@ commands:
 
 permissions:
   rc.*:
-    description: Allows everything.
+    description: Allows and bypasses everything.
     default: false
     children:
       rc.commands.*: true
@@ -72,6 +72,7 @@ permissions:
       rc.bypass.limit.creation.wither: true
       rc.bypass.limit.creation.snow-golem: true
       rc.bypass.limit.creation.iron-golem: true
+      rc.bypass.limit.damage: true
       rc.bypass.confiscate.invalid-items: true
       rc.bypass.confiscate.middle-click: true
       rc.bypass.confiscate.items.material: true # per Material enum
@@ -214,6 +215,9 @@ permissions:
     default: false
   rc.bypass.limit.creation.iron-golem:
     description: Allows to build an Iron golem while in creative mode.
+    default: false
+  rc.bypass.limit.damage:
+    description: Allows to be damaged and die.
     default: false
   
   rc.bypass.confiscate.invalid-items:

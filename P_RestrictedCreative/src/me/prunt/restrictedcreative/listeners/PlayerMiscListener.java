@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -203,6 +204,36 @@ public class PlayerMiscListener implements Listener {
 	}
 
 	@EventHandler(ignoreCancelled = true)
+	public void onPlayerDamage(EntityDamageEvent e) {
+		// Ignore other than players
+		if (!(e.getEntity() instanceof Player))
+			return;
+
+		Player p = (Player) e.getEntity();
+
+		// No need to control damage in disabled worlds
+		if (getMain().getUtils().isDisabledWorld(p.getWorld().getName()))
+			return;
+
+		// No need to control non-creative players
+		if (p.getGameMode() != GameMode.CREATIVE)
+			return;
+
+		// No need to control disabled features
+		if (!getMain().getSettings().isEnabled("limit.damage"))
+			return;
+
+		// No need to control bypassed players
+		if (p.hasPermission("rc.bypass.limit.damage"))
+			return;
+
+		if (Main.DEBUG)
+			System.out.println("onPlayerDamage");
+
+		e.setCancelled(true);
+	}
+
+	@EventHandler(ignoreCancelled = true)
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Player p = e.getEntity();
 
@@ -278,6 +309,7 @@ public class PlayerMiscListener implements Listener {
 			// Switch inventories, permissions etc
 			getMain().getUtils().setCreative(p, false);
 			InventoryHandler.setPreviousGameMode(p, GameMode.CREATIVE);
+
 			//noinspection UnnecessaryReturnStatement
 			return;
 		}

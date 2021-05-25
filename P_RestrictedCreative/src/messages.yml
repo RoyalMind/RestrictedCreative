@@ -8,6 +8,7 @@ no-console: '&cThis command can only be used in-game.'
 not-found: '&cPlayer %player% is not online!'
 disabled:
   general: '&cYou can''t do that in creative mode.'
+  drops: '&cThis block didn''t drop anything, because it was placed in creative mode.'
   interact: '&cYou can''t do that, because that was modified in creative mode.'
   region: '&cYou can''t do that outside the allowed region.'
   creature: '&cYou can''t do that, because a part of the creature was placed in creative mode.'

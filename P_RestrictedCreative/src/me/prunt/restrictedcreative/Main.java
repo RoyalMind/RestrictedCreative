@@ -168,8 +168,11 @@ public class Main extends JavaPlugin {
 		// Register commands
 		for (Entry<String, Map<String, Object>> entry : getDescription().getCommands().entrySet()) {
 			String name = entry.getKey();
-
 			PluginCommand cmd = getCommand(name);
+
+			if (cmd == null)
+				continue;
+
 			cmd.setExecutor(getExecutor(name));
 			cmd.setPermissionMessage(getMessages().getMessage("no-permission"));
 			cmd.setDescription(getSettings().getMessage("commands." + name + ".description"));
@@ -235,12 +238,12 @@ public class Main extends JavaPlugin {
 					+ " (player VARCHAR(36), type TINYINT(1), storage TEXT, armor TEXT, extra TEXT, effects TEXT, xp BIGINT, lastused BIGINT(11), UNIQUE (player))");
 		}
 
-		// TODO - option to disable purge!
-		if (getSettings().isEnabled("general.saving.inventories.enabled")) {
+		// Purge old database entries
+		if (getSettings().isEnabled("general.saving.inventories.purge.enabled")) {
 			long survival = Instant.now().getEpochSecond()
-					- 86400 * getSettings().getInt("general.saving.inventories.purge.survival");
+					- 86400L * getSettings().getInt("general.saving.inventories.purge.survival");
 			long creative = Instant.now().getEpochSecond()
-					- 86400 * getSettings().getInt("general.saving.inventories.purge.creative");
+					- 86400L * getSettings().getInt("general.saving.inventories.purge.creative");
 
 			getDB().executeUpdate(
 					"DELETE FROM " + getDB().getInvsTable() + " WHERE type = 0 AND lastused < "

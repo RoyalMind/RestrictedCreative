@@ -4,6 +4,8 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.block.data.Bisected.Half;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Bed;
@@ -20,6 +22,7 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.utils.MaterialHandler;
 import me.prunt.restrictedcreative.utils.Utils;
+import org.bukkit.inventory.ItemStack;
 
 public class BlockBreakListener implements Listener {
 	private final Main main;
@@ -48,6 +51,7 @@ public class BlockBreakListener implements Listener {
 		Player p = e.getPlayer();
 		Block b = e.getBlock();
 		BlockData bd = b.getBlockData();
+		BlockState bs = b.getState();
 		Material m = b.getType();
 
 		// No need to control blocks in disabled worlds
@@ -57,8 +61,7 @@ public class BlockBreakListener implements Listener {
 		/*
 		 * Disabled blocks for creative players
 		 * 
-		 * Must come before excluded check in order for it to work when tracking is
-		 * disabled
+		 * Must come before excluded check in order for it to work when tracking is disabled
 		 */
 		if (p.getGameMode() == GameMode.CREATIVE && getMain().getUtils().isDisabledBreaking(m)
 				&& !p.hasPermission("rc.bypass.disable.breaking")
@@ -134,6 +137,13 @@ public class BlockBreakListener implements Listener {
 			remove(e, p, false, bl);
 		}
 
+		// Drop container contents
+		else if (bs instanceof Container) {
+			for (ItemStack is : ((Container) bs).getInventory().getContents()) {
+				b.getWorld().dropItemNaturally(b.getLocation(), is);
+			}
+		}
+
 		// Others
 		remove(e, p, true, b);
 	}
@@ -151,5 +161,9 @@ public class BlockBreakListener implements Listener {
 			e.setDropItems(false);
 			e.setExpToDrop(0);
 		}
+
+		// Notify the breaker why there's no drops
+		if (getMain().getSettings().isEnabled("tracking.blocks.notify"))
+			getMain().getUtils().sendMessage(p, true, "disabled.drops");
 	}
 }
