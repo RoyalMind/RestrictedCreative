@@ -22,9 +22,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.WorldEdit;
 
-import co.aikar.taskchain.BukkitTaskChainFactory;
-import co.aikar.taskchain.TaskChain;
-import co.aikar.taskchain.TaskChainFactory;
 import me.prunt.restrictedcreative.commands.MainCommand;
 import me.prunt.restrictedcreative.commands.SwitchCommand;
 import me.prunt.restrictedcreative.listeners.BlockBreakListener;
@@ -56,7 +53,6 @@ public class Main extends JavaPlugin {
 
 	private Database database;
 	private Utils utils;
-	private static TaskChainFactory taskChainFactory;
 
 	private ConfigProvider config;
 	private ConfigProvider messages;
@@ -67,7 +63,6 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		setFMV(new FixedMetadataValue(getInstance(), "true"));
-		taskChainFactory = BukkitTaskChainFactory.create(this);
 		setUtils(new Utils(this));
 
 		loadConfigs();
@@ -327,13 +322,5 @@ public class Main extends JavaPlugin {
 
 	public void setUtils(Utils utils) {
 		this.utils = utils;
-	}
-
-	public static <T> TaskChain<T> newChain() {
-		return taskChainFactory.newChain();
-	}
-
-	public static <T> TaskChain<T> newSharedChain(String name) {
-		return taskChainFactory.newSharedChain(name);
 	}
 }
