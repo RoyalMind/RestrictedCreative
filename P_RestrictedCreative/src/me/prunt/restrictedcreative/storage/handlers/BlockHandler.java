@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import me.prunt.restrictedcreative.utils.external.CoreProtectUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -18,7 +19,7 @@ import org.bukkit.metadata.MetadataValue;
 
 import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.SyncData;
-import me.prunt.restrictedcreative.utils.BlocksHub;
+import me.prunt.restrictedcreative.utils.external.BlocksHubUtils;
 import me.prunt.restrictedcreative.utils.Utils;
 
 public class BlockHandler {
@@ -80,9 +81,10 @@ public class BlockHandler {
 	public static void breakBlock(Block b, Player p, boolean update) {
 		Utils.dropContainerContents(b.getState());
 
-		// BlocksHub
-		if (Utils.isInstalled("BlocksHub")) {
-			new BlocksHub(b, p, update);
+		if (Utils.isInstalled("CoreProtect")) {
+			new CoreProtectUtils(b, p, update);
+		} else if (Utils.isInstalled("BlocksHub")) {
+			new BlocksHubUtils(b, p, update);
 		} else {
 			b.setType(Material.AIR, update);
 		}

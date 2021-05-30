@@ -6,6 +6,9 @@ import me.prunt.restrictedcreative.Main;
 import me.prunt.restrictedcreative.storage.handlers.BlockHandler;
 import me.prunt.restrictedcreative.storage.handlers.InventoryHandler;
 import me.prunt.restrictedcreative.storage.handlers.PermissionHandler;
+import me.prunt.restrictedcreative.utils.external.GriefPreventionUtils;
+import me.prunt.restrictedcreative.utils.external.TownyAdvancedUtils;
+import me.prunt.restrictedcreative.utils.external.WorldGuardUtils;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -784,6 +787,9 @@ public class Utils {
 		    return;
 
         for (ItemStack is : ((Container) bs).getInventory().getContents()) {
+            if (is == null)
+                continue;
+
             bs.getWorld().dropItemNaturally(bs.getLocation(), is);
         }
     }

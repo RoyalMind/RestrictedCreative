@@ -51,7 +51,6 @@ public class BlockBreakListener implements Listener {
 		Player p = e.getPlayer();
 		Block b = e.getBlock();
 		BlockData bd = b.getBlockData();
-		BlockState bs = b.getState();
 		Material m = b.getType();
 
 		// No need to control blocks in disabled worlds
@@ -158,7 +157,8 @@ public class BlockBreakListener implements Listener {
 		}
 
 		// Notify the breaker why there's no drops
-		if (getMain().getSettings().isEnabled("tracking.blocks.notify"))
+		if (p.getGameMode() != GameMode.CREATIVE &&
+				getMain().getSettings().isEnabled("tracking.blocks.notify"))
 			getMain().getUtils().sendMessage(p, true, "disabled.drops");
 	}
 }

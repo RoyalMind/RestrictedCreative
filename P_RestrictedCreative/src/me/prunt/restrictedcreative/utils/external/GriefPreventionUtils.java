@@ -1,4 +1,4 @@
-package me.prunt.restrictedcreative.utils;
+package me.prunt.restrictedcreative.utils.external;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;

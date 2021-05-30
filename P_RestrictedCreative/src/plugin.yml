@@ -1,10 +1,10 @@
 name: RestrictedCreative
-version: 2.5
+version: 2.5.1
 description: Lightweight, but fully-featured and customizable creative mode limiter.
 author: Prunt
 main: me.prunt.restrictedcreative.Main
 website: 'https://www.spigotmc.org/resources/restrictedcreative.42790/'
-softdepend: [ProtocolLib, WorldEdit, WorldGuard, GriefPrevention, Towny, Vault, BlocksHub, Slimefun]
+softdepend: [ProtocolLib, WorldEdit, WorldGuard, GriefPrevention, Towny, Vault, BlocksHub, Slimefun, CoreProtect]
 api-version: 1.13
 
 commands:

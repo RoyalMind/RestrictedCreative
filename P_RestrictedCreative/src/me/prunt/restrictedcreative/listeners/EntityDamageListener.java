@@ -161,7 +161,8 @@ public class EntityDamageListener implements Listener {
 	 * or the environment. This is not raised if the boat is simply 'removed' due to
 	 * other means.
 	 */
-	@EventHandler(ignoreCancelled = true)
+	// HIGHEST required for PlotSquared and similar plugins
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onVehicleDestory(VehicleDestroyEvent e) {
 		Entity en = e.getVehicle();
 

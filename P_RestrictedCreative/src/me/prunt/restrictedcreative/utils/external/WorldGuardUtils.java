@@ -1,5 +1,6 @@
-package me.prunt.restrictedcreative.utils;
+package me.prunt.restrictedcreative.utils.external;
 
+import me.prunt.restrictedcreative.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
