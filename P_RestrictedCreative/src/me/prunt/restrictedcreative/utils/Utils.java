@@ -781,16 +781,4 @@ public class Utils {
             System.out.println("loadInventory: c?" + (InventoryHandler.getCreativeInv(p) != null)
                     + " s?" + (InventoryHandler.getSurvivalInv(p) != null));
     }
-
-    public static void dropContainerContents(BlockState bs) {
-		if (!(bs instanceof Container))
-		    return;
-
-        for (ItemStack is : ((Container) bs).getInventory().getContents()) {
-            if (is == null)
-                continue;
-
-            bs.getWorld().dropItemNaturally(bs.getLocation(), is);
-        }
-    }
 }

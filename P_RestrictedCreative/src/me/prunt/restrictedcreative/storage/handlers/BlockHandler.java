@@ -79,8 +79,6 @@ public class BlockHandler {
 	}
 
 	public static void breakBlock(Block b, Player p, boolean update) {
-		Utils.dropContainerContents(b.getState());
-
 		if (Utils.isInstalled("CoreProtect")) {
 			new CoreProtectUtils(b, p, update);
 		} else if (Utils.isInstalled("BlocksHub")) {

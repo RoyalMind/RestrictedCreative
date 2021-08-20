@@ -148,7 +148,6 @@ public class BlockBreakListener implements Listener {
 			e.setCancelled(true);
 		} else {
 			for (Block b : blocks) {
-				Utils.dropContainerContents(b.getState());
 				BlockHandler.removeTracking(b);
 			}
 
