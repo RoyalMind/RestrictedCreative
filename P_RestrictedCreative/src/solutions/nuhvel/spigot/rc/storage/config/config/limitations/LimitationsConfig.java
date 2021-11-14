@@ -8,6 +8,7 @@ import java.util.List;
 public final class LimitationsConfig {
     public MovingLimitation moving = new MovingLimitation();
     public RegionLimitation regions = new RegionLimitation();
+    public CreationLimitation creation = new CreationLimitation();
     public ItemLimitation items = new ItemLimitation();
     public List<String> commands = List.of("(.*)(buy|sell)(.*)", "(.*)(chest)(.*)");
     public boolean receivingDamage = false;

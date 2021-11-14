@@ -2,6 +2,7 @@ package solutions.nuhvel.spigot.rc.storage.database;
 
 import org.bukkit.Bukkit;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
+import solutions.nuhvel.spigot.rc.storage.config.config.database.DatabaseType;
 
 import java.sql.*;
 
@@ -12,17 +13,17 @@ public class Database {
     private final String name;
     private final String user;
     private final String pass;
-    private final String type;
+    private final DatabaseType type;
     private final String table_blocks;
     private final String table_inventories;
     private final int port;
     private final boolean ssl;
     private Connection connection;
 
-    public Database(RestrictedCreative plugin, String type) {
+    public Database(RestrictedCreative plugin, DatabaseType type) {
         this.plugin = plugin;
 
-        this.type = type != null ? type : plugin.config.database.type.toString().toLowerCase();
+        this.type = type != null ? type : plugin.config.database.type;
         this.host = plugin.config.database.mysql.host;
         this.name = plugin.config.database.name;
         this.user = plugin.config.database.mysql.username;
@@ -66,12 +67,12 @@ public class Database {
     public boolean isValidConnection() {
         try {
             switch (type) {
-                case ("mysql"):
+                case MYSQL:
                     return connection.isValid(1);
-                case ("sqlite"):
+                case SQLITE:
                     return !connection.isClosed();
                 default:
-                    log("Incompatible database type provided: '" + type + "'. Compatible are: MySQL and SQLite.");
+                    log("Incompatible database type provided: '" + type + "'. Compatible are: MYSQL and SQLITE.");
                     return false;
             }
         } catch (SQLException e) {
@@ -81,8 +82,8 @@ public class Database {
 
     private void openConnection() {
         switch (type) {
-            case ("mysql") -> openMySQLConnection();
-            case ("sqlite") -> openSQLiteConnection();
+            case MYSQL -> openMySQLConnection();
+            case SQLITE -> openSQLiteConnection();
             default -> log("Incompatible database type provided: '" + type + "'. Compatible are: MySQL and SQLite.");
         }
     }

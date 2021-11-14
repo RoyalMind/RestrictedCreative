@@ -10,6 +10,8 @@ public final class PluginMessages extends BukkitYamlConfiguration {
     public String prefix = "&2&lCreative > ";
     @Comment("")
     public ErrorMessages errors = new ErrorMessages();
+    @Comment("")
+    public DisabledMessages disabled = new DisabledMessages();
 
     public PluginMessages(Path path, BukkitYamlProperties properties) {
         super(path, properties);

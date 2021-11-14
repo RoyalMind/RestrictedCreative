@@ -6,68 +6,55 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 import solutions.nuhvel.spigot.rc.storage.handlers.BlockHandler;
+import solutions.nuhvel.spigot.rc.utils.helpers.PreconditionChecker;
+
+import java.util.List;
 
 public class BlockExplodeListener implements Listener {
-	private RestrictedCreative restrictedCreative;
+    private final RestrictedCreative plugin;
 
-	public BlockExplodeListener(RestrictedCreative restrictedCreative) {
-		this.restrictedCreative = restrictedCreative;
-	}
+    public BlockExplodeListener(RestrictedCreative plugin) {
+        this.plugin = plugin;
+    }
 
-	private RestrictedCreative getMain() {
-		return this.restrictedCreative;
-	}
+    private RestrictedCreative getMain() {
+        return this.plugin;
+    }
 
-	/*
-	 * Called when a block explodes
-	 */
-	// HIGHEST required for WorldGuard and similar plugins
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-	public void onBlockExplode(BlockExplodeEvent e) {
-		// No need to control blocks in disabled worlds
-		if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
-			return;
+    /*
+     * Called when a block explodes
+     */
+    // HIGHEST required for WorldGuard and similar plugins
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onBlockExplode(BlockExplodeEvent e) {
+        if (new PreconditionChecker(plugin).isAllowedWorld(e.getBlock().getWorld().getName()).anyFailed())
+            return;
 
-		// Loops through all broken blocks
-		for (Block b : e.blockList()) {
-			if (getMain().getUtils().isExcludedFromTracking(b.getType()))
+        // Loops through all broken blocks
+        breakTrackedBlocks(e.blockList());
+    }
+
+    /*
+     * Called when an entity explodes
+     */
+    // HIGHEST required for WorldGuard and similar plugins
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onEntityExplode(EntityExplodeEvent e) {
+        if (new PreconditionChecker(plugin).isAllowedWorld(e.getEntity().getWorld().getName()).anyFailed())
+            return;
+
+        // Loops through all broken blocks
+        breakTrackedBlocks(e.blockList());
+    }
+
+	private void breakTrackedBlocks(List<Block> blocks) {
+		for (Block b : blocks) {
+			if (new PreconditionChecker(plugin).isExcludedFromTracking(b.getType()).isTracked(b).allSucceeded())
 				continue;
 
-			if (!BlockHandler.isTracked(b))
-				continue;
-
-			if (RestrictedCreative.DEBUG)
-				System.out.println("onBlockExplode: " + b.getType());
-
-			BlockHandler.breakBlock(b, null);
-		}
-	}
-
-	/*
-	 * Called when an entity explodes
-	 */
-	// HIGHEST required for WorldGuard and similar plugins
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-	public void onEntityExplode(EntityExplodeEvent e) {
-		// No need to control blocks in disabled worlds
-		if (getMain().getUtils().isDisabledWorld(e.getEntity().getWorld().getName()))
-			return;
-
-		// Loops through all broken blocks
-		for (Block b : e.blockList()) {
-			if (getMain().getUtils().isExcludedFromTracking(b.getType()))
-				continue;
-
-			if (!BlockHandler.isTracked(b))
-				continue;
-
-			if (RestrictedCreative.DEBUG)
-				System.out.println("onEntityExplode: " + b.getType());
-
-			BlockHandler.breakBlock(b, null);
+			BlockHandler.breakBlock(b);
 		}
 	}
 }

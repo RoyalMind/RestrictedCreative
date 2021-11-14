@@ -1,15 +1,18 @@
 package solutions.nuhvel.spigot.rc.utils.helpers;
 
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.metadata.MetadataValue;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 import solutions.nuhvel.spigot.rc.utils.Utils;
 import solutions.nuhvel.spigot.rc.utils.external.GriefPreventionUtils;
 import solutions.nuhvel.spigot.rc.utils.external.TownyAdvancedUtils;
 import solutions.nuhvel.spigot.rc.utils.external.WorldGuardUtils;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class PreconditionChecker {
@@ -30,44 +33,44 @@ public class PreconditionChecker {
         return checkHasFailed;
     }
 
-    public PreconditionChecker isAllowedWorld(String name) {
-        if (this.checkHasFailed) return this;
+    public boolean allSucceeded() {
+        return !checkHasFailed;
+    }
 
-        if (this.player != null && this.player.hasPermission("rc.bypass.general.disabled-worlds"))
+    public PreconditionChecker isAllowedWorld(String name) {
+        if (checkHasFailed) return this;
+
+        if (player != null && player.hasPermission("rc.bypass.general.disabled-worlds"))
             return this;
 
         List<String> whitelisted = plugin.config.system.worlds.whitelisted;
         List<String> disabled = plugin.config.system.worlds.disabled;
 
-        updateCheckWithResult(!whitelisted.isEmpty()
-                ? whitelisted.contains(name)
-                : !disabled.contains(name));
-        return this;
+        return updateCheckWithResult(!whitelisted.isEmpty() ? whitelisted.contains(name) : !disabled.contains(name));
     }
 
     public PreconditionChecker isAllowedHeight() {
-        if (this.checkHasFailed && this.player == null) return this;
+        if (checkHasFailed && player == null) return this;
 
-        if (this.player.getGameMode() != GameMode.CREATIVE)
+        if (player.getGameMode() != GameMode.CREATIVE)
             return this;
 
         if (!plugin.config.limitations.moving.enabled)
             return this;
 
-        if (this.player.hasPermission("rc.bypass.limit.moving"))
+        if (player.hasPermission("rc.bypass.limit.moving"))
             return this;
 
-        double current = this.player.getLocation().getY();
+        double current = player.getLocation().getY();
         int above = plugin.config.limitations.moving.above;
         int below = plugin.config.limitations.moving.below;
 
-        updateCheckWithResult(below <= current && current <= above);
-        return this;
+        return updateCheckWithResult(below <= current && current <= above);
     }
 
     public PreconditionChecker isAllowedRegion() {
-        if (this.player == null) return this;
-        return isAllowedRegion(this.player.getLocation().getBlock());
+        if (player == null) return this;
+        return isAllowedRegion(player.getLocation().getBlock());
     }
 
     public PreconditionChecker isAllowedRegion(Block block) {
@@ -75,24 +78,82 @@ public class PreconditionChecker {
     }
 
     public PreconditionChecker isAllowedRegion(Block block, Material type) {
-        if (this.checkHasFailed || this.player == null) return this;
+        if (checkHasFailed || player == null) return this;
 
         if (!plugin.config.limitations.regions.ownership.enabled
                 && !plugin.config.limitations.regions.ownership.allowMembers)
             return this;
 
-        if (this.player.hasPermission("rc.bypass.limit.regions"))
+        if (player.hasPermission("rc.bypass.limit.regions"))
             return this;
 
-        updateCheckWithResult(canBuildHere(player, block, type));
-        return this;
+        return updateCheckWithResult(canBuildHere(player, block, type));
     }
 
     public PreconditionChecker doesNotHavePermission(String permission) {
-        if (this.checkHasFailed || this.player == null) return this;
+        if (checkHasFailed || player == null) return this;
 
-        updateCheckWithResult(!this.player.hasPermission(permission));
-        return this;
+        return updateCheckWithResult(!player.hasPermission(permission));
+    }
+
+    public PreconditionChecker isNotExcludedFromTracking(Material m, Material... exceptions) {
+        if (checkHasFailed) return this;
+
+        if (Arrays.asList(exceptions).contains(m))
+            return this;
+
+        if (player != null && (player.hasPermission("rc.bypass.tracking.blocks")
+                || player.hasPermission("rc.bypass.tracking.blocks." + m)))
+            return this;
+
+        var isExcluded = plugin.config.tracking.blocks.excluded.contains(m)
+                || isTrackingDisabled() || m == Material.AIR;
+        return updateCheckWithResult(!isExcluded);
+    }
+
+    public PreconditionChecker isTracked(Block b) {
+        if (checkHasFailed) return this;
+        return updateCheckWithResult(isTrackedBlock(b));
+    }
+
+    public PreconditionChecker isTracked(Entity e) {
+        if (checkHasFailed) return this;
+        return updateCheckWithResult(e != null && e.getScoreboardTags().contains("GMC"));
+    }
+
+    public PreconditionChecker isDisabledBreaking(Material m) {
+        if (checkHasFailed) return this;
+
+        if (player != null && (player.hasPermission("rc.bypass.disable.breaking")
+                || player.hasPermission("rc.bypass.disable.breaking." + m)))
+            return this;
+
+        return updateCheckWithResult(plugin.config.disable.breaking.contains(m));
+    }
+
+
+    public PreconditionChecker isDisabledPlacing(Material type) {
+        if (checkHasFailed) return this;
+
+        if (player != null && (player.hasPermission("rc.bypass.disable.placing")
+                || player.hasPermission("rc.bypass.disable.placing." + type)))
+            return this;
+
+        return updateCheckWithResult(plugin.config.disable.placing.contains(type));
+    }
+
+    private boolean isTrackedBlock(Block b) {
+        if (b == null) return false;
+
+        for (MetadataValue mdv : b.getMetadata("RC3"))
+            if (mdv.asBoolean())
+                return true;
+
+        return false;
+    }
+
+    private boolean isTrackingDisabled() {
+        return !plugin.config.tracking.blocks.enabled;
     }
 
     private boolean canBuildHere(Player player, Block block, Material material) {
@@ -103,13 +164,11 @@ public class PreconditionChecker {
                 && GriefPreventionUtils.canBuildHere(plugin, player, block, material))
             return true;
 
-        if (Utils.isInstalled("Towny") && TownyAdvancedUtils.canBuildHere(plugin, player, block, material))
-            return true;
-
-        return false;
+        return Utils.isInstalled("Towny") && TownyAdvancedUtils.canBuildHere(plugin, player, block, material);
     }
 
-    private void updateCheckWithResult(boolean checkResult) {
-        if (!this.checkHasFailed) this.checkHasFailed = !checkResult;
+    private PreconditionChecker updateCheckWithResult(boolean checkResult) {
+        if (!checkHasFailed) checkHasFailed = !checkResult;
+        return this;
     }
 }

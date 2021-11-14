@@ -147,29 +147,12 @@ public class Utils {
         this.plugin = plugin;
     }
 
-    public boolean isTrackingDisabled() {
-        return !plugin.config.tracking.blocks.enabled;
-    }
-
-    public boolean isExcludedFromTracking(Material m) {
-        return plugin.config.tracking.blocks.excluded.contains(m)
-                || isTrackingDisabled() || m == Material.AIR;
-    }
-
     public boolean isExcludedFromConfiscating(Material m) {
         return plugin.config.confiscate.middleClick.excluded.contains(m) || m == Material.AIR;
     }
 
     private boolean isInvalid(Material m) {
         return plugin.config.confiscate.items.materials.contains(m);
-    }
-
-    public boolean isDisabledPlacing(Material m) {
-        return plugin.config.disable.placing.contains(m);
-    }
-
-    public boolean isDisabledBreaking(Material m) {
-        return plugin.config.disable.breaking.contains(m);
     }
 
     public void sendMessage(CommandSender sender, boolean includePrefix, String message) {

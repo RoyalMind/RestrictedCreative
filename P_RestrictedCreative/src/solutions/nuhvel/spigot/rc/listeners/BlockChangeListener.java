@@ -17,16 +17,17 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 import solutions.nuhvel.spigot.rc.storage.handlers.BlockHandler;
 import solutions.nuhvel.spigot.rc.storage.handlers.EntityHandler;
+import solutions.nuhvel.spigot.rc.utils.helpers.PreconditionChecker;
 
 public class BlockChangeListener implements Listener {
-	private RestrictedCreative restrictedCreative;
+	private final RestrictedCreative plugin;
 
-	public BlockChangeListener(RestrictedCreative restrictedCreative) {
-		this.restrictedCreative = restrictedCreative;
+	public BlockChangeListener(RestrictedCreative plugin) {
+		this.plugin = plugin;
 	}
 
 	private RestrictedCreative getMain() {
-		return this.restrictedCreative;
+		return this.plugin;
 	}
 
 	/*
@@ -40,28 +41,20 @@ public class BlockChangeListener implements Listener {
 	public void onBlockChange(BlockFromToEvent e) {
 		Block b = e.getToBlock();
 
-		// No need to control blocks in disabled worlds
-		if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
-			return;
-
-		// No need to control excluded blocks
-		if (getMain().getUtils().isExcludedFromTracking(b.getType()))
+		if (new PreconditionChecker(plugin)
+				.isAllowedWorld(b.getWorld().getName())
+				.isExcludedFromTracking(b.getType())
+				.isTracked(b)
+				.anyFailed())
 			return;
 
 		// Waterloggable blocks won't be affected by liquids
 		if (b.getBlockData() instanceof Waterlogged)
 			return;
 
-		// No need to control non-tracked blocks
-		if (!BlockHandler.isTracked(b))
-			return;
-
-		if (RestrictedCreative.DEBUG)
-			System.out.println("onBlockChange: " + b.getType());
-
 		// Removes, because otherwise a liquid would destroy it and drop the block
 		e.setCancelled(true);
-		BlockHandler.breakBlock(b, null);
+		BlockHandler.breakBlock(b);
 	}
 
 	/*
@@ -73,48 +66,33 @@ public class BlockChangeListener implements Listener {
 		Material m = b.getType();
 		Entity en = e.getEntity();
 
-		// No need to control blocks in disabled worlds
-		if (getMain().getUtils().isDisabledWorld(b.getWorld().getName()))
+		if (new PreconditionChecker(plugin)
+				.isAllowedWorld(b.getWorld().getName())
+				.isExcludedFromTracking(b.getType(), Material.AIR)
+				.anyFailed())
 			return;
-
-		// No need to control excluded blocks (except AIR)
-		if (getMain().getUtils().isExcludedFromTracking(m) && m != Material.AIR)
-			return;
-
-		if (RestrictedCreative.DEBUG)
-			System.out.println("onEntityChangeBlock: " + en.getType() + " " + e.getTo());
 
 		// Crops trampled by mobs
 		Block bl = b.getRelative(BlockFace.UP);
 		if (BlockHandler.isTracked(bl) && m == Material.FARMLAND) {
-			if (RestrictedCreative.DEBUG)
-				System.out.println("Crops trampled by mobs: " + bl.getType());
-
 			BlockHandler.breakBlock(bl, null);
 			b.setType(Material.DIRT);
 			e.setCancelled(true);
 			return;
 		}
 
-		// No need to control non-tracked blocks and entities
-		if (!BlockHandler.isTracked(b) && !EntityHandler.isTracked(en))
+		if (new PreconditionChecker(plugin).isTracked(b).isTracked(en).allSucceeded())
 			return;
 
 		// Lily pad broken by boat
-		if (m == Material.LILY_PAD && BlockHandler.isTracked(b)) {
-			if (RestrictedCreative.DEBUG)
-				System.out.println("Lily pad broken by boat");
-
-			BlockHandler.breakBlock(b, null);
+		if (m == Material.LILY_PAD && new PreconditionChecker(plugin).isTracked(b).anyFailed()) {
+			BlockHandler.breakBlock(b);
 			return;
 		}
 
 		// Wither destroying blocks
-		if (en.getType() == EntityType.WITHER && BlockHandler.isTracked(b)) {
-			if (RestrictedCreative.DEBUG)
-				System.out.println("Block destroyed by Wither: " + b.getType());
-
-			BlockHandler.breakBlock(b, null);
+		if (en.getType() == EntityType.WITHER && new PreconditionChecker(plugin).isTracked(b).anyFailed()) {
+			BlockHandler.breakBlock(b);
 			return;
 		}
 
@@ -126,17 +104,11 @@ public class BlockChangeListener implements Listener {
 				EntityHandler.setAsTracked(en);
 
 				((FallingBlock) en).setDropItem(false);
-
-				if (RestrictedCreative.DEBUG)
-					System.out.println("blockToFallingblock: " + m);
 			}
 
 			// FALLING_BLOCK is transforming into regular block
 			else {
 				BlockHandler.setAsTracked(b);
-
-				if (RestrictedCreative.DEBUG)
-					System.out.println("fallingblockToBlock: " + e.getTo());
 			}
 		}
 	}
@@ -149,23 +121,22 @@ public class BlockChangeListener implements Listener {
 	 */
 	@EventHandler(ignoreCancelled = true)
 	public void onSpongeAbsorb(SpongeAbsorbEvent e) {
-		// No need to control blocks in disabled worlds
-		if (getMain().getUtils().isDisabledWorld(e.getBlock().getWorld().getName()))
+		if (new PreconditionChecker(plugin)
+				.isAllowedWorld(e.getBlock().getWorld().getName())
+				.anyFailed())
 			return;
 
 		for (BlockState bs : e.getBlocks()) {
 			Block b = bs.getBlock();
-
-			if (!BlockHandler.isTracked(b))
-				continue;
-
 			Material m = b.getType();
+
+			if (new PreconditionChecker(plugin).isTracked(b).anyFailed())
+				continue;
 
 			if (m != Material.KELP && m != Material.KELP_PLANT)
 				continue;
 
 			BlockHandler.breakBlock(bs.getBlock(), null, false);
-
 		}
 	}
 }

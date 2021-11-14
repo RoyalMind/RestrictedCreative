@@ -1,9 +1,4 @@
-# Check out the default messages: https://bitbucket.org/Prunt/restrictedcreative/wiki/Default%20messages
-# Messages explanation: https://bitbucket.org/Prunt/restrictedcreative/wiki/Home#markdown-header-messages
-#
-prefix: '&2&lCreative > '
 reloaded: '&aConfig reloaded!'
-no-permission: '&cYou don''t have enough permissions to do that!'
 no-console: '&cThis command can only be used in-game.'
 not-found: '&cPlayer %player% is not online!'
 disabled:
@@ -11,7 +6,6 @@ disabled:
   drops: '&cThis block didn''t drop anything, because it was placed in creative mode.'
   interact: '&cYou can''t do that, because that was modified in creative mode.'
   region: '&cYou can''t do that outside the allowed region.'
-  creature: '&cYou can''t do that, because a part of the creature was placed in creative mode.'
 database:
   load: '&ePlease wait! Loading data from database...'
   loaded: '&eLoaded %blocks% blocks in %chunks% chunks from database!'

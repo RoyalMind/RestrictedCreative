@@ -31,7 +31,3 @@ limit:
   combat:
     pvp: true
     pve: true
-  creation:
-    wither: true
-    snow-golem: true
-    iron-golem: true

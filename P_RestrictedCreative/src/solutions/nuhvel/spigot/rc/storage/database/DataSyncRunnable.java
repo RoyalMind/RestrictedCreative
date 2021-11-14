@@ -7,6 +7,7 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
+import solutions.nuhvel.spigot.rc.storage.config.config.database.DatabaseType;
 import solutions.nuhvel.spigot.rc.storage.handlers.BlockHandler;
 import solutions.nuhvel.spigot.rc.utils.Utils;
 
@@ -16,10 +17,10 @@ public class DataSyncRunnable implements Runnable {
 	private final Set<BlockModel> toRemove;
 	private final boolean onDisable;
 
-	public DataSyncRunnable(RestrictedCreative plugin, Set<BlockModel> fAdd, Set<BlockModel> fDel, boolean onDisable) {
+	public DataSyncRunnable(RestrictedCreative plugin, Set<BlockModel> toAdd, Set<BlockModel> toRemove, boolean onDisable) {
 		this.plugin = plugin;
-		this.toAdd = fAdd;
-		this.toRemove = fDel;
+		this.toAdd = toAdd;
+		this.toRemove = toRemove;
 		this.onDisable = onDisable;
 	}
 
@@ -33,7 +34,7 @@ public class DataSyncRunnable implements Runnable {
 			return;
 
 		long start = System.currentTimeMillis();
-		String or = BlockHandler.isUsingSQLite() ? "OR " : "";
+		String or = plugin.config.database.type == DatabaseType.SQLITE ? "OR " : "";
 
 		plugin.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.save");
 

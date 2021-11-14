@@ -5,6 +5,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
+import solutions.nuhvel.spigot.rc.storage.database.BlockRepository;
 import solutions.nuhvel.spigot.rc.storage.handlers.BlockHandler;
 import solutions.nuhvel.spigot.rc.utils.Utils;
 
@@ -18,10 +19,6 @@ public class ChunkListener implements Listener {
 		if (e.isNewChunk())
 			return;
 
-		if (RestrictedCreative.EXTRADEBUG)
-			System.out.println("onChunkLoad: " + Utils.getChunkString(e.getChunk()));
-
-		// BlockHandler.loadChunkFromDatabase(e.getChunk());
-		BlockHandler.loadBlocks(e.getChunk());
+		BlockRepository.loadChunkFromDatabase(e.getChunk());
 	}
 }

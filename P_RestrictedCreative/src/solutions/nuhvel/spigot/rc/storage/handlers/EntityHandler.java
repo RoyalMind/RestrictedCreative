@@ -18,23 +18,9 @@ import solutions.nuhvel.spigot.rc.utils.Utils;
 public class EntityHandler {
 	private static final Set<String> trackedLocs = new HashSet<>();
 
-	public static boolean isTracked(Entity e) {
-		if (e == null)
-			return false;
-
-		if (RestrictedCreative.DEBUG)
-			System.out.println("isTracked: " + e.getType() + " "
-					+ Arrays.toString(e.getScoreboardTags().toArray()));
-
-		return e.getScoreboardTags().contains("GMC");
-	}
-
 	public static void setAsTracked(Entity e) {
 		if (e == null)
 			return;
-
-		if (RestrictedCreative.DEBUG)
-			System.out.println("setAsTracked: " + e.getType());
 
 		e.addScoreboardTag("GMC");
 	}
@@ -101,9 +87,6 @@ public class EntityHandler {
 	}
 
 	public static void addToTrackedLocs(Location loc) {
-		if (RestrictedCreative.DEBUG)
-			System.out.println("addToTrackedLocs: " + Utils.getLocString(loc));
-
 		trackedLocs.add(Utils.getLocString(loc));
 	}
 
