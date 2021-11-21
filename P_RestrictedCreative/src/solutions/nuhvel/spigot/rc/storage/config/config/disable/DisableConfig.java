@@ -14,4 +14,6 @@ public final class DisableConfig {
     public List<Material> placing = Arrays.asList(Material.BEDROCK, Material.END_PORTAL_FRAME, Material.TNT, Material.SCAFFOLDING);
     @ElementType(Material.class)
     public List<Material> breaking = Arrays.asList(Material.BEDROCK, Material.END_PORTAL_FRAME);
+
+    public DisableInteracting interacting = new DisableInteracting();
 }

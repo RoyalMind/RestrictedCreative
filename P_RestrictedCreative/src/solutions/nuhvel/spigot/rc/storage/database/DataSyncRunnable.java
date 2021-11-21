@@ -1,109 +1,129 @@
 package solutions.nuhvel.spigot.rc.storage.database;
 
+import org.bukkit.Bukkit;
+import solutions.nuhvel.spigot.rc.RestrictedCreative;
+import solutions.nuhvel.spigot.rc.storage.config.config.database.DatabaseType;
+import solutions.nuhvel.spigot.rc.utils.MessagingUtils;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Set;
 
-import org.bukkit.Bukkit;
-
-import solutions.nuhvel.spigot.rc.RestrictedCreative;
-import solutions.nuhvel.spigot.rc.storage.config.config.database.DatabaseType;
-import solutions.nuhvel.spigot.rc.storage.handlers.BlockHandler;
-import solutions.nuhvel.spigot.rc.utils.Utils;
-
 public class DataSyncRunnable implements Runnable {
-	private final RestrictedCreative plugin;
-	private final Set<BlockModel> toAdd;
-	private final Set<BlockModel> toRemove;
-	private final boolean onDisable;
+    private final RestrictedCreative plugin;
+    private final Set<BlockModel> toAdd;
+    private final Set<BlockModel> toRemove;
+    private final boolean onDisable;
 
-	public DataSyncRunnable(RestrictedCreative plugin, Set<BlockModel> toAdd, Set<BlockModel> toRemove, boolean onDisable) {
-		this.plugin = plugin;
-		this.toAdd = toAdd;
-		this.toRemove = toRemove;
-		this.onDisable = onDisable;
-	}
+    public DataSyncRunnable(RestrictedCreative plugin, Set<BlockModel> toAdd, Set<BlockModel> toRemove,
+            boolean onDisable) {
+        this.plugin = plugin;
+        this.toAdd = toAdd;
+        this.toRemove = toRemove;
+        this.onDisable = onDisable;
+    }
 
-	@Override
-	public void run() {
-		int addedCount = toAdd.size();
-		int removedCount = toRemove.size();
+    @Override
+    public void run() {
+        long start = System.currentTimeMillis();
 
-		// If no changes should be made
-		if (addedCount + removedCount == 0)
-			return;
+        saveData(toAdd, toRemove);
 
-		long start = System.currentTimeMillis();
-		String or = plugin.config.database.type == DatabaseType.SQLITE ? "OR " : "";
+        String took = String.valueOf(System.currentTimeMillis() - start);
 
-		plugin.getUtils().sendMessage(Bukkit.getConsoleSender(), true, "database.save");
+        if (onDisable) {
+            plugin.blockRepository.addToDatabase.clear();
+            plugin.blockRepository.removeFromDatabase.clear();
 
-		plugin.getDB().setAutoCommit(false);
+            MessagingUtils.sendMessage(Bukkit.getConsoleSender(), plugin.messagingUtils
+                    .getFormattedMessage(true, plugin.messages.database.done)
+                    .replaceAll("%mills%", took));
+        } else {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                plugin.blockRepository.addToDatabase.removeAll(toAdd);
+                plugin.blockRepository.removeFromDatabase.removeAll(toRemove);
 
-		if (addedCount > 0)
-			syncData(toAdd, "INSERT " + or + "IGNORE INTO " + plugin.getDB().getBlocksTable()
-					+ " (block) VALUES (?)", "database.added");
+                MessagingUtils.sendMessage(Bukkit.getConsoleSender(), plugin.messagingUtils
+                        .getFormattedMessage(true, plugin.messages.database.done)
+                        .replaceAll("%mills%", took));
+            });
+        }
+    }
 
-		if (removedCount > 0)
-			syncData(toRemove, "DELETE FROM " + plugin.getDB().getBlocksTable() + " WHERE block = ?",
-					"database.removed");
+    private void saveData(Set<BlockModel> toAdd, Set<BlockModel> toRemove) {
+        int addedCount = toAdd.size();
+        int removedCount = toRemove.size();
 
-		plugin.getDB().setAutoCommit(true);
+        // If no changes should be made
+        if (addedCount + removedCount == 0)
+            return;
 
-		if (onDisable) {
-			BlockHandler.addToDatabase.clear();
-			BlockHandler.removeFromDatabase.clear();
+        plugin.messagingUtils.sendMessage(Bukkit.getConsoleSender(), true, plugin.messages.database.saving);
 
-			String took = String.valueOf(System.currentTimeMillis() - start);
+        plugin.database.setAutoCommit(false);
 
-			Utils.sendMessage(Bukkit.getConsoleSender(),
-					plugin.getUtils().getFormattedMessage(true, "database.done").replaceAll("%mills%", took));
-		} else {
-			Bukkit.getScheduler().runTask(plugin, new Runnable() {
-				@Override
-				public void run() {
-					BlockHandler.addToDatabase.removeAll(toAdd);
-					BlockHandler.removeFromDatabase.removeAll(toRemove);
+        if (addedCount > 0)
+            syncData(toAdd, getAddStatement(), plugin.messages.database.added, false);
+        if (removedCount > 0)
+            syncData(toRemove, getRemoveStatement(), plugin.messages.database.removed, true);
 
-					String took = String.valueOf(System.currentTimeMillis() - start);
+        plugin.database.setAutoCommit(true);
+    }
 
-					Utils.sendMessage(Bukkit.getConsoleSender(), plugin.getUtils()
-							.getFormattedMessage(true, "database.done").replaceAll("%mills%", took));
-				}
-			});
-		}
-	}
+    private String getAddStatement() {
+        String or = plugin.config.database.type == DatabaseType.SQLITE ? "OR " : "";
+        return "INSERT " + or + "IGNORE INTO " + plugin.database.getBlocksTable() +
+                " (x, y, z, world, chunk_x, chunk_z, owner, created) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    }
 
-	private void syncData(Set<BlockModel> blocks, String statement, String message) {
-		PreparedStatement ps = plugin.getDB().getStatement(statement);
-		int count = 0;
+    private String getRemoveStatement() {
+        return "DELETE FROM " + plugin.database.getBlocksTable() + " WHERE x = ? AND y = ? AND z = ? AND world = ?";
+    }
 
-		try {
-			for (BlockModel block : blocks) {
-				ps.setString(1, block);
-				ps.addBatch();
-				count++;
+    private void syncData(Set<BlockModel> blocks, String statement, String message, boolean onlyBasicData) {
+        PreparedStatement ps = plugin.database.getStatement(statement);
+        int count = 0;
 
-				if (count % 4096 == 0) {
-					ps.executeBatch();
-					ps.clearBatch();
-				}
-			}
+        try {
+            for (BlockModel model : blocks) {
+                var location = model.block.getLocation();
+                if (location.getWorld() == null)
+                    continue;
 
-			ps.executeBatch();
-			ps.clearBatch();
-			plugin.getDB().commit();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				ps.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
+                ps.setInt(1, location.getBlockX());
+                ps.setInt(2, location.getBlockY());
+                ps.setInt(3, location.getBlockZ());
+                ps.setString(4, location.getWorld().getName());
+                if (!onlyBasicData) {
+                    ps.setInt(5, location.getChunk().getX());
+                    ps.setInt(6, location.getChunk().getZ());
+                    ps.setString(7, model.owner.getUniqueId().toString());
+                    ps.setLong(8, model.created.getTime() / 1000);
+                }
 
-		Utils.sendMessage(Bukkit.getConsoleSender(), plugin.getUtils().getFormattedMessage(true, message)
-				.replaceAll("%blocks%", String.valueOf(count)));
-	}
+                ps.addBatch();
+                count++;
+
+                if (count % 4096 == 0) {
+                    ps.executeBatch();
+                    ps.clearBatch();
+                }
+            }
+
+            ps.executeBatch();
+            ps.clearBatch();
+            plugin.database.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        MessagingUtils.sendMessage(Bukkit.getConsoleSender(),
+                plugin.messagingUtils.getFormattedMessage(true, message).replaceAll("%blocks%", String.valueOf(count)));
+    }
 }

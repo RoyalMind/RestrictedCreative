@@ -12,6 +12,8 @@ public final class TrackingBlocks {
     public boolean enabled = true;
     public boolean notify = false;
 
+    public int syncInterval = 6000;
+
     @ElementType(Material.class)
     public List<Material> excluded = new ArrayList<>();
 }

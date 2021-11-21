@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
-import solutions.nuhvel.spigot.rc.storage.handlers.BlockHandler;
+import solutions.nuhvel.spigot.rc.storage.handlers.TrackableHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public class CreatureBuildHelper {
         Block middle = head.getRelative(bodyDir);
         Block bottom = middle.getRelative(bodyDir);
 
-        return !BlockHandler.isTracked(middle) && !BlockHandler.isTracked(bottom);
+        return !TrackableHandler.isTracked(middle) && !TrackableHandler.isTracked(bottom);
     }
 
     private boolean couldIronGolemBeBuilt(Block head) {
@@ -73,8 +73,8 @@ public class CreatureBuildHelper {
         Block middle2 = head.getRelative(middleDir.getOppositeFace());
 
         boolean middleRow =
-                BlockHandler.isTracked(middle) || BlockHandler.isTracked(middle1) || BlockHandler.isTracked(middle2);
-        boolean headBottom = BlockHandler.isTracked(head) || BlockHandler.isTracked(bottom);
+                TrackableHandler.isTracked(middle) || TrackableHandler.isTracked(middle1) || TrackableHandler.isTracked(middle2);
+        boolean headBottom = TrackableHandler.isTracked(head) || TrackableHandler.isTracked(bottom);
 
         return !(headBottom || middleRow);
     }
@@ -108,9 +108,9 @@ public class CreatureBuildHelper {
         Block middle2 = head.getRelative(headDir.getOppositeFace());
 
         boolean headRow =
-                BlockHandler.isTracked(head) || BlockHandler.isTracked(head1) || BlockHandler.isTracked(head2);
-        boolean middleRow = BlockHandler.isTracked(middle1) || BlockHandler.isTracked(middle2);
-        boolean middleBottom = BlockHandler.isTracked(middle) || BlockHandler.isTracked(bottom);
+                TrackableHandler.isTracked(head) || TrackableHandler.isTracked(head1) || TrackableHandler.isTracked(head2);
+        boolean middleRow = TrackableHandler.isTracked(middle1) || TrackableHandler.isTracked(middle2);
+        boolean middleBottom = TrackableHandler.isTracked(middle) || TrackableHandler.isTracked(bottom);
 
         return !(middleBottom || headRow || middleRow);
     }

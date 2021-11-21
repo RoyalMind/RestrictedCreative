@@ -3,22 +3,25 @@ package solutions.nuhvel.spigot.rc.listeners;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
-
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
-import solutions.nuhvel.spigot.rc.storage.database.BlockRepository;
-import solutions.nuhvel.spigot.rc.storage.handlers.BlockHandler;
-import solutions.nuhvel.spigot.rc.utils.Utils;
+import solutions.nuhvel.spigot.rc.utils.helpers.PreconditionChecker;
 
 public class ChunkListener implements Listener {
-	/*
-	 * Called when a chunk is loaded
-	 */
-	@EventHandler
-	public void onChunkLoad(ChunkLoadEvent e) {
-		// New chunks can't contain creative blocks
-		if (e.isNewChunk())
-			return;
+    private final RestrictedCreative plugin;
 
-		BlockRepository.loadChunkFromDatabase(e.getChunk());
-	}
+    public ChunkListener(RestrictedCreative plugin) {
+        this.plugin = plugin;
+    }
+
+    /*
+     * Called when a chunk is loaded
+     */
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent e) {
+        // New chunks can't contain creative blocks
+        if (new PreconditionChecker(plugin).isWorldAllowed(e.getWorld().getName()).anyFailed() || e.isNewChunk())
+            return;
+
+        plugin.blockRepository.loadChunkFromDatabase(e.getChunk());
+    }
 }

@@ -6,9 +6,9 @@ import java.util.Set;
 import org.bukkit.entity.Player;
 
 public class CommandHandler {
-	private static Set<Player> addWithCommand = new HashSet<>();
-	private static Set<Player> removeWithCommand = new HashSet<>();
-	private static Set<Player> infoWithCommand = new HashSet<>();
+	private static final Set<Player> addWithCommand = new HashSet<>();
+	private static final Set<Player> removeWithCommand = new HashSet<>();
+	private static final Set<Player> infoWithCommand = new HashSet<>();
 
 	public static Set<Player> getAddWithCommand() {
 		return addWithCommand;

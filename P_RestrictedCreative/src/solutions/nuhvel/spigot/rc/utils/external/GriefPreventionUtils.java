@@ -9,21 +9,21 @@ import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class GriefPreventionUtils {
-	public static boolean canBuildHere(RestrictedCreative restrictedCreative, Player p, Block b, Material m) {
+	public static boolean canBuildHere(RestrictedCreative plugin, Player p, Block b, Material m) {
 		Claim claim = GriefPrevention.instance.dataStore.getClaimAt(b.getLocation(), false, null);
 
 		// Wilderness
 		if (claim == null)
 			return false;
 
-		if (!restrictedCreative.getSettings().isEnabled("limit.regions.owner-based.enabled"))
+		if (!plugin.config.limitations.regions.ownership.enabled)
 			return false;
 
 		// Owner check
 		if (claim.getOwnerName().equalsIgnoreCase(p.getName()))
 			return true;
 
-		if (!restrictedCreative.getSettings().isEnabled("limit.regions.owner-based.allow-members"))
+		if (!plugin.config.limitations.regions.ownership.allowMembers)
 			return false;
 
 		// Member check

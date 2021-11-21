@@ -6,6 +6,7 @@ import solutions.nuhvel.spigot.rc.storage.config.config.confiscate.ConfiscateIte
 @ConfigurationElement
 public final class MiscellaneousConfig {
     public ArmorColorConfig armor = new ArmorColorConfig();
-    public ConfiscateItems items = new ConfiscateItems();
-    public boolean invalidItems = true;
+    public ConfiscateItems confiscate = new ConfiscateItems();
+    public MiscPermissions permissions = new MiscPermissions();
+    public MiscGroups groups = new MiscGroups();
 }

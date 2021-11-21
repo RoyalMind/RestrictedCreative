@@ -11,18 +11,18 @@ import org.primesoft.blockshub.api.IWorld;
 import org.primesoft.blockshub.api.platform.BukkitBlockData;
 
 public class BlocksHubUtils {
-	public BlocksHubUtils(Block b, Player p, boolean update) {
-		IBlocksHubApi blockshub = ((IBlocksHubApiProvider) Bukkit.getServer().getPluginManager().getPlugin("BlocksHub"))
-				.getApi();
+    public BlocksHubUtils(Block b, Player p, boolean update) {
+        IBlocksHubApi blockshub =
+                ((IBlocksHubApiProvider) Bukkit.getServer().getPluginManager().getPlugin("BlocksHub")).getApi();
 
-		IPlayer player = p == null ? blockshub.getPlayer("RestrictedCreative") : blockshub.getPlayer(p.getUniqueId());
-		IWorld world = blockshub.getWorld(b.getWorld().getUID());
-		BukkitBlockData oldBlock = new BukkitBlockData(b.getBlockData());
+        IPlayer player = p == null ? blockshub.getPlayer("RestrictedCreative") : blockshub.getPlayer(p.getUniqueId());
+        IWorld world = blockshub.getWorld(b.getWorld().getUID());
+        BukkitBlockData oldBlock = new BukkitBlockData(b.getBlockData());
 
-		b.setType(Material.AIR, update);
+        b.setType(Material.AIR, update);
 
-		BukkitBlockData newBlock = new BukkitBlockData(b.getBlockData());
+        BukkitBlockData newBlock = new BukkitBlockData(b.getBlockData());
 
-		blockshub.logBlock(player, world, b.getX(), b.getY(), b.getZ(), oldBlock, newBlock);
-	}
+        blockshub.logBlock(player, world, b.getX(), b.getY(), b.getZ(), oldBlock, newBlock);
+    }
 }

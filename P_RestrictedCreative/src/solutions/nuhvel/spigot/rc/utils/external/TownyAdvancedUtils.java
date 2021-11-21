@@ -1,38 +1,35 @@
 package solutions.nuhvel.spigot.rc.utils.external;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.TownyUniverse;
+import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-
-import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
-import com.palmergames.bukkit.towny.object.Resident;
-import com.palmergames.bukkit.towny.object.Town;
-
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 
 public class TownyAdvancedUtils {
-	public static boolean canBuildHere(RestrictedCreative restrictedCreative, Player p, Block b, Material m) {
-		if (!restrictedCreative.getSettings().isEnabled("limit.regions.owner-based.enabled"))
-			return false;
+    // Only allow players to build in their own Town
+    public static boolean canBuildHere(RestrictedCreative plugin, Player p, Block b) {
+        if (!plugin.config.limitations.regions.ownership.enabled)
+            return false;
 
-		// Gets the player or block location
-		Location loc = (b != null) ? b.getLocation() : p.getLocation();
+        var loc = b != null ? b.getLocation() : p.getLocation();
 
-		// Owner check
-		try {
-			TownyAPI towny = TownyAPI.getInstance();
+        try {
+            var townBlock = TownyAPI.getInstance().getTownBlock(loc);
+            if (townBlock == null)
+                return false;
 
-			Resident resident = towny.getDataSource().getResident(p.getName());
-			Town town = towny.getTownBlock(loc).getTown();
+            var resident = TownyUniverse.getInstance().getResident(p.getUniqueId());
+            if (resident == null)
+                return false;
 
-			if (resident.getTown().equals(town))
-				return true;
-		} catch (NotRegisteredException | NullPointerException e) {
-			return false;
-		}
+            if (resident.getTown().equals(townBlock.getTown()))
+                return true;
+        } catch (NotRegisteredException | NullPointerException e) {
+            return false;
+        }
 
-		return false;
-	}
+        return false;
+    }
 }

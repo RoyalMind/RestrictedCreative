@@ -7,17 +7,19 @@ import solutions.nuhvel.spigot.rc.storage.config.config.database.DatabaseType;
 import java.sql.*;
 
 public class Database {
+    public final DatabaseType type;
+
     private final RestrictedCreative plugin;
 
     private final String host;
     private final String name;
     private final String user;
     private final String pass;
-    private final DatabaseType type;
     private final String table_blocks;
     private final String table_inventories;
     private final int port;
     private final boolean ssl;
+
     private Connection connection;
 
     public Database(RestrictedCreative plugin, DatabaseType type) {
@@ -80,58 +82,6 @@ public class Database {
         }
     }
 
-    private void openConnection() {
-        switch (type) {
-            case MYSQL -> openMySQLConnection();
-            case SQLITE -> openSQLiteConnection();
-            default -> log("Incompatible database type provided: '" + type + "'. Compatible are: MySQL and SQLite.");
-        }
-    }
-
-    private void openMySQLConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                return;
-            }
-
-            synchronized (this) {
-                if (connection != null && !connection.isClosed()) {
-                    return;
-                }
-                Class.forName("com.mysql.jdbc.Driver");
-                connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.name
-                        + "?autoReconnect=true&useSSL=" + this.ssl, this.user, this.pass);
-            }
-        } catch (SQLException e) {
-            log("Could not connect to database, check config:");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            log("com.mysql.jdbc.Driver is not installed.");
-        }
-    }
-
-    private void openSQLiteConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                return;
-            }
-
-            synchronized (this) {
-                if (connection != null && !connection.isClosed()) {
-                    return;
-                }
-                Class.forName("org.sqlite.JDBC");
-                connection = DriverManager
-                        .getConnection("jdbc:sqlite:" + plugin.getDataFolder().getPath() + "/" + this.name + ".db");
-            }
-        } catch (SQLException e) {
-            log("Could not connect to database:");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            log("org.sqlite.JDBC is not installed.");
-        }
-    }
-
     public void closeConnection() {
         try {
             connection.close();
@@ -186,6 +136,59 @@ public class Database {
         } catch (SQLException e) {
             log("Could not commit:");
             e.printStackTrace();
+        }
+    }
+
+    private void openConnection() {
+        switch (type) {
+            case MYSQL -> openMySQLConnection();
+            case SQLITE -> openSQLiteConnection();
+            default -> log("Incompatible database type provided: '" + type + "'. Compatible are: MySQL and SQLite.");
+        }
+    }
+
+    private void openMySQLConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                return;
+            }
+
+            synchronized (this) {
+                if (connection != null && !connection.isClosed()) {
+                    return;
+                }
+                Class.forName("com.mysql.jdbc.Driver");
+                connection = DriverManager.getConnection(
+                        "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.name +
+                                "?autoReconnect=true&useSSL=" + this.ssl, this.user, this.pass);
+            }
+        } catch (SQLException e) {
+            log("Could not connect to database, check config:");
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            log("com.mysql.jdbc.Driver is not installed.");
+        }
+    }
+
+    private void openSQLiteConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                return;
+            }
+
+            synchronized (this) {
+                if (connection != null && !connection.isClosed()) {
+                    return;
+                }
+                Class.forName("org.sqlite.JDBC");
+                connection = DriverManager.getConnection(
+                        "jdbc:sqlite:" + plugin.getDataFolder().getPath() + "/" + this.name + ".db");
+            }
+        } catch (SQLException e) {
+            log("Could not connect to database:");
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            log("org.sqlite.JDBC is not installed.");
         }
     }
 

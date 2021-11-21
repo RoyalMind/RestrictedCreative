@@ -1,30 +1,33 @@
 package solutions.nuhvel.spigot.rc;
 
 import de.exlll.configlib.configs.yaml.BukkitYamlConfiguration;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import solutions.nuhvel.spigot.rc.storage.config.config.PluginConfig;
-import solutions.nuhvel.spigot.rc.storage.config.messages.PluginMessages;
+import solutions.nuhvel.spigot.rc.storage.config.config.RcConfig;
+import solutions.nuhvel.spigot.rc.storage.config.messages.RcMessages;
 import solutions.nuhvel.spigot.rc.storage.database.BlockRepository;
 import solutions.nuhvel.spigot.rc.storage.database.Database;
+import solutions.nuhvel.spigot.rc.storage.handlers.InventoryHandler;
+import solutions.nuhvel.spigot.rc.storage.handlers.TrackableHandler;
+import solutions.nuhvel.spigot.rc.utils.MessagingUtils;
+import solutions.nuhvel.spigot.rc.utils.minecraft.ServerUtils;
 import solutions.nuhvel.spigot.rc.utils.Utils;
-import solutions.nuhvel.spigot.rc.utils.helpers.CommandHandler;
-import solutions.nuhvel.spigot.rc.utils.helpers.ListenerHandler;
+import solutions.nuhvel.spigot.rc.utils.handlers.CommandHandler;
+import solutions.nuhvel.spigot.rc.utils.handlers.ListenerHandler;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.List;
 
 public class RestrictedCreative extends JavaPlugin {
-    public PluginConfig config;
-    public PluginMessages messages;
+    public RcConfig config;
+    public RcMessages messages;
+    public Database database;
+    public TrackableHandler trackableHandler;
     public ListenerHandler listenerHandler;
+    public MessagingUtils messagingUtils;
+    public BlockRepository blockRepository;
     private CommandHandler commandHandler;
     private Utils utils;
-    private Database database;
-    private BlockRepository blockRepository;
 
     // TODO:
 	/*You just need to add all the new blocks and it works 99%
@@ -59,63 +62,59 @@ public class RestrictedCreative extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        setUtils(new Utils(this));
+        utils = new Utils(this);
+        messagingUtils = new MessagingUtils(this);
 
         loadConfig();
         loadMessages();
 
+        database = new Database(this, config.database.type);
+        blockRepository = new BlockRepository(this, database);
+
+        trackableHandler = new TrackableHandler(this, blockRepository);
         commandHandler = new CommandHandler(this);
         listenerHandler = new ListenerHandler(this);
 
-        database = new Database(this, config.database.type);
-        blockRepository = new BlockRepository(this, database);
+        InventoryHandler.setForceGamemodeEnabled(ServerUtils.isForceGamemodeEnabled());
     }
 
-    public void reloadConfigs() {
+    public void reload() {
         loadConfig();
         loadMessages();
 
         // Reload command messages, aliases etc as well
         commandHandler = new CommandHandler(this);
-    }
-
-    public static Plugin getInstance() {
-        return Bukkit.getPluginManager().getPlugin("RestrictedCreative");
+        // Reload listeners, because they can be toggled by the config
+        listenerHandler.registerListeners();
     }
 
     public Utils getUtils() {
         return utils;
     }
 
-    public void setUtils(Utils utils) {
-        this.utils = utils;
-    }
-
     private void loadConfig() {
-        Path configPath = new File(getDataFolder(), "config.yml").toPath();
+        var configPath = new File(getDataFolder(), "config.yml").toPath();
 
-        BukkitYamlConfiguration.BukkitYamlProperties properties = BukkitYamlConfiguration.BukkitYamlProperties.builder()
-                                                                                                              .setPrependedComments(
-                                                                                                                      Arrays.asList(
-                                                                                                                              "Check out default config: link"
-                                                                                                                              // TODO
-                                                                                                                      ))
-                                                                                                              .build();
-        config = new PluginConfig(configPath, properties);
+        var properties = BukkitYamlConfiguration.BukkitYamlProperties
+                .builder()
+                .setPrependedComments(List.of("Check out default config: link"
+                        // TODO
+                ))
+                .build();
+        config = new RcConfig(configPath, properties);
         config.loadAndSave();
     }
 
     private void loadMessages() {
-        Path configPath = new File(getDataFolder(), "messages.yml").toPath();
+        var configPath = new File(getDataFolder(), "messages.yml").toPath();
 
-        BukkitYamlConfiguration.BukkitYamlProperties properties = BukkitYamlConfiguration.BukkitYamlProperties.builder()
-                                                                                                              .setPrependedComments(
-                                                                                                                      Arrays.asList(
-                                                                                                                              "Check out default messages: link"
-                                                                                                                              // TODO
-                                                                                                                      ))
-                                                                                                              .build();
-        messages = new PluginMessages(configPath, properties);
+        var properties = BukkitYamlConfiguration.BukkitYamlProperties
+                .builder()
+                .setPrependedComments(List.of("Check out default messages: link"
+                        // TODO
+                ))
+                .build();
+        messages = new RcMessages(configPath, properties);
         messages.loadAndSave();
     }
 }
