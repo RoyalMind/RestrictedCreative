@@ -4,6 +4,6 @@ import de.exlll.configlib.annotation.ConfigurationElement;
 
 @ConfigurationElement
 public final class SystemConfig {
-    public SystemWorlds worlds = new SystemWorlds();
     public boolean delayLogin = true;
+    public SystemWorlds worlds = new SystemWorlds();
 }

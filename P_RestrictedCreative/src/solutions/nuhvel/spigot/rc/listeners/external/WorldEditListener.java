@@ -49,10 +49,10 @@ public class WorldEditListener {
 
         plugin.getUtils().debug("onEditSession: " + player.getGameMode());
 
-        e.setExtent(createNewExtent(e.getExtent(), world));
+        e.setExtent(createNewExtent(e.getExtent(), world, player));
     }
 
-    private Extent createNewExtent(Extent currentExtent, String worldName) {
+    private Extent createNewExtent(Extent currentExtent, String worldName, Player player) {
         return new AbstractDelegateExtent(currentExtent) {
             @SuppressWarnings({"unchecked"})
             @Override
@@ -68,7 +68,7 @@ public class WorldEditListener {
                 if (blockIsRemoved(newBlock))
                     plugin.trackableHandler.removeTracking(block);
                 else
-                    plugin.trackableHandler.setAsTracked(block);
+                    plugin.trackableHandler.setAsTracked(block, player);
 
                 return getExtent().setBlock(position, newBlock);
             }

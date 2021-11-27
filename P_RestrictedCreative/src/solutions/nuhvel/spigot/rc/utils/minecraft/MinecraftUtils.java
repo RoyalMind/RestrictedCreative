@@ -15,11 +15,11 @@ public class MinecraftUtils {
         return w.getName() + ";" + loc.getBlockX() + ";" + loc.getBlockZ();
     }
 
-    public static boolean isVersionOlderThanInclusive(MinecraftVersion version) {
+    public static boolean isVersionAtOrOlderThan(MinecraftVersion version) {
         return getCurrentVersion().compareTo(version) <= 0;
     }
 
-    public static boolean isVersionNewerThanInclusive(MinecraftVersion version) {
+    public static boolean isVersionAtOrNewerThan(MinecraftVersion version) {
         return getCurrentVersion().compareTo(version) >= 0;
     }
 

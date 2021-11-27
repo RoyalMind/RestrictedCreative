@@ -1,4 +1,4 @@
-package solutions.nuhvel.spigot.rc.utils;
+package solutions.nuhvel.spigot.rc.utils.minecraft;
 
 import org.bukkit.Material;
 import org.bukkit.Tag;

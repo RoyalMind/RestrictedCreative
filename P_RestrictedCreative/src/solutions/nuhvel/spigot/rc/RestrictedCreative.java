@@ -1,6 +1,7 @@
 package solutions.nuhvel.spigot.rc;
 
 import de.exlll.configlib.configs.yaml.BukkitYamlConfiguration;
+import de.exlll.configlib.format.FieldNameFormatters;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import solutions.nuhvel.spigot.rc.storage.config.config.RcConfig;
@@ -10,6 +11,7 @@ import solutions.nuhvel.spigot.rc.storage.database.Database;
 import solutions.nuhvel.spigot.rc.storage.handlers.InventoryHandler;
 import solutions.nuhvel.spigot.rc.storage.handlers.TrackableHandler;
 import solutions.nuhvel.spigot.rc.utils.MessagingUtils;
+import solutions.nuhvel.spigot.rc.utils.helpers.InventoryHelper;
 import solutions.nuhvel.spigot.rc.utils.minecraft.ServerUtils;
 import solutions.nuhvel.spigot.rc.utils.Utils;
 import solutions.nuhvel.spigot.rc.utils.handlers.CommandHandler;
@@ -51,8 +53,9 @@ public class RestrictedCreative extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        var inventoryHelper = new InventoryHelper(this);
         for (Player p : getServer().getOnlinePlayers()) {
-            getUtils().saveInventory(p);
+            inventoryHelper.saveInventory(p);
         }
 
         blockRepository.saveAndClose();
@@ -97,6 +100,7 @@ public class RestrictedCreative extends JavaPlugin {
 
         var properties = BukkitYamlConfiguration.BukkitYamlProperties
                 .builder()
+                .setFormatter(FieldNameFormatters.LOWER_UNDERSCORE)
                 .setPrependedComments(List.of("Check out default config: link"
                         // TODO
                 ))
@@ -110,6 +114,7 @@ public class RestrictedCreative extends JavaPlugin {
 
         var properties = BukkitYamlConfiguration.BukkitYamlProperties
                 .builder()
+                .setFormatter(FieldNameFormatters.LOWER_UNDERSCORE)
                 .setPrependedComments(List.of("Check out default messages: link"
                         // TODO
                 ))

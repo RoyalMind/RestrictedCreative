@@ -11,7 +11,6 @@ import org.bukkit.block.data.type.Door.Hinge;
 import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.*;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,15 +22,13 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.Metadatable;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 import solutions.nuhvel.spigot.rc.storage.handlers.CommandHandler;
 import solutions.nuhvel.spigot.rc.storage.handlers.TrackableHandler;
-import solutions.nuhvel.spigot.rc.utils.MaterialHandler;
-import solutions.nuhvel.spigot.rc.utils.MessagingUtils;
 import solutions.nuhvel.spigot.rc.utils.helpers.ArmorStandHelper;
 import solutions.nuhvel.spigot.rc.utils.helpers.ConfiscationHelper;
 import solutions.nuhvel.spigot.rc.utils.helpers.PreconditionChecker;
+import solutions.nuhvel.spigot.rc.utils.minecraft.MaterialHandler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -164,7 +161,7 @@ public class PlayerInteractListener implements Listener {
         if (b == null || b.getType() == Material.AIR)
             return;
 
-        checkCommands(e, p, b);
+        CommandHandler.checkCommands(plugin, e, p, b);
 
         // Creative placed cake shouldn't be edible
         if (new PreconditionChecker(plugin).isTracked(b).allSucceeded() && b.getType() == Material.CAKE) {
@@ -223,7 +220,7 @@ public class PlayerInteractListener implements Listener {
         Entity en = e.getRightClicked();
         EntityType et = en.getType();
 
-        checkCommands(e, p, en);
+        CommandHandler.checkCommands(plugin, e, p, en);
 
         // No need to track non-creative players
         if (p.getGameMode() != GameMode.CREATIVE)
@@ -346,44 +343,6 @@ public class PlayerInteractListener implements Listener {
             return;
 
         e.setCancelled(true);
-    }
-
-    private void checkCommands(Cancellable e, Player p, Metadatable blockOrEntity) {
-        /* Command /block */
-        if (CommandHandler.isInfoWithCommand(p)) {
-            var message = new PreconditionChecker(plugin).isTracked(blockOrEntity).allSucceeded()
-                    ? plugin.messages.block.info.yes : plugin.messages.block.info.no;
-            MessagingUtils.sendMessage(p, plugin.messagingUtils
-                    .getFormattedMessage(true, message)
-                    .replaceAll("%material%", getType(blockOrEntity)));
-
-            CommandHandler.removeInfoWithCommand(p);
-            e.setCancelled(true);
-        } else if (CommandHandler.isAddWithCommand(p)) {
-            plugin.trackableHandler.setAsTracked(blockOrEntity);
-            CommandHandler.removeAddWithCommand(p);
-            e.setCancelled(true);
-
-            MessagingUtils.sendMessage(p, plugin.messagingUtils
-                    .getFormattedMessage(true, plugin.messages.block.add.done)
-                    .replaceAll("%material%", getType(blockOrEntity)));
-        } else if (CommandHandler.isRemoveWithCommand(p)) {
-            plugin.trackableHandler.removeTracking(blockOrEntity);
-            CommandHandler.removeRemoveWithCommand(p);
-            e.setCancelled(true);
-
-            MessagingUtils.sendMessage(p, plugin.messagingUtils
-                    .getFormattedMessage(true, plugin.messages.block.remove.done)
-                    .replaceAll("%material%", getType(blockOrEntity)));
-        }
-    }
-
-    private String getType(Metadatable blockOrEntity) {
-        if (blockOrEntity instanceof Block block)
-            return block.getType().toString();
-        else if (blockOrEntity instanceof Entity entity)
-            return entity.getType().toString();
-        return "?";
     }
 
     private void checkForAttachments(Player p, Block b) {

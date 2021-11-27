@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 import solutions.nuhvel.spigot.rc.storage.config.config.miscellaneous.ArmorMaterial;
-import solutions.nuhvel.spigot.rc.utils.MaterialHandler;
+import solutions.nuhvel.spigot.rc.utils.minecraft.MaterialHandler;
 
 import java.util.List;
 
@@ -22,8 +22,7 @@ public class ArmorHelper {
         List<ItemStack> armorList = MaterialHandler.getArmorList(type);
 
         if (type == ArmorMaterial.LEATHER) {
-            var rgb = java.awt.Color.decode(plugin.config.miscellaneous.armor.color).getRGB();
-            var color = Color.fromRGB(rgb);
+            var color = getColorFromHex(plugin.config.miscellaneous.armor.color);
 
             for (ItemStack is : armorList) {
                 LeatherArmorMeta lam = (LeatherArmorMeta) is.getItemMeta();
@@ -40,5 +39,12 @@ public class ArmorHelper {
 
         p.getInventory().setArmorContents(list);
         p.updateInventory();
+    }
+
+    public static Color getColorFromHex(String colorStr) {
+        return Color.fromRGB(
+                Integer.valueOf(colorStr.substring(1, 3), 16),
+                Integer.valueOf(colorStr.substring(3, 5), 16),
+                Integer.valueOf(colorStr.substring(5, 7), 16));
     }
 }

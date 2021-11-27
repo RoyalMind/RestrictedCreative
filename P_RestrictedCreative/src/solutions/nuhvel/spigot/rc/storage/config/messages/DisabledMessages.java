@@ -4,7 +4,7 @@ import de.exlll.configlib.annotation.ConfigurationElement;
 
 @ConfigurationElement
 public class DisabledMessages {
-    public String general = "&cYou can''t do that in creative mode.";
+    public String general = "&cYou can't do that in creative mode.";
     public String creature = "&cYou can't do that, because a part of the creature was placed in creative mode.";
     public String height = "&cYou can't do that outside the allowed height limits.";
     public String container = "&cYou can't open a container while in creative mode.";

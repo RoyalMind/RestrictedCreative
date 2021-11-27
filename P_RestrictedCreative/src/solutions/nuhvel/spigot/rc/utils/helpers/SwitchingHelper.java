@@ -14,16 +14,16 @@ public class SwitchingHelper {
     public void setCreative(Player p, boolean toCreative) {
         // Permissions
         if (plugin.config.miscellaneous.permissions.enabled && !p.hasPermission("rc.bypass.creative.permissions"))
-            setPermissions(p, toCreative);
+            new PermissionsHelper(plugin).setPermissions(p, toCreative);
 
         // Groups
         if (ServerUtils.isInstalled("Vault") && plugin.config.miscellaneous.groups.enabled &&
                 !p.hasPermission("rc.bypass.creative.groups"))
-            setGroups(p, toCreative);
+            new PermissionsHelper(plugin).setGroups(p, toCreative);
 
         // Inventory
         if (plugin.config.tracking.inventories.enabled && !p.hasPermission("rc.bypass.tracking.inventory"))
-            separateInventory(p, toCreative);
+            new InventoryHelper(plugin).separateInventory(p, toCreative);
 
         // Armor
         if (toCreative && plugin.config.miscellaneous.armor.enabled && !p.hasPermission("rc.bypass.creative.armor"))

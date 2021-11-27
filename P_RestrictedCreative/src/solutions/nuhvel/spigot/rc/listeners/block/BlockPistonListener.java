@@ -16,7 +16,7 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 import solutions.nuhvel.spigot.rc.storage.handlers.TrackableHandler;
-import solutions.nuhvel.spigot.rc.utils.MaterialHandler;
+import solutions.nuhvel.spigot.rc.utils.minecraft.MaterialHandler;
 import solutions.nuhvel.spigot.rc.utils.helpers.PreconditionChecker;
 
 import java.util.ArrayList;
@@ -116,14 +116,10 @@ public class BlockPistonListener implements Listener {
             newBlocks.add(b.getRelative(direction));
         }
 
-        // Remove old blocks first
-        for (Block b : oldBlocks) {
+        for (Block b : oldBlocks)
             plugin.trackableHandler.removeTracking(b);
-        }
-        // Add new blocks afterwards
-        for (Block b : newBlocks) {
-            plugin.trackableHandler.setAsTracked(b);
-        }
+        for (Block b : newBlocks)
+            plugin.trackableHandler.setAsTracked(b, null);
     }
 
     private void breakDoor(Door door, Block b) {

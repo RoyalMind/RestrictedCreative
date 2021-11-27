@@ -5,5 +5,6 @@ import de.exlll.configlib.annotation.ConfigurationElement;
 @ConfigurationElement
 public final class TrackingInventories {
     public boolean enabled = true;
+    public boolean saving = true;
     public InventoriesPurge purge = new InventoriesPurge();
 }

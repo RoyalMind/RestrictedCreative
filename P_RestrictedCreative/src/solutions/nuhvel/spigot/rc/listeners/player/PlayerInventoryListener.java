@@ -55,7 +55,7 @@ public class PlayerInventoryListener implements Listener {
         }
 
         // Middle-click check
-        if (plugin.config.confiscate.middleClick.enabled && !p.hasPermission("rc.bypass.confiscate.middle-click")) {
+        if (plugin.config.limitations.confiscate.middleClick.enabled && !p.hasPermission("rc.bypass.confiscate.middle-click")) {
             Material m = is.getType();
 
             // If it's a block (not an item) and it's not excluded
@@ -122,6 +122,6 @@ public class PlayerInventoryListener implements Listener {
     }
 
     private boolean isExcludedFromConfiscating(Material m) {
-        return plugin.config.confiscate.middleClick.excluded.contains(m) || m == Material.AIR;
+        return plugin.config.limitations.confiscate.middleClick.excluded.contains(m) || m == Material.AIR;
     }
 }

@@ -30,15 +30,23 @@ public class DataSyncRunnable implements Runnable {
         saveData(toAdd, toRemove);
 
         String took = String.valueOf(System.currentTimeMillis() - start);
+        int addedCount = toAdd.size();
+        int removedCount = toRemove.size();
 
         if (onDisable) {
             plugin.blockRepository.addToDatabase.clear();
             plugin.blockRepository.removeFromDatabase.clear();
 
+            if (addedCount + removedCount == 0)
+                return;
+
             MessagingUtils.sendMessage(Bukkit.getConsoleSender(), plugin.messagingUtils
                     .getFormattedMessage(true, plugin.messages.database.done)
                     .replaceAll("%mills%", took));
         } else {
+            if (addedCount + removedCount == 0)
+                return;
+
             Bukkit.getScheduler().runTask(plugin, () -> {
                 plugin.blockRepository.addToDatabase.removeAll(toAdd);
                 plugin.blockRepository.removeFromDatabase.removeAll(toRemove);
@@ -86,6 +94,7 @@ public class DataSyncRunnable implements Runnable {
 
         try {
             for (BlockModel model : blocks) {
+                var owner = model.owner != null ? model.owner.getUniqueId().toString() : "";
                 var location = model.block.getLocation();
                 if (location.getWorld() == null)
                     continue;
@@ -97,7 +106,7 @@ public class DataSyncRunnable implements Runnable {
                 if (!onlyBasicData) {
                     ps.setInt(5, location.getChunk().getX());
                     ps.setInt(6, location.getChunk().getZ());
-                    ps.setString(7, model.owner.getUniqueId().toString());
+                    ps.setString(7, owner);
                     ps.setLong(8, model.created.getTime() / 1000);
                 }
 

@@ -43,7 +43,7 @@ public class GameModeCommand implements CommandExecutor {
 
                 player.setGameMode(this.gameMode);
                 plugin.messagingUtils.sendMessage(player, true,
-                        plugin.messages.commands.getByName(getName()).Switch.me);
+                        plugin.messages.commands.getCommandByName(getName()).gamemode.me);
                 return true;
             case 1:
                 if (sender.hasPermission("rc.commands." + getName() + ".others")) {
@@ -65,9 +65,9 @@ public class GameModeCommand implements CommandExecutor {
 
                     player.setGameMode(this.gameMode);
                     plugin.messagingUtils.sendMessage(player, true,
-                            plugin.messages.commands.getByName(getName()).Switch.me);
+                            plugin.messages.commands.getCommandByName(getName()).gamemode.me);
                     MessagingUtils.sendMessage(sender, plugin.messagingUtils
-                            .getFormattedMessage(true, plugin.messages.commands.getByName(getName()).Switch.other)
+                            .getFormattedMessage(true, plugin.messages.commands.getCommandByName(getName()).gamemode.other)
                             .replaceAll("%player%", player.getName()));
                     return true;
                 }

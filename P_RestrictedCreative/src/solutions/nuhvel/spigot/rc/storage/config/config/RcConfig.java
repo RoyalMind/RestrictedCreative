@@ -2,7 +2,6 @@ package solutions.nuhvel.spigot.rc.storage.config.config;
 
 import de.exlll.configlib.annotation.Comment;
 import de.exlll.configlib.configs.yaml.BukkitYamlConfiguration;
-import solutions.nuhvel.spigot.rc.storage.config.config.confiscate.ConfiscateConfig;
 import solutions.nuhvel.spigot.rc.storage.config.config.database.DatabaseConnection;
 import solutions.nuhvel.spigot.rc.storage.config.config.disable.DisableConfig;
 import solutions.nuhvel.spigot.rc.storage.config.config.limitations.LimitationsConfig;
@@ -24,11 +23,8 @@ public final class RcConfig extends BukkitYamlConfiguration {
             "Purge times are in days"})
     public TrackingConfig tracking = new TrackingConfig();
 
-    @Comment({"", "Creative limitations"})
+    @Comment({"", "Creative mode limitations"})
     public LimitationsConfig limitations = new LimitationsConfig();
-
-    @Comment({"", "Confiscate from creative hands"})
-    public ConfiscateConfig confiscate = new ConfiscateConfig();
 
     @Comment({"", "Disable interacting with items/blocks"})
     public DisableConfig disable = new DisableConfig();

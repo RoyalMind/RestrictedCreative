@@ -39,7 +39,7 @@ public class BlockModel {
             return null;
 
         blockModel.block = world.getBlockAt(x, y, z);
-        blockModel.owner = Bukkit.getPlayer(UUID.fromString(owner));
+        blockModel.owner = owner.isEmpty() ? null : Bukkit.getPlayer(UUID.fromString(owner));
         blockModel.created = Date.from(Instant.ofEpochSecond(created));
 
         return blockModel;

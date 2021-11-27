@@ -75,17 +75,17 @@ public class BlockChangeListener implements Listener {
             return;
         }
 
-        if (new PreconditionChecker(plugin).isTracked(b).isTracked(en).allSucceeded())
+        if (!TrackableHandler.isTracked(b) && !TrackableHandler.isTracked(en))
             return;
 
         // Lily pad broken by boat
-        if (m == Material.LILY_PAD && new PreconditionChecker(plugin).isTracked(b).anyFailed()) {
+        if (m == Material.LILY_PAD && TrackableHandler.isTracked(b)) {
             plugin.trackableHandler.breakBlock(b);
             return;
         }
 
         // Wither destroying blocks
-        if (en.getType() == EntityType.WITHER && new PreconditionChecker(plugin).isTracked(b).anyFailed()) {
+        if (en.getType() == EntityType.WITHER && TrackableHandler.isTracked(b)) {
             plugin.trackableHandler.breakBlock(b);
             return;
         }
@@ -102,7 +102,7 @@ public class BlockChangeListener implements Listener {
 
             // FALLING_BLOCK is transforming into regular block
             else {
-                plugin.trackableHandler.setAsTracked(b);
+                plugin.trackableHandler.setAsTracked(b, null);
             }
         }
     }

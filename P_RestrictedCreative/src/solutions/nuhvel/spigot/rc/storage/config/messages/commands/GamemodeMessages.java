@@ -3,15 +3,15 @@ package solutions.nuhvel.spigot.rc.storage.config.messages.commands;
 import de.exlll.configlib.annotation.ConfigurationElement;
 
 @ConfigurationElement
-public class SwitchMessages {
+public class GamemodeMessages {
     public String me;
     public String other;
 
-    public SwitchMessages() {
+    public GamemodeMessages() {
         this("", "");
     }
 
-    public SwitchMessages(String me, String other) {
+    public GamemodeMessages(String me, String other) {
         this.me = me;
         this.other = other;
     }

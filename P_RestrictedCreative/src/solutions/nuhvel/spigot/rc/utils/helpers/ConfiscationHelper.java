@@ -27,12 +27,12 @@ public class ConfiscationHelper {
         Material m = is.getType();
 
         // Invalid items
-        if (plugin.config.confiscate.invalidItems && !p.hasPermission("rc.bypass.confiscate.invalid-items")) {
+        if (plugin.config.limitations.confiscate.invalidItems && !p.hasPermission("rc.bypass.confiscate.invalid-items")) {
             if ((ServerUtils.isInstalled("ProtocolLib") && isInvalidNBT(is)) || isInvalid(is))
                 return true;
         }
 
-        if (!plugin.config.confiscate.items.enabled)
+        if (!plugin.config.limitations.confiscate.items.enabled)
             return false;
 
         if (!p.hasPermission("rc.bypass.confiscate.items.material") &&
@@ -51,12 +51,12 @@ public class ConfiscationHelper {
     }
 
     private boolean isInvalid(Material m) {
-        return plugin.config.confiscate.items.materials.contains(m);
+        return plugin.config.limitations.confiscate.items.materials.contains(m);
     }
 
     private boolean isInvalidNBT(ItemStack is) {
         // No need to control disabled features
-        if (!plugin.config.confiscate.invalidItems)
+        if (!plugin.config.limitations.confiscate.invalidItems)
             return false;
 
         if (is == null || is.getType() == Material.AIR)
@@ -78,7 +78,7 @@ public class ConfiscationHelper {
 
     private boolean isInvalid(ItemStack is) {
         // No need to control disabled features
-        if (!plugin.config.confiscate.invalidItems)
+        if (!plugin.config.limitations.confiscate.invalidItems)
             return false;
 
         if (is == null || is.getType() == Material.AIR)
@@ -103,7 +103,7 @@ public class ConfiscationHelper {
         if (is == null || is.getItemMeta() == null)
             return false;
 
-        for (String name : plugin.config.confiscate.items.names) {
+        for (String name : plugin.config.limitations.confiscate.items.names) {
             ItemMeta im = is.getItemMeta();
             if (im == null)
                 return false;
@@ -118,7 +118,7 @@ public class ConfiscationHelper {
 
     // Check if item lore is bad
     private boolean isBadLore(ItemStack is) {
-        for (String name : plugin.config.confiscate.items.lores) {
+        for (String name : plugin.config.limitations.confiscate.items.lores) {
             ItemMeta im = is.getItemMeta();
             if (im == null)
                 return false;

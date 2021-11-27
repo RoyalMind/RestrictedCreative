@@ -1,17 +1,14 @@
 package solutions.nuhvel.spigot.rc;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Player;
 import solutions.nuhvel.spigot.rc.storage.handlers.TrackableHandler;
 
 public class RestrictedCreativeAPI {
     public RestrictedCreativeAPI() {
-    }
-
-    // Returns the total count of creative placed blocks and entities
-    public static int getTotal() {
-        return Integer.parseInt(TrackableHandler.getTotalCount());
     }
 
     // Returns whether the block was placed in creative or not
@@ -30,8 +27,8 @@ public class RestrictedCreativeAPI {
     }
 
     // Adds given block to creative blocks list
-    public static void add(Block b) {
-        TrackableHandler.setAsTracked(b);
+    public static void add(Block b, Player p) {
+        ((RestrictedCreative) Bukkit.getPluginManager().getPlugin("RestrictedCreative")).trackableHandler.setAsTracked(b, p);
     }
 
     // Adds given block to creative blocks list
@@ -41,7 +38,7 @@ public class RestrictedCreativeAPI {
 
     // Adds given block to creative blocks list
     public static void remove(Block b) {
-        TrackableHandler.removeTracking(b);
+        ((RestrictedCreative) Bukkit.getPluginManager().getPlugin("RestrictedCreative")).trackableHandler.removeTracking(b);
     }
 
     // Adds given block to creative blocks list

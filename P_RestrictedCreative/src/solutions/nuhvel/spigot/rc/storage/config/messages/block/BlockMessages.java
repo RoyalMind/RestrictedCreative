@@ -9,11 +9,11 @@ public class BlockMessages {
     public String cancel = "&cCancelled!";
 
     public SubCommandMessages add = new SubCommandMessages(
-            "&aRight-click a block/entity you want to add to the database. Type '/rc block add' again to cancel.",
-            "&aAdded %material% to the database!");
+            "&aRight-click a block/entity you want to add to the database. Type \"/rc block add\" again to cancel.",
+            "&aAdded %type% to the database!");
     public SubCommandMessages remove = new SubCommandMessages(
-            "&aRight-click a block/entity you want to remove from the database. Type '/rc block remove' again to cancel.",
-            "&aRemoved %material% from the database!");
+            "&aRight-click a block/entity you want to remove from the database. Type \"/rc block remove\" again to cancel.",
+            "&aRemoved %type% from the database!");
 
     public InfoMessages info = new InfoMessages();
 }

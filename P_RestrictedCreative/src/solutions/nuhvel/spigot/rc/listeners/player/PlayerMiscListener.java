@@ -12,10 +12,11 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
-import solutions.nuhvel.spigot.rc.storage.config.messages.commands.Command;
+import solutions.nuhvel.spigot.rc.storage.config.messages.commands.ISimpleCommand;
 import solutions.nuhvel.spigot.rc.storage.database.BlockRepository;
 import solutions.nuhvel.spigot.rc.storage.handlers.CommandHandler;
 import solutions.nuhvel.spigot.rc.storage.handlers.InventoryHandler;
+import solutions.nuhvel.spigot.rc.utils.helpers.InventoryHelper;
 import solutions.nuhvel.spigot.rc.utils.helpers.PreconditionChecker;
 import solutions.nuhvel.spigot.rc.utils.helpers.SwitchingHelper;
 
@@ -80,8 +81,8 @@ public class PlayerMiscListener implements Listener {
         Player player = e.getPlayer();
         String fullCommand = e.getMessage();
 
-        for (Command command : plugin.messages.commands.asList()) {
-            for (String alias : command.aliases) {
+        for (ISimpleCommand command : plugin.messages.commands.asList()) {
+            for (String alias : command.getAliases()) {
                 // + space to not catch other commands
                 if (!fullCommand.startsWith("/" + alias + " ") && !fullCommand.equalsIgnoreCase("/" + alias))
                     continue;
@@ -94,7 +95,7 @@ public class PlayerMiscListener implements Listener {
                 argList.removeAll(Arrays.asList("", null));
                 arguments = argList.toArray(new String[0]);
 
-                PluginCommand pc = plugin.getCommand(command.name);
+                PluginCommand pc = plugin.getCommand(command.getName());
                 if (pc == null)
                     continue;
 
@@ -218,7 +219,7 @@ public class PlayerMiscListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
 
-        plugin.getUtils().loadInventory(p);
+        new InventoryHelper(plugin).loadInventory(p);
 
         // When force-gamemode is enabled, PlayerGamemodeChangeEvent isn't fired onjoin
         if (!InventoryHandler.isForceGamemodeEnabled())
@@ -260,7 +261,7 @@ public class PlayerMiscListener implements Listener {
         CommandHandler.removeAddWithCommand(p);
         CommandHandler.removeRemoveWithCommand(p);
 
-        plugin.getUtils().saveInventory(p);
+        new InventoryHelper(plugin).saveInventory(p);
     }
 
     private boolean illegalContainerOpened(Player p) {

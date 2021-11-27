@@ -16,7 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
-import solutions.nuhvel.spigot.rc.utils.MaterialHandler;
+import solutions.nuhvel.spigot.rc.utils.minecraft.MaterialHandler;
 import solutions.nuhvel.spigot.rc.utils.minecraft.ServerUtils;
 import solutions.nuhvel.spigot.rc.utils.helpers.PreconditionChecker;
 

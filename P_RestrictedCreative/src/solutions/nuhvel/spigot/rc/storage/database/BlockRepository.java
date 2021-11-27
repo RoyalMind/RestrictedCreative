@@ -60,7 +60,8 @@ public class BlockRepository {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             var blocks = getBlocksFromDatabase(chunk);
 
-            Bukkit.getScheduler().runTask(plugin, () -> loadBlocks(blocks));
+            if (!blocks.isEmpty())
+                Bukkit.getScheduler().runTask(plugin, () -> loadBlocks(blocks));
         });
     }
 
@@ -70,9 +71,11 @@ public class BlockRepository {
                 var result = plugin.database.executeQuery("SELECT COUNT(*) FROM " + plugin.database.getBlocksTable());
                 result.next();
 
-                var count = result.getInt(0);
+                var count = result.getInt(1);
                 count -= removeFromDatabase.size();
                 count += addToDatabase.size();
+
+                plugin.getUtils().debug("to remove: " + removeFromDatabase.size() + "; to add: " + addToDatabase.size());
 
                 callback.accept(count);
             } catch (SQLException e) {
@@ -82,6 +85,8 @@ public class BlockRepository {
     }
 
     private void loadBlocks(Set<BlockModel> blocks) {
+        plugin.getUtils().debug("loadBlocks: " + blocks.size());
+
         for (BlockModel model : blocks) {
             Block block = model.block;
 
@@ -98,12 +103,12 @@ public class BlockRepository {
                 "CREATE TABLE IF NOT EXISTS " + plugin.database.getBlocksTable() + " (" + "`x` INT NOT NULL, " +
                         "`y` INT NOT NULL, " + "`z` INT NOT NULL, " + "`world` VARCHAR NOT NULL, " +
                         "`chunk_x` INT NOT NULL, " + "`chunk_z` INT NOT NULL, " + "`owner` CHAR(36) NOT NULL, " +
-                        "`created` INT UNSIGNED NOT NULL, " + "UNIQUE `x_y_z_world` (`x`, `y`, `z`, `world`))");
+                        "`created` INT UNSIGNED NOT NULL, " + "UNIQUE (`x`, `y`, `z`, `world`))");
 
         plugin.database.executeUpdate("CREATE TABLE IF NOT EXISTS " + plugin.database.getInventoryTable() + " (" +
                 "`player` CHAR(36) NOT NULL, " + "`type` TINYINT(1), " + "`storage` VARCHAR, " + "`armor` VARCHAR, " +
                 "`extra` VARCHAR, " + "`effects` VARCHAR, " + "`xp` BIGINT, " + "`last_used` BIGINT(11), " +
-                "UNIQUE `player` (player))");
+                "UNIQUE (player))");
     }
 
     private void purgeOldData() {
@@ -112,13 +117,14 @@ public class BlockRepository {
             long creative = Instant.now().getEpochSecond() - 86400L * plugin.config.tracking.inventories.purge.creative;
 
             plugin.database.executeUpdate(
-                    "DELETE FROM " + plugin.database.getInventoryTable() + " WHERE type = 0 AND lastused < " +
-                            survival + " OR type = 1 AND lastused < " + creative);
+                    "DELETE FROM " + plugin.database.getInventoryTable() + " WHERE type = 0 AND last_used < " +
+                            survival + " OR type = 1 AND last_used < " + creative);
         }
     }
 
     private void startDataSync() {
-        int interval = plugin.config.tracking.blocks.syncInterval;
+        // `syncInterval` is in minutes, `interval` is in ticks
+        int interval = plugin.config.tracking.blocks.syncInterval * 60 * 20;
 
         Bukkit.getServer().getScheduler().runTaskTimer(plugin, () -> {
             final HashSet<BlockModel> fAdd = new HashSet<>(addToDatabase);
@@ -153,11 +159,11 @@ public class BlockRepository {
         try {
             var statement = plugin.database.getStatement(
                     "SELECT x, y, z, owner, created FROM " + plugin.database.getBlocksTable() +
-                            " WHERE chunk_x = ? AND chunk_Y = ? AND world = ?");
+                            " WHERE chunk_x = ? AND chunk_z = ? AND world = ?");
 
             statement.setInt(1, chunk.getX());
-            statement.setInt(1, chunk.getZ());
-            statement.setString(1, world);
+            statement.setInt(2, chunk.getZ());
+            statement.setString(3, world);
 
             var result = statement.executeQuery();
             while (result.next()) {

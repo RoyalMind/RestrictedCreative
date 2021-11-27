@@ -6,7 +6,7 @@ import org.bukkit.command.PluginCommand;
 import solutions.nuhvel.spigot.rc.RestrictedCreative;
 import solutions.nuhvel.spigot.rc.commands.GameModeCommand;
 import solutions.nuhvel.spigot.rc.commands.MainCommand;
-import solutions.nuhvel.spigot.rc.storage.config.messages.commands.Command;
+import solutions.nuhvel.spigot.rc.storage.config.messages.commands.ISimpleCommand;
 
 import java.util.Map;
 
@@ -24,15 +24,16 @@ public class CommandHandler {
         for (Map.Entry<String, Map<String, Object>> entry : plugin.getDescription().getCommands().entrySet()) {
             String name = entry.getKey();
             PluginCommand cmd = plugin.getCommand(name);
-            Command command = plugin.messages.commands.getByName(name);
+            ISimpleCommand command = plugin.messages.commands.getByName(name);
 
             if (cmd == null || command == null)
                 continue;
 
             cmd.setExecutor(getExecutor(name));
-            cmd.setPermissionMessage(plugin.messages.errors.noPermission);
-            cmd.setDescription(command.description);
-            cmd.setUsage(command.usage);
+            cmd.setPermissionMessage(
+                    plugin.messagingUtils.getFormattedMessage(false, plugin.messages.errors.noPermission));
+            cmd.setDescription(plugin.messagingUtils.getFormattedMessage(false, command.getDescription()));
+            cmd.setUsage(plugin.messagingUtils.getFormattedMessage(false, command.getUsage()));
         }
     }
 

@@ -124,6 +124,6 @@ public class BlockPlaceListener implements Listener {
             return;
 
         for (var bl : blocks)
-            plugin.trackableHandler.setAsTracked(bl);
+            plugin.trackableHandler.setAsTracked(bl, player);
     }
 }

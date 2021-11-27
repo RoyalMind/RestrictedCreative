@@ -28,21 +28,12 @@ public class TrackableHandler {
     private static final String itemFrameMetadataKey = metadataKey + "_IF";
     private static final String armorStandMetadataKey = metadataKey + "_AS_";
     private static final Set<String> trackedLocs = new HashSet<>();
-    private static int totalCount = -1;
     private final BlockRepository blockRepository;
     private final RestrictedCreative plugin;
 
     public TrackableHandler(RestrictedCreative plugin, BlockRepository blockRepository) {
         this.plugin = plugin;
         this.blockRepository = blockRepository;
-    }
-
-    public static String getTotalCount() {
-        return String.valueOf(totalCount);
-    }
-
-    public static void setTotalCount(int totalCount) {
-        TrackableHandler.totalCount = totalCount;
     }
 
     public static boolean isTracked(Metadatable blockOrEntity) {
@@ -59,12 +50,12 @@ public class TrackableHandler {
         return false;
     }
 
-    public void setAsTracked(Metadatable blockOrEntity) {
+    public void setAsTracked(Metadatable blockOrEntity, Player player) {
         if (blockOrEntity == null)
             return;
 
         if (blockOrEntity instanceof Block block)
-            setAsTracked(block);
+            setAsTracked(block, player);
         else if (blockOrEntity instanceof Entity entity)
             setAsTracked(entity);
     }
@@ -77,10 +68,6 @@ public class TrackableHandler {
             removeTracking(block);
         else if (blockOrEntity instanceof Entity entity)
             removeTracking(entity);
-    }
-
-    public void setAsTracked(Block block) {
-        setAsTracked(block, null);
     }
 
     public void setAsTracked(Block block, Player owner) {
