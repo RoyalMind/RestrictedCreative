@@ -96,21 +96,21 @@ public class PlayerInventoryListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onInventoryOpen(InventoryOpenEvent e) {
-        Player p = (Player) e.getPlayer();
+        Player player = (Player) e.getPlayer();
 
-        if (new PreconditionChecker(plugin, p)
-                .isWorldAllowed(p.getWorld().getName())
+        if (new PreconditionChecker(plugin, player)
+                .isWorldAllowed(player.getWorld().getName())
                 .isGameMode(GameMode.CREATIVE)
-                .anyFailed() && !plugin.config.limitations.interaction.inventories)
+                .anyFailed() || !plugin.config.limitations.interaction.inventories)
             return;
 
         // No need to control bypassed players
-        if (p.hasPermission("rc.bypass.limit.interact.inventories") ||
-                p.hasPermission("rc.bypass.limit.interact.inventories." + e.getView().getType()))
+        if (player.hasPermission("rc.bypass.limit.interact.inventories") ||
+                player.hasPermission("rc.bypass.limit.interact.inventories." + e.getView().getType()))
             return;
 
         e.setCancelled(true);
-        plugin.messagingUtils.sendMessage(p, true, plugin.messages.disabled.container);
+        plugin.messagingUtils.sendMessage(player, true, plugin.messages.disabled.container);
     }
 
     private boolean armorIsEquipped(ItemStack[] armorContents) {

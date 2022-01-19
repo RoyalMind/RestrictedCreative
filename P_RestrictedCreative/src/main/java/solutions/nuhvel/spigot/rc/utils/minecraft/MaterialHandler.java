@@ -10,8 +10,6 @@ import org.bukkit.block.data.FaceAttachable;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.type.*;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import solutions.nuhvel.spigot.rc.storage.config.config.miscellaneous.ArmorMaterial;
 
 import java.util.ArrayList;
@@ -50,7 +48,7 @@ public class MaterialHandler {
                     Material.TNT_MINECART, Material.ACACIA_BOAT, Material.BIRCH_BOAT, Material.DARK_OAK_BOAT,
                     Material.JUNGLE_BOAT, Material.OAK_BOAT, Material.SPRUCE_BOAT));
 
-    public static boolean needsBlockBelow(@NotNull Block b) {
+    public static boolean needsBlockBelow(Block b) {
         BlockData bd = b.getBlockData();
         Material m = b.getType();
 
@@ -98,7 +96,7 @@ public class MaterialHandler {
         return getNeededFace(b) == BlockFace.DOWN;
     }
 
-    public static @Nullable BlockFace getNeededFace(@NotNull Block b) {
+    public static BlockFace getNeededFace(Block b) {
         BlockData bd = b.getBlockData();
 
         if (bd instanceof Lantern)
@@ -152,23 +150,23 @@ public class MaterialHandler {
         return null;
     }
 
-    public static boolean isDoor(@NotNull Block b) {
+    public static boolean isDoor(Block b) {
         return b.getBlockData() instanceof Door;
     }
 
-    public static boolean isCrop(@NotNull Block b) {
+    public static boolean isCrop(Block b) {
         return crops.contains(b.getType());
     }
 
-    public static boolean isRail(@NotNull Block b) {
+    public static boolean isRail(Block b) {
         return b.getBlockData() instanceof Rail;
     }
 
-    public static boolean isDoublePlant(@NotNull Block b) {
+    public static boolean isDoublePlant(Block b) {
         return doublePlants.contains(b.getType());
     }
 
-    public static boolean isCarpet(@NotNull Block b) {
+    public static boolean isCarpet(Block b) {
         return Tag.CARPETS.isTagged(b.getType());
     }
 
@@ -176,7 +174,7 @@ public class MaterialHandler {
         return entities.contains(m);
     }
 
-    public static @NotNull List<ItemStack> getArmorList(ArmorMaterial type) {
+    public static List<ItemStack> getArmorList(ArmorMaterial type) {
         List<ItemStack> result = new ArrayList<>();
 
         for (String armorPiece : List.of("BOOTS", "LEGGINGS", "CHESTPLATE", "HELMET"))
